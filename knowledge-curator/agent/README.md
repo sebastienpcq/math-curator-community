@@ -26,3 +26,9 @@ Le modèle 0.5B peut proposer des changements incorrects même si le JSON est va
 ## Limites
 
 Il ne s'agit pas encore d'une boucle capable de coder, corriger et vérifier seule. Une autonomie accrue demandera un environnement isolé et des tests plus complets.
+
+## Diagnostics V0.4
+
+L'agent effectue au maximum deux tentatives par cycle. Si une proposition est rejetée, sa réponse brute est enregistrée localement dans `agent-reports/` au format texte pour diagnostic ; **ne publiez pas ce dossier** et vérifiez qu'il ne contient pas de secrets avant de partager un rapport. La seconde tentative utilise une consigne réduite. La limite de génération est de 450 tokens. Une proposition acceptée n'est validée que sur sa structure, pas sur sa pertinence scientifique ou technique.
+
+Commande : `python3 knowledge-curator/agent/local_agent.py --model qwen2.5-coder:0.5b --iterations 1`.

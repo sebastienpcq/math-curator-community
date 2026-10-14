@@ -1,22 +1,44 @@
-# Math Curator
+# Math Curator — Une extension pour apprendre les maths sur YouTube
 
-J'en avais un peu marre de chercher des bons cours de maths sur YouTube et de tomber sur tout et n'importe quoi, alors j'ai décidé de faire ma propre extension.
+J'en avais un peu marre de chercher des cours de maths intéressants sur YouTube et de devoir faire le tri entre les bonnes vidéos, les recommandations hors sujet et les Shorts qui n'apportent pas grand-chose.
 
-Le principe est simple : garder ce qui m'intéresse et virer le reste.
+Du coup, plutôt que de continuer à perdre du temps, j'ai fini par développer ma propre extension Chrome.
 
-On peut choisir son niveau, les domaines mathématiques, filtrer les recommandations et masquer les Shorts.
+L'idée est assez simple : **faire de YouTube un outil d'apprentissage un peu plus sérieux**, sans avoir à se battre constamment avec ses recommandations.
 
-C'est gratuit, sans compte et sans rien à installer en plus.
+Avec Math Curator, on peut notamment :
+
+- Choisir son niveau en mathématiques.
+- Sélectionner les domaines qu'on souhaite travailler.
+- Filtrer les recommandations pour privilégier les contenus pédagogiques.
+- Masquer les Shorts et limiter les distractions.
+
+Le but n'est pas de prétendre que l'extension va trouver systématiquement les meilleurs cours du monde, mais plutôt de faciliter les recherches et de garder un environnement un minimum cohérent quand on veut bosser ses maths.
+
+C'est gratuit, sans compte à créer et sans logiciel supplémentaire à installer.
 
 ## Installation
 
-1. Téléchargez le ZIP dans **Releases**.
-2. Décompressez-le.
-3. Allez sur `chrome://extensions/`.
-4. Activez le mode développeur.
-5. Cliquez sur « Charger l'extension non empaquetée » et sélectionnez le dossier.
+Pour ceux qui veulent essayer :
 
-C'est encore une première version, donc il y aura sûrement des trucs à corriger.
+1. Récupérez le fichier ZIP dans les [Releases](https://github.com/seblenonsaint/math-curator-community/releases).
+2. Décompressez l'archive.
+3. Ouvrez `chrome://extensions/` dans Chrome.
+4. Activez le **mode développeur** en haut à droite.
+5. Cliquez sur **Charger l'extension non empaquetée**, puis sélectionnez le dossier décompressé contenant le fichier `manifest.json`.
 
+Et voilà.
 
-Si ça peut servir à d'autres, tant mieux. Et si vous trouvez des bugs, dites-le-moi, je les corrigerai au fur et à mesure.
+## Pour la suite
+
+C'est une première version, donc je ne vais pas prétendre que tout est parfait. Il y a certainement des ajustements à faire, des filtres à améliorer et quelques bugs qui m'ont échappé.
+
+Je compte continuer à travailler dessus tranquillement, en fonction de ce que je remarque à l'utilisation et des retours éventuels.
+
+Si certains veulent la tester, me signaler un problème ou proposer une amélioration, n'hésitez pas. Les retours constructifs sont toujours utiles.
+
+Et si ça peut éviter à quelques personnes de perdre autant de temps que moi à chercher des cours convenables, ce sera déjà pas mal.
+
+**GitHub :** https://github.com/seblenonsaint/math-curator-community
+
+**Téléchargement :** https://github.com/seblenonsaint/math-curator-community/releases

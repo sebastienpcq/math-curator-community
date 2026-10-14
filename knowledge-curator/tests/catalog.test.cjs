@@ -1,0 +1,14 @@
+'use strict';
+const test=require('node:test');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const {validateCatalog,validateResource}=require('../schema.cjs');
+const catalog=JSON.parse(fs.readFileSync(path.join(__dirname,'../catalog.json'),'utf8'));
+const base={id:'example-001',title:'Introduction',url:'https://example.org/video',discipline:'mathematics',level:'beginner',review:{status:'unreviewed'}};
+test('catalogue de départ valide',()=>assert.deepEqual(validateCatalog(catalog),[]));
+test('entrée non revue possible sans note',()=>assert.deepEqual(validateResource(base),[]));
+test('aucune note non justifiée',()=>assert.ok(validateResource({...base,review:{status:'unreviewed',scores:{accuracy:5}}}).length));
+test('revue complète requise',()=>assert.ok(validateResource({...base,review:{status:'reviewed'}}).length));
+test('URL non HTTPS refusée',()=>assert.ok(validateResource({...base,url:'http://example.org'}).length));
+test('id dupliqué interdit',()=>assert.ok(validateCatalog({...catalog,resources:[base,base]}).length));

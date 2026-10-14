@@ -20,7 +20,9 @@ jobs:
           node-version: '22'
       - run: |
           node --check knowledge-curator/app.js
+          node --check knowledge-curator/learning.cjs
+          node --check knowledge-curator/learning-ui.js
           node --check knowledge-curator/schema.cjs
           node --check knowledge-curator/cli.cjs
-          node --test knowledge-curator/tests/catalog.test.cjs
+          node --test knowledge-curator/tests/*.test.cjs
           node knowledge-curator/cli.cjs list

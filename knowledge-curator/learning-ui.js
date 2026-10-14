@@ -81,6 +81,27 @@ function render(){
    item.append(form);
   }
   }
+  const review=KnowledgeReview.reviewState(s,history);
+  if(review.due && s.reviewExerciseIds?.length){
+   const ex=exercises.get(s.reviewExerciseIds[0]);
+   if(ex){
+    const form=document.createElement('form');form.className='exercise delayed-review';
+    const label=document.createElement('label');label.textContent='Révision différée : '+ex.question;
+    const input=document.createElement('input');input.type='text';input.inputMode='decimal';input.required=true;label.append(input);
+    const btn=document.createElement('button');btn.type='submit';btn.textContent='Tester mon rappel';
+    const feedback=document.createElement('p');feedback.setAttribute('role','status');
+    form.append(label,btn,feedback);
+    form.addEventListener('submit',event=>{
+     event.preventDefault();
+     const ok=KnowledgeLearning.grade(ex,input.value);
+     try {KnowledgeAttempts.append(localStorage,{skillId:s.id,exerciseId:ex.id,correct:ok,timestamp:new Date().toISOString()});}
+     catch(error){msg.textContent='Révision non enregistrée : '+error.message;return;}
+     msg.textContent=(ok?'Rappel correct. ':'Rappel à consolider. ')+ex.explanation;
+     render();
+    });
+    item.append(form);
+   }
+  }
   steps.append(item);
  }
  count.textContent=done+' / '+path.steps.length+' compétences démontrées';

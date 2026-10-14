@@ -1,0 +1,52 @@
+name: Import extension source
+
+on:
+  push:
+    paths:
+      - .github/workflows/import-extension-source.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  import-source:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Extract versioned extension sources
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile
+          archive = Path("math-curator-community-v1.zip")
+          prefix = "math-curator-community/"
+          allowed = {"manifest.json", "popup.html", "options.html", "SHARE_GUIDE.md",
+                     "src/background.js", "src/popup.js", "src/config.js",
+                     "src/scoring.js", "src/content.css", "src/options.js",
+                     "src/ui.css", "src/content.js", "tests/community.test.cjs"}
+          with ZipFile(archive) as z:
+              names = {i.filename for i in z.infolist() if not i.is_dir()}
+              expected = {prefix + p for p in allowed}
+              if not expected.issubset(names):
+                  raise SystemExit("Archive incomplete: required source files missing")
+              for path in sorted(allowed):
+                  dest = Path(path)
+                  dest.parent.mkdir(parents=True, exist_ok=True)
+                  dest.write_bytes(z.read(prefix + path))
+          PY
+      - name: Validate JavaScript and run tests
+        run: |
+          for file in src/*.js; do node --check "$file"; done
+          node --test tests/community.test.cjs
+      - name: Commit extracted sources
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add manifest.json popup.html options.html SHARE_GUIDE.md src tests
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: publish inspectable extension source from v1 ZIP"
+            git push
+          fi

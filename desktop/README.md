@@ -1,6 +1,6 @@
 # Math Curator Desktop — prototype expérimental
 
-Ce prototype **ne filtre pas encore** YouTube dans sa fenêtre intégrée. Il permet de tester deux modes : ouverture dans le navigateur habituel (où l'extension doit être installée pour filtrer), ou ouverture dans une fenêtre Electron isolée (sans filtrage).
+La version expérimentale 0.2 propose deux modes : ouverture dans le navigateur habituel (où l'extension doit être installée pour filtrer), ou ouverture dans une fenêtre Electron avec un **premier filtrage des recommandations** fondé sur le moteur de règles existant et le masquage des Shorts. Les paramètres sont encore fixes (débutant, équilibré), sans interface de configuration. Le classement ne vérifie pas la qualité mathématique du contenu.
 
 ## Lancer localement
 

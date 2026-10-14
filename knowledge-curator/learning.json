@@ -19,6 +19,9 @@
             "ex-arithmetic",
             "ex-arithmetic-v2",
             "ex-arithmetic-v3"
+          ],
+          "reviewExerciseIds": [
+            "review-arithmetic"
           ]
         },
         {
@@ -33,6 +36,9 @@
             "ex-fractions",
             "ex-fractions-v2",
             "ex-fractions-v3"
+          ],
+          "reviewExerciseIds": [
+            "review-fractions"
           ]
         },
         {
@@ -47,6 +53,9 @@
             "ex-powers",
             "ex-powers-v2",
             "ex-powers-v3"
+          ],
+          "reviewExerciseIds": [
+            "review-powers"
           ]
         },
         {
@@ -64,6 +73,9 @@
             "ex-symbols",
             "ex-symbols-v2",
             "ex-symbols-v3"
+          ],
+          "reviewExerciseIds": [
+            "review-symbols"
           ]
         },
         {
@@ -80,6 +92,9 @@
             "ex-equations",
             "ex-equations-v2",
             "ex-equations-v3"
+          ],
+          "reviewExerciseIds": [
+            "review-equations"
           ]
         },
         {
@@ -96,6 +111,9 @@
             "ex-functions",
             "ex-functions-v2",
             "ex-functions-v3"
+          ],
+          "reviewExerciseIds": [
+            "review-functions"
           ]
         },
         {
@@ -111,6 +129,9 @@
             "ex-logarithms",
             "ex-logarithms-v2",
             "ex-logarithms-v3"
+          ],
+          "reviewExerciseIds": [
+            "review-logarithms"
           ]
         }
       ]
@@ -305,6 +326,69 @@
       "answer": 1,
       "tolerance": 0,
       "explanation": "10¹ = 10."
+    },
+    {
+      "id": "review-arithmetic",
+      "skillId": "arithmetic",
+      "type": "numeric",
+      "question": "Une boîte contient 6 rangées de 8 objets. Combien y a-t-il d'objets ?",
+      "answer": 48,
+      "tolerance": 0,
+      "explanation": "6 × 8 = 48."
+    },
+    {
+      "id": "review-fractions",
+      "skillId": "fractions",
+      "type": "numeric",
+      "question": "Tu bois 3/8 de litre puis 1/8 de litre. Combien as-tu bu en décimal ?",
+      "answer": 0.5,
+      "tolerance": 0,
+      "explanation": "4/8 = 1/2 = 0,5 litre."
+    },
+    {
+      "id": "review-powers",
+      "skillId": "powers",
+      "type": "numeric",
+      "question": "Un carré de côté 5 a quelle aire ?",
+      "answer": 25,
+      "tolerance": 0,
+      "explanation": "5² = 25."
+    },
+    {
+      "id": "review-symbols",
+      "skillId": "symbols",
+      "type": "numeric",
+      "question": "Un billet coûte x euros. Avec x = 7, combien coûtent 4 billets plus 2 euros de frais ?",
+      "answer": 30,
+      "tolerance": 0,
+      "explanation": "4 × 7 + 2 = 30."
+    },
+    {
+      "id": "review-equations",
+      "skillId": "equations",
+      "type": "numeric",
+      "question": "Un abonnement coûte 5 € plus 3 € par séance. Pour 20 €, combien de séances ?",
+      "answer": 5,
+      "tolerance": 0,
+      "explanation": "3x + 5 = 20, donc x = 5."
+    },
+    {
+      "id": "review-functions",
+      "skillId": "functions",
+      "type": "numeric",
+      "question": "Un trajet coûte 4 € fixes puis 2 € par km. Quel prix pour 6 km ?",
+      "answer": 16,
+      "tolerance": 0,
+      "explanation": "4 + 2 × 6 = 16."
+    },
+    {
+      "id": "review-logarithms",
+      "skillId": "logarithms",
+      "type": "numeric",
+      "question": "Quel exposant faut-il donner à 10 pour obtenir 10 000 ?",
+      "answer": 4,
+      "tolerance": 0,
+      "explanation": "10⁴ = 10 000."
     }
   ]
 }

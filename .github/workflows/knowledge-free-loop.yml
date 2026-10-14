@@ -1,0 +1,56 @@
+name: Knowledge Curator - boucle gratuite
+
+on:
+  workflow_dispatch:
+    inputs:
+      iterations:
+        description: "Nombre de cycles de validation (1 à 5)"
+        required: true
+        default: "3"
+        type: choice
+        options: ["1", "2", "3", "4", "5"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: knowledge-curator-free-loop
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Run bounded offline validation cycles
+        shell: bash
+        env:
+          ITERATIONS: ${{ inputs.iterations }}
+        run: |
+          set -euo pipefail
+          case "$ITERATIONS" in 1|2|3|4|5) ;; *) exit 2 ;; esac
+          mkdir -p reports
+          echo "# Knowledge Curator — vérification automatisée" > reports/validation.md
+          echo "Branche : ${GITHUB_REF_NAME}" >> reports/validation.md
+          for ((i=1;i<=ITERATIONS;i++)); do
+            echo "## Cycle $i" >> reports/validation.md
+            node --check knowledge-curator/app.js
+            node --check knowledge-curator/learning.cjs
+            node --check knowledge-curator/learning-ui.js
+            node --check knowledge-curator/schema.cjs
+            node --test knowledge-curator/tests/*.test.cjs
+            node knowledge-curator/cli.cjs list
+            echo "Contrôles réussis." >> reports/validation.md
+          done
+          echo "Aucun agent IA ni modification automatique du code dans ce workflow." >> reports/validation.md
+      - name: Upload validation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: knowledge-curator-validation
+          path: reports/
+          if-no-files-found: warn

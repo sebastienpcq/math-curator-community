@@ -13,12 +13,12 @@ import urllib.request
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 PROJECT = ROOT / "knowledge-curator"
 TASKS = [
-    ("Historique des tentatives", "learning-ui.js",
-     "Indiquer COMMENT mémoriser un objet {skillId, correct, timestamp} après la soumission d’un exercice, sans toucher aux données existantes."),
-    ("Validation des acquis", "learning.cjs",
-     "Proposer un critère de maîtrise sur plusieurs exercices distincts, sans changer le code."),
-    ("Tests de progression", "tests/learning.test.cjs",
-     "Proposer deux tests supplémentaires utiles pour détecter une régression."),
+    ("Test de conservation des tentatives", "attempts.cjs",
+     "Proposer un test qui enregistre trois tentatives false, false, true puis les relit. Résultat attendu : trois événements distincts conservés dans le même ordre."),
+    ("Erreur de stockage", "attempts.cjs",
+     "Proposer un test simulant une erreur de quota localStorage ; résultat attendu : une erreur visible et aucun historique précédent supprimé."),
+    ("Validation des événements", "tests/attempts.test.cjs",
+     "Proposer un test qui rejette un timestamp invalide ou un exercice sans identifiant, sans écrire dans le stockage."),
 ]
 MAX_SOURCE = 1100
 

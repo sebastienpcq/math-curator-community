@@ -1,0 +1,14 @@
+{
+  "name": "math-curator-desktop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Prototype expérimental de Math Curator sur ordinateur",
+  "main": "main.cjs",
+  "scripts": {
+    "start": "electron .",
+    "check": "node --check main.cjs && node --check renderer.cjs"
+  },
+  "devDependencies": {
+    "electron": "^38.0.0"
+  }
+}

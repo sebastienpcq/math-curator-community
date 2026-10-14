@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Agent local V0.2 : propositions courtes, validées, jamais appliquées."""
+"""Agent local V0.3 : propositions courtes, validées, jamais appliquées."""
 import argparse
 import datetime
 import json
@@ -14,18 +14,18 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 PROJECT = ROOT / "knowledge-curator"
 TASKS = [
     ("Historique des tentatives", "learning-ui.js",
-     "Proposer un historique local minimal des réponses aux exercices, sans identifiants personnels."),
+     "Indiquer COMMENT mémoriser un objet {skillId, correct, timestamp} après la soumission d’un exercice, sans toucher aux données existantes."),
     ("Validation des acquis", "learning.cjs",
      "Proposer un critère de maîtrise sur plusieurs exercices distincts, sans changer le code."),
     ("Tests de progression", "tests/learning.test.cjs",
      "Proposer deux tests supplémentaires utiles pour détecter une régression."),
 ]
-MAX_SOURCE = 2800
+MAX_SOURCE = 1100
 
 def query_ollama(prompt, model, timeout):
     payload = json.dumps({
         "model": model, "prompt": prompt, "stream": False,
-        "format": "json", "options": {"temperature": 0.1, "num_predict": 350}
+        "format": "json", "options": {"temperature": 0.1, "num_predict": 280}
     }).encode("utf-8")
     request = urllib.request.Request(
         "http://127.0.0.1:11434/api/generate", data=payload,
@@ -47,10 +47,23 @@ def validate_answer(raw, target):
         return None, "Fichier proposé différent du fichier demandé"
     if any(marker in value["change"] for marker in ("```", "function ", "const ", "git reset", "rm -rf")):
         return None, "Proposition contenant du code ou une commande non attendue"
+    normalized = [re.sub(r"[^a-z0-9]+", " ", value[k].lower()).strip() for k in ("objective","change","test","risk")]
+    if len(set(normalized)) < 4:
+        return None, "Champs répétitifs ou identiques"
+    tokens = [set(s.split()) for s in normalized]
+    for i in range(4):
+        for j in range(i+1,4):
+            if len(tokens[i] | tokens[j]) and len(tokens[i] & tokens[j]) / len(tokens[i] | tokens[j]) > 0.78:
+                return None, "Formulations trop similaires"
+    details = ("tentative", "stockage", "localstorage", "exercice", "réponse", "historique", "test", "assert", "validation", "maîtrise", "progression")
+    if not any(term in value["change"].lower() for term in details):
+        return None, "Changement trop vague ou sans rapport"
+    if not any(term in value["test"].lower() for term in ("tester", "vérifier", "assert", "test", "contrôler", "simuler")):
+        return None, "Test non vérifiable"
     return value, None
 
 def main():
-    parser = argparse.ArgumentParser(description="Knowledge Curator : agent local V0.2")
+    parser = argparse.ArgumentParser(description="Knowledge Curator : agent local V0.3")
     parser.add_argument("--model", default="qwen2.5-coder:0.5b")
     parser.add_argument("--iterations", type=int, default=1)
     parser.add_argument("--timeout", type=int, default=90)
@@ -64,11 +77,11 @@ def main():
     if subprocess.run(["git", "status", "--porcelain"], cwd=ROOT,
                       capture_output=True, text=True, check=True).stdout.strip():
         sys.exit("Dépôt modifié : sauvegarder ou déplacer les fichiers non suivis.")
-    output = ["# Rapport Ollama — agent V0.2", "",
+    output = ["# Rapport Ollama — agent V0.3", "",
               "Propositions non vérifiées. Aucun code source n'est modifié.", ""]
     directory = PROJECT / "agent-reports"
     directory.mkdir(exist_ok=True)
-    destination = directory / ("proposal-v02-" +
+    destination = directory / ("proposal-v03-" +
         datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%d-%H%M%S") + ".md")
     try:
         for index in range(args.iterations):
@@ -89,7 +102,7 @@ def main():
                 "objective, file, change, test, risk. "
                 "Chaque champ doit faire entre 12 et 500 caractères. "
                 f"Le champ file doit être exactement {target}. "
-                f"Tâche : {task}\nExtrait du fichier (peut être tronqué) :\n{snippet}")
+                f"Tâche précise : {task}\nDonne une action concrète et un cas de test avec résultat attendu.\nExtrait du fichier :\n{snippet}")
             print(f"[{index + 1}/{args.iterations}] Analyse Ollama : {title}...", flush=True)
             try:
                 raw = query_ollama(prompt, args.model, args.timeout)

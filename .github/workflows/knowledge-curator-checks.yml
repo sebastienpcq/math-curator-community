@@ -23,6 +23,7 @@ jobs:
           python3 -m unittest discover -s knowledge-curator/agent -p 'test_*.py'
           node --check knowledge-curator/app.js
           node --check knowledge-curator/learning.cjs
+          node --check knowledge-curator/mastery.cjs
           node --check knowledge-curator/attempts.cjs
           node --check knowledge-curator/learning-ui.js
           node --check knowledge-curator/schema.cjs

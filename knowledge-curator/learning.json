@@ -16,7 +16,9 @@
             "ka-basic"
           ],
           "exerciseIds": [
-            "ex-arithmetic"
+            "ex-arithmetic",
+            "ex-arithmetic-v2",
+            "ex-arithmetic-v3"
           ]
         },
         {
@@ -28,7 +30,9 @@
           "objective": "Calculer avec des fractions et comparer des proportions.",
           "resourceIds": [],
           "exerciseIds": [
-            "ex-fractions"
+            "ex-fractions",
+            "ex-fractions-v2",
+            "ex-fractions-v3"
           ]
         },
         {
@@ -40,7 +44,9 @@
           "objective": "Manipuler les puissances d'exposants entiers.",
           "resourceIds": [],
           "exerciseIds": [
-            "ex-powers"
+            "ex-powers",
+            "ex-powers-v2",
+            "ex-powers-v3"
           ]
         },
         {
@@ -55,7 +61,9 @@
             "ka-algebra"
           ],
           "exerciseIds": [
-            "ex-symbols"
+            "ex-symbols",
+            "ex-symbols-v2",
+            "ex-symbols-v3"
           ]
         },
         {
@@ -69,7 +77,9 @@
             "ka-algebra"
           ],
           "exerciseIds": [
-            "ex-equations"
+            "ex-equations",
+            "ex-equations-v2",
+            "ex-equations-v3"
           ]
         },
         {
@@ -83,7 +93,9 @@
             "ka-premiere"
           ],
           "exerciseIds": [
-            "ex-functions"
+            "ex-functions",
+            "ex-functions-v2",
+            "ex-functions-v3"
           ]
         },
         {
@@ -96,7 +108,9 @@
           "objective": "Comprendre l'inverse de l'exponentielle et les logarithmes.",
           "resourceIds": [],
           "exerciseIds": [
-            "ex-logarithms"
+            "ex-logarithms",
+            "ex-logarithms-v2",
+            "ex-logarithms-v3"
           ]
         }
       ]
@@ -165,6 +179,132 @@
       "answer": 3,
       "tolerance": 0,
       "explanation": "10³ = 1000, donc log10(1000) = 3."
+    },
+    {
+      "id": "ex-arithmetic-v2",
+      "skillId": "arithmetic",
+      "type": "numeric",
+      "question": "Combien vaut 9 × 6 ?",
+      "answer": 54,
+      "tolerance": 0,
+      "explanation": "9 × 6 = 54."
+    },
+    {
+      "id": "ex-arithmetic-v3",
+      "skillId": "arithmetic",
+      "type": "numeric",
+      "question": "Combien vaut 72 ÷ 8 ?",
+      "answer": 9,
+      "tolerance": 0,
+      "explanation": "72 ÷ 8 = 9."
+    },
+    {
+      "id": "ex-fractions-v2",
+      "skillId": "fractions",
+      "type": "numeric",
+      "question": "Combien vaut 1/4 + 1/4 ? (décimal)",
+      "answer": 0.5,
+      "tolerance": 0,
+      "explanation": "1/4 + 1/4 = 1/2 = 0,5."
+    },
+    {
+      "id": "ex-fractions-v3",
+      "skillId": "fractions",
+      "type": "numeric",
+      "question": "Combien vaut 3/4 - 1/2 ? (décimal)",
+      "answer": 0.25,
+      "tolerance": 0,
+      "explanation": "3/4 - 2/4 = 1/4."
+    },
+    {
+      "id": "ex-powers-v2",
+      "skillId": "powers",
+      "type": "numeric",
+      "question": "Combien vaut 2 puissance 4 ?",
+      "answer": 16,
+      "tolerance": 0,
+      "explanation": "2⁴ = 16."
+    },
+    {
+      "id": "ex-powers-v3",
+      "skillId": "powers",
+      "type": "numeric",
+      "question": "Combien vaut 3 puissance 3 ?",
+      "answer": 27,
+      "tolerance": 0,
+      "explanation": "3³ = 27."
+    },
+    {
+      "id": "ex-symbols-v2",
+      "skillId": "symbols",
+      "type": "numeric",
+      "question": "Pour x = 4, combien vaut 3x + 1 ?",
+      "answer": 13,
+      "tolerance": 0,
+      "explanation": "3 × 4 + 1 = 13."
+    },
+    {
+      "id": "ex-symbols-v3",
+      "skillId": "symbols",
+      "type": "numeric",
+      "question": "Pour x = 5, combien vaut 2x - 3 ?",
+      "answer": 7,
+      "tolerance": 0,
+      "explanation": "10 - 3 = 7."
+    },
+    {
+      "id": "ex-equations-v2",
+      "skillId": "equations",
+      "type": "numeric",
+      "question": "Résous 2x + 1 = 11.",
+      "answer": 5,
+      "tolerance": 0,
+      "explanation": "2x = 10, donc x = 5."
+    },
+    {
+      "id": "ex-equations-v3",
+      "skillId": "equations",
+      "type": "numeric",
+      "question": "Résous 4x - 4 = 20.",
+      "answer": 6,
+      "tolerance": 0,
+      "explanation": "4x = 24, donc x = 6."
+    },
+    {
+      "id": "ex-functions-v2",
+      "skillId": "functions",
+      "type": "numeric",
+      "question": "Si f(x) = 3x + 2, calcule f(3).",
+      "answer": 11,
+      "tolerance": 0,
+      "explanation": "9 + 2 = 11."
+    },
+    {
+      "id": "ex-functions-v3",
+      "skillId": "functions",
+      "type": "numeric",
+      "question": "Si g(x) = x², calcule g(2).",
+      "answer": 4,
+      "tolerance": 0,
+      "explanation": "2² = 4."
+    },
+    {
+      "id": "ex-logarithms-v2",
+      "skillId": "logarithms",
+      "type": "numeric",
+      "question": "Combien vaut log10(100) ?",
+      "answer": 2,
+      "tolerance": 0,
+      "explanation": "10² = 100."
+    },
+    {
+      "id": "ex-logarithms-v3",
+      "skillId": "logarithms",
+      "type": "numeric",
+      "question": "Combien vaut log10(10) ?",
+      "answer": 1,
+      "tolerance": 0,
+      "explanation": "10¹ = 10."
     }
   ]
 }

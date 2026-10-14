@@ -45,7 +45,7 @@ def validate_answer(raw, target):
         return None, "Champs manquants, trop courts ou trop longs"
     if value["file"].strip() != target:
         return None, "Fichier proposé différent du fichier demandé"
-    if any(marker in value["change"] for marker in ("\`\`\`", "function ", "const ", "git reset", "rm -rf")):
+    if any(marker in value["change"] for marker in ("```", "function ", "const ", "git reset", "rm -rf")):
         return None, "Proposition contenant du code ou une commande non attendue"
     return value, None
 

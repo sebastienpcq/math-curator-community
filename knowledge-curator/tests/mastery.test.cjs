@@ -1,0 +1,11 @@
+'use strict';
+const test=require('node:test');
+const assert=require('node:assert/strict');
+const m=require('../mastery.cjs');
+const step={id:'fractions',exerciseIds:['e1','e2','e3']};
+const e=(id,correct)=>({skillId:'fractions',exerciseId:id,correct,timestamp:'2026-10-15T00:00:00Z'});
+test('one correct answer never establishes mastery',()=>assert.equal(m.achieved(step,[e('e1',true)]),false));
+test('different correct exercises establish provisional mastery',()=>assert.equal(m.achieved(step,[e('e1',true),e('e2',true),e('e3',true)]),true));
+test('latest incorrect response removes provisional mastery',()=>assert.equal(m.achieved(step,[e('e1',true),e('e2',true),e('e3',true),e('e1',false)]),false));
+test('retries on one exercise never replace independent questions',()=>assert.equal(m.achieved(step,[e('e1',false),e('e1',true),e('e1',true)]),false));
+test('unrelated skill events are ignored',()=>assert.equal(m.achieved(step,[e('e1',true),{...e('e2',true),skillId:'powers'},e('e3',true)]),false));

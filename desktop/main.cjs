@@ -21,6 +21,23 @@ const isYouTube = input => {
   try { const u = new URL(input); return u.protocol === 'https:' && ['youtube.com','www.youtube.com','m.youtube.com'].includes(u.hostname); }
   catch { return false; }
 };
+const isGoogleSignIn = input => {
+  try { const u = new URL(input); return u.protocol === 'https:' && u.hostname === 'accounts.google.com'; }
+  catch { return false; }
+};
+function openGoogleSignInTest(url) {
+  const auth = new BrowserWindow({
+    width: 620, height: 780, title: 'Test Google Sign-In — ne pas saisir de mot de passe',
+    webPreferences: {nodeIntegration: false, contextIsolation: true, sandbox: true}
+  });
+  auth.webContents.setWindowOpenHandler(() => ({action: 'deny'}));
+  auth.webContents.on('will-navigate', (event, target) => {
+    if (!isGoogleSignIn(target) && !isYouTube(target)) {
+      event.preventDefault();
+    }
+  });
+  auth.loadURL(url);
+}
 function openYouTubeWindow() {
   // Browser isolated from the local UI. No privileged preload or Node access.
   const win = new BrowserWindow({

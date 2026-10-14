@@ -14,5 +14,96 @@
       "label": "Histoire"
     }
   ],
-  "resources": []
+  "resources": [
+    {
+      "id": "ka-basic",
+      "title": "Bases en calcul",
+      "discipline": "mathematics",
+      "level": "beginner",
+      "url": "https://fr.khanacademy.org/math/early-math/cc-early-math-add-sub-basics",
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "ka-algebra",
+      "title": "Algèbre I",
+      "discipline": "mathematics",
+      "level": "intermediate",
+      "url": "https://fr.khanacademy.org/math/algebra-home/algebra-basics",
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "ka-premiere",
+      "title": "Mathématiques de première générale",
+      "discipline": "mathematics",
+      "level": "intermediate",
+      "url": "https://fr.khanacademy.org/math/k-8-grades/fr-v2-premiere-s",
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "ka-integral",
+      "title": "Calcul intégral",
+      "discipline": "mathematics",
+      "level": "advanced",
+      "url": "https://fr.khanacademy.org/mission/integral-calculus",
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "ka-physics-energy",
+      "title": "Travail et énergie",
+      "discipline": "physics",
+      "level": "intermediate",
+      "url": "https://fr.khanacademy.org/science/physics/work-and-energy",
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "lumni-revolution",
+      "title": "La Révolution française, de 1789 à 1795",
+      "discipline": "history",
+      "level": "beginner",
+      "url": "https://www.lumni.fr/programme/la-revolution-francaise-de-1789-a-1795",
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "lumni-1789",
+      "title": "1789, la Révolution française",
+      "discipline": "history",
+      "level": "beginner",
+      "url": "https://www.lumni.fr/video/1789-la-revolution-francaise-2-avril",
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "lumni-parole",
+      "title": "La liberté de parole pendant la Révolution",
+      "discipline": "history",
+      "level": "intermediate",
+      "url": "https://www.lumni.fr/video/comment-la-revolution-francaise-a-t-elle-libere-la-parole-des-citoyens",
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "lumni-roi",
+      "title": "Le roi et la Révolution française",
+      "discipline": "history",
+      "level": "intermediate",
+      "url": "https://www.lumni.fr/video/le-roi-et-la-revolution-francaise",
+      "review": {
+        "status": "unreviewed"
+      }
+    }
+  ]
 }

@@ -18,3 +18,5 @@
 #study-message{min-height:24px}
 @media(max-width:760px){#study-steps{grid-template-columns:1fr}}
 @media(prefers-color-scheme:dark){.study{border-color:#33483c}.study-step{--study-bg:#202d25;border-color:#3b5040}.exercise{border-color:#3b5040}.study-step button,.study-actions button,.import-label{background:#36654e;color:#fff}}
+
+.history{margin-top:32px;border-top:1px solid #bacac0;padding-top:14px}.history ol{padding-left:24px;line-height:1.9;max-height:340px;overflow:auto}.history li{font-size:13px}.exercise{margin-top:8px}

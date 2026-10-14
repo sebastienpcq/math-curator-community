@@ -18,4 +18,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: node --test knowledge-curator/tests/catalog.test.cjs
+      - run: |
+          node --check knowledge-curator/app.js
+          node --check knowledge-curator/schema.cjs
+          node --check knowledge-curator/cli.cjs
+          node --test knowledge-curator/tests/catalog.test.cjs
+          node knowledge-curator/cli.cjs list

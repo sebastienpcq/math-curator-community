@@ -53,6 +53,7 @@ function render(){
     const ok=KnowledgeLearning.grade(exercise,input.value);
     feedback.textContent=(ok?'Réponse correcte. ':'Réponse à revoir. ')+exercise.explanation;
     setStatus(s.id,ok?'demonstrated':'consolidate');
+    msg.textContent=(ok?'Réponse correcte. ':'Réponse à revoir. ')+exercise.explanation;
    });
    if(!unlocked){submit.disabled=true;submit.title='Prérequis à vérifier';}
    item.append(form);

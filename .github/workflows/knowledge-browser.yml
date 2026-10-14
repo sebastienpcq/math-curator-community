@@ -2,7 +2,11 @@ name: Knowledge Curator browser integration
 on:
   push:
     branches:
-      - fix/knowledge-curator-v0.5-integration
+      - feature/knowledge-curator-v0.5
+    paths:
+      - 'knowledge-curator/**'
+      - '.github/workflows/knowledge-browser.yml'
+  pull_request:
     paths:
       - 'knowledge-curator/**'
       - '.github/workflows/knowledge-browser.yml'

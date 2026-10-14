@@ -42,3 +42,22 @@ Un score numérique seul ne démontre pas la qualité d'un cours. Les évaluatio
 4. Expérimenter une évaluation de l'apprentissage et non du visionnage.
 
 Ce dossier est indépendant de `src/` et `desktop/` : il ne modifie pas le fonctionnement de Math Curator.
+
+## V0.3 — parcours pilote
+
+La branche `feature/knowledge-curator-v0.3` comprend un parcours d'algèbre de sept compétences, un graphe de prérequis avec détection des cycles, sept exercices numériques à correction déterministe et une progression sauvegardée dans le navigateur. Import/export JSON et réinitialisation sont disponibles dans l'interface.
+
+La validation d'un exercice signifie seulement une **maîtrise provisoirement démontrée sur une question**, pas une certification complète. Les cours liés proviennent du catalogue existant et restent non évalués. Certaines compétences n'ont pas encore de ressource dédiée ; il faut alors utiliser l'objectif et l'exercice comme démonstration du fonctionnement.
+
+Limites : pas de diagnostic initial, pas de répétition espacée, pas de correction de réponses ouvertes, pas de tests graphiques automatisés sur Chromebook, et pas encore de mécanisme robuste de maîtrise reposant sur plusieurs exercices indépendants. Un passage manuel des étapes et l'accessibilité détaillée restent à valider. L'import rejette les données non conformes et est limité à 100 Ko.
+
+Pour essayer cette version depuis un nouveau clone :
+
+```bash
+cd ~
+git clone --branch feature/knowledge-curator-v0.3 https://github.com/seblenonsaint/math-curator-community.git knowledge-v03
+cd knowledge-v03/knowledge-curator
+python3 -m http.server 8765 --bind 127.0.0.1
+```
+
+Ouvrir `http://localhost:8765` dans Chrome. Arrêter un ancien serveur utilisant le port 8765 avant le lancement.

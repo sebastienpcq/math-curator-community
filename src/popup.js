@@ -1,0 +1,5 @@
+(async()=>{'use strict';const $=id=>document.getElementById(id);let s={...MathConfig.DEFAULTS,...(await chrome.storage.local.get('settings')).settings};
+for(const k of ['enabled','mode','level','threshold','hideShorts','showBadges']){const e=$(k);e[e.type==='checkbox'?'checked':'value']=s[k];e.addEventListener('input',async()=>{s[k]=e.type==='checkbox'?e.checked:e.type==='range'?Number(e.value):e.value;await save();});}
+async function save(){await chrome.storage.local.set({settings:s});$('status').textContent=s.enabled?'Actif sur YouTube':'Désactivé : toutes les vidéos sont réaffichées';$('thresholdValue').textContent=s.threshold+'/85';}
+$('restore').onclick=async()=>{s.enabled=false;$('enabled').checked=false;await save();};$('options').onclick=()=>chrome.runtime.openOptionsPage();await save();
+})();

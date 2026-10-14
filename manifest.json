@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "Math Curator Community",
+  "version": "1.0.0",
+  "description": "Filtre local et réversible de vidéos de mathématiques sur YouTube, sans compte ni IA externe.",
+  "permissions": [
+    "storage"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Math Curator Community"
+  },
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.youtube.com/*"
+      ],
+      "js": [
+        "src/config.js",
+        "src/scoring.js",
+        "src/content.js"
+      ],
+      "css": [
+        "src/content.css"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "options_page": "options.html"
+}

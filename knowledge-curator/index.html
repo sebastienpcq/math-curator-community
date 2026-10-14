@@ -9,6 +9,7 @@
 <script src="learning.cjs" defer></script>
 <script src="attempts.cjs" defer></script>
 <script src="mastery.cjs" defer></script>
+<script src="review.cjs" defer></script>
 <script src="learning-ui.js" defer></script>
 </head>
 <body>
@@ -22,7 +23,7 @@
 <button type="reset" class="reset">Réinitialiser</button>
 </form>
 <section aria-live="polite"><div class="sectionbar"><h2>Ressources</h2><span id="count">Chargement…</span></div><div id="resources" class="cards"></div><p id="empty" hidden>Aucune ressource ne correspond à ta recherche.</p></section>
-<section id="study" class="study"><div class="sectionbar"><h2>Mon parcours : algèbre</h2><span id="study-count"></span></div><p>Les étapes deviennent accessibles selon tes acquis vérifiés. Tu peux consulter toutes les notions, mais les tests permettent de démontrer progressivement leur maîtrise.</p><div id="study-steps"></div><section class="history"><h3>Historique des tentatives</h3><p>Dernières réponses enregistrées sur cet appareil.</p><ol id="attempt-history"></ol></section><div class="study-actions"><button type="button" id="progress-export">Exporter ma progression</button><label class="import-label">Importer une progression <input type="file" id="progress-import" accept="application/json,.json"></label><button type="button" id="progress-reset">Réinitialiser</button></div><p id="study-message" role="status"></p></section>
+<section id="study" class="study"><div class="sectionbar"><h2>Mon parcours : algèbre</h2><span id="study-count"></span></div><p>Les étapes deviennent accessibles selon tes acquis vérifiés. Tu peux consulter toutes les notions, mais les tests permettent de démontrer progressivement leur maîtrise.</p><div id="review-dashboard" class="review-dashboard" aria-live="polite"></div><div id="study-steps"></div><section class="history"><h3>Historique des tentatives</h3><p>Dernières réponses enregistrées sur cet appareil.</p><ol id="attempt-history"></ol></section><div class="study-actions"><button type="button" id="progress-export">Exporter ma progression</button><label class="import-label">Importer une progression <input type="file" id="progress-import" accept="application/json,.json"></label><button type="button" id="progress-reset">Réinitialiser</button></div><p id="study-message" role="status"></p></section>
 <section class="method"><h2>Notre méthode</h2><p>Les ressources ci-dessus sont <strong>référencées, mais non évaluées</strong>. La présence dans le catalogue n'est pas une garantie de qualité. Une évaluation complète nécessitera une justification documentée, des contrôles d'exactitude et une appréciation pédagogique selon le public visé.</p></section>
 </main><footer>Knowledge Curator · Prototype local, sans compte ni suivi comportemental · Les liens ouvrent le site de leur éditeur.</footer>
 </body></html>

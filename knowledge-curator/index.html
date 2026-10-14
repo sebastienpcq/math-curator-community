@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Knowledge Curator — Explorer pour comprendre</title>
+<link rel="stylesheet" href="style.css">
+<script src="app.js" defer></script>
+</head>
+<body>
+<header class="top"><div class="brand">▣ <strong>Knowledge Curator</strong> <span>Prototype</span></div><div class="tagline">Explorer pour comprendre, pas pour défiler.</div></header>
+<main>
+<section class="intro"><p class="eyebrow">BIBLIOTHÈQUE PÉDAGOGIQUE • VERSION EXPÉRIMENTALE</p><h1>Qu'aimerais-tu comprendre ?</h1><p>Des cours rangés par discipline et par niveau. Aucun flux infini, aucune lecture automatique, aucun score pédagogique inventé.</p></section>
+<form id="filters" class="filters" role="search">
+<label>Rechercher<input type="search" id="query" placeholder="Équations, Révolution française…" autocomplete="off"></label>
+<label>Discipline<select id="discipline"><option value="">Toutes les disciplines</option><option value="mathematics">Mathématiques</option><option value="physics">Physique</option><option value="history">Histoire</option></select></label>
+<label>Niveau<select id="level"><option value="">Tous les niveaux</option><option value="beginner">Débutant</option><option value="intermediate">Intermédiaire</option><option value="advanced">Avancé</option></select></label>
+<button type="reset" class="reset">Réinitialiser</button>
+</form>
+<section aria-live="polite"><div class="sectionbar"><h2>Ressources</h2><span id="count">Chargement…</span></div><div id="resources" class="cards"></div><p id="empty" hidden>Aucune ressource ne correspond à ta recherche.</p></section>
+<section class="method"><h2>Notre méthode</h2><p>Les ressources ci-dessus sont <strong>référencées, mais non évaluées</strong>. La présence dans le catalogue n'est pas une garantie de qualité. Une évaluation complète nécessitera une justification documentée, des contrôles d'exactitude et une appréciation pédagogique selon le public visé.</p></section>
+</main><footer>Knowledge Curator · Prototype local, sans compte ni suivi comportemental · Les liens ouvrent le site de leur éditeur.</footer>
+</body></html>

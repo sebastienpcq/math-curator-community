@@ -1,34 +1,28 @@
-# Agent local expérimental (gratuit)
+# Agent local V0.2 — Knowledge Curator
 
-Cet outil interroge **uniquement Ollama installé localement**, propose jusqu'à cinq améliorations successives, et produit un fichier Markdown non approuvé. **Il ne modifie jamais les sources, ne lance jamais le code généré et ne publie rien sur GitHub.** Ce n'est pas encore un agent de codage entièrement autonome.
+Cet agent utilise uniquement Ollama sur `127.0.0.1:11434`, sans API payante. Il **ne modifie jamais les sources** et n'exécute pas le contenu généré.
 
-## Préparer le Chromebook (Linux)
+## Changements par rapport à V0.1
 
-Vérifier Node.js, Python 3 et Ollama. Installer Ollama selon la documentation officielle si nécessaire, puis télécharger un modèle compatible avec la mémoire disponible, par exemple :
+- Une tâche précise et un seul extrait de fichier (2 800 caractères maximum) par cycle.
+- Réponse JSON obligatoire, comportant objectif, fichier, changement, test et risque.
+- Contrôles de forme avant conservation de la proposition (pas de garantie de justesse technique).
+- Affichage de l'avancement, délai maximal configurable et rapport même après interruption.
+- Trois cycles maximum par lancement.
 
-```bash
-ollama pull qwen2.5-coder:3b
-```
+## Sur Chromebook
 
-Le modèle utilise de l'espace disque, de la RAM et du calcul local. Sur un Chromebook peu puissant, il peut être lent ou impossible à charger.
-
-## Exécution
-
-Depuis la racine du clone de la branche `feature/knowledge-curator-v0.3`, avec Ollama lancé :
+Depuis le clone Git `~/knowledge-v03` :
 
 ```bash
-python3 knowledge-curator/agent/local_agent.py --iterations 1
+git pull origin feature/knowledge-curator-v0.3
+python3 knowledge-curator/agent/local_agent.py --model qwen2.5-coder:0.5b --iterations 1
 ```
 
-Les propositions sont enregistrées dans `knowledge-curator/agent-reports/`, dossier ignoré par Git. Ne pas considérer le texte généré comme fiable sans revue humaine.
+Les rapports sont enregistrés sous `knowledge-curator/agent-reports/`, qui est ignoré par Git. Si l'agent refuse de démarrer à cause du statut Git, vérifier `git status --short` et préserver les modifications utiles.
 
-## Sécurité
+Le modèle 0.5B peut proposer des changements incorrects même si le JSON est valide. Ne pas appliquer le résultat sans revue. Pour comparer V0.1 et V0.2, examiner les rapports des deux exécutions.
 
-- URL Ollama limitée à `127.0.0.1:11434`.
-- Aucune clé API requise.
-- Aucune écriture de code et aucune commande issue du modèle exécutée.
-- Refus de démarrer si le dépôt a des modifications en attente.
-- Tests avant chaque proposition ; arrêt en cas d'échec.
-- L'agent lit certains fichiers du dépôt : ne jamais y placer de mots de passe ou de clés.
+## Limites
 
-Une boucle de codage autonome réelle demanderait une sandbox isolée, un mécanisme d'application de patches, des tests d'intégration et une revue des modifications avant publication.
+Il ne s'agit pas encore d'une boucle capable de coder, corriger et vérifier seule. Une autonomie accrue demandera un environnement isolé et des tests plus complets.

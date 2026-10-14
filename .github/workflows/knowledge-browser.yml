@@ -1,0 +1,31 @@
+name: Knowledge Curator browser integration
+on:
+  push:
+    branches:
+      - fix/knowledge-curator-v0.5-integration
+    paths:
+      - 'knowledge-curator/**'
+      - '.github/workflows/knowledge-browser.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Playwright and Chromium
+        run: |
+          npm install --no-save @playwright/test@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Serve local site and run browser checks
+        run: |
+          python3 -m http.server 8770 --bind 127.0.0.1 --directory knowledge-curator &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID || true' EXIT
+          sleep 2
+          npx playwright test knowledge-curator/tests/browser.spec.cjs --reporter=line --workers=1

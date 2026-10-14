@@ -21,7 +21,7 @@ C'est gratuit, sans compte à créer et sans logiciel supplémentaire à install
 
 Pour ceux qui veulent essayer :
 
-1. Récupérez le fichier ZIP dans les [Releases](https://github.com/seblenonsaint/math-curator-community/releases).
+1. Téléchargez le fichier [`math-curator-community-v1.zip`](https://github.com/seblenonsaint/math-curator-community/blob/main/math-curator-community-v1.zip) depuis le dépôt (bouton **Download raw file**).
 2. Décompressez l'archive.
 3. Ouvrez `chrome://extensions/` dans Chrome.
 4. Activez le **mode développeur** en haut à droite.
@@ -35,10 +35,14 @@ C'est une première version, donc je ne vais pas prétendre que tout est parfait
 
 Je compte continuer à travailler dessus tranquillement, en fonction de ce que je remarque à l'utilisation et des retours éventuels.
 
-Si certains veulent la tester, me signaler un problème ou proposer une amélioration, n'hésitez pas. Les retours constructifs sont toujours utiles.
+Si certains veulent la tester, [signaler un problème](https://github.com/seblenonsaint/math-curator-community/issues/new/choose) ou proposer une amélioration, n'hésitez pas. Les retours constructifs sont toujours utiles.
 
 Et si ça peut éviter à quelques personnes de perdre autant de temps que moi à chercher des cours convenables, ce sera déjà pas mal.
 
 **GitHub :** https://github.com/seblenonsaint/math-curator-community
 
-**Téléchargement :** https://github.com/seblenonsaint/math-curator-community/releases
+**Téléchargement de la version 1 :** https://github.com/seblenonsaint/math-curator-community/blob/main/math-curator-community-v1.zip
+
+**Historique des versions :** https://github.com/seblenonsaint/math-curator-community/releases
+
+**Contribuer :** [CONTRIBUTING.md](CONTRIBUTING.md)

@@ -15,7 +15,7 @@ function validate(data){
  for(const x of data.exercises||[])if(x.type!=='numeric'||!Number.isFinite(x.answer)||x.tolerance<0)errors.push('Invalid exercise '+x.id);
  return errors;
 }
-function normalizeAnswer(value){const s=String(value).trim().replace(',','.');if(!/^[+-]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)$/.test(s))return null;const n=Number(s);return Number.isFinite(n)?n:null;}
+function normalizeAnswer(value){const s=String(value).trim().replace(',','.');if(!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/.test(s))return null;const n=Number(s);return Number.isFinite(n)?n:null;}
 function grade(exercise,value){const n=normalizeAnswer(value);return n!==null&&Math.abs(n-exercise.answer)<=exercise.tolerance;}
 function available(path,progress){return path.steps.filter(s=>s.prerequisites.every(p=>progress[p]?.status==='demonstrated'));}
 const api={validate,normalizeAnswer,grade,available};

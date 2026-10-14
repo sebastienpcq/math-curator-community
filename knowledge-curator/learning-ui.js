@@ -7,7 +7,7 @@ const count=document.querySelector('#study-count');
 let data=null,progress={};
 let history=[];
 function readHistory(){try{return KnowledgeAttempts.read(localStorage);}catch(error){msg.textContent='Historique inaccessible : '+error.message;return [];}}
-function derivedProgress(){const next={...progress};for(const s of data.paths[0].steps){const state=KnowledgeMastery.status(s,history);if(state==='demonstrated'||state==='consolidate'||state==='in_progress')next[s.id]={status:state,updatedAt:next[s.id]?.updatedAt||new Date().toISOString()};else if(next[s.id]?.status==='demonstrated')next[s.id]={status:'in_progress',updatedAt:new Date().toISOString()};}return next;}
+function derivedProgress(){const next={...progress};for(const s of data.paths[0].steps){const state=KnowledgeMastery.status(s,history);if(state!=='not_started')next[s.id]={status:state,updatedAt:next[s.id]?.updatedAt||new Date().toISOString()};else if(next[s.id]?.status==='demonstrated'||next[s.id]?.status==='consolidate')next[s.id]={status:'in_progress',updatedAt:new Date().toISOString()};}return next;}
 function showHistory(){const list=document.querySelector('#attempt-history');list.replaceChildren();for(const a of history.slice(-30).reverse()){const li=document.createElement('li');const skill=data.paths[0].steps.find(s=>s.id===a.skillId);li.textContent=(skill?.title||a.skillId)+' · '+a.exerciseId+' · '+(a.correct?'correct':'incorrect')+' · '+new Date(a.timestamp).toLocaleString('fr-FR');list.append(li);}if(!history.length){const li=document.createElement('li');li.textContent='Aucune tentative enregistrée.';list.append(li);}}
 function validProgress(p){
  if(!p||typeof p!=='object'||Array.isArray(p))return false;

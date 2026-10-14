@@ -6,6 +6,12 @@ on:
     paths:
       - 'knowledge-curator/**'
       - '.github/workflows/knowledge-browser.yml'
+  pull_request:
+    branches:
+      - fix/knowledge-curator-v0.5-integration
+    paths:
+      - 'knowledge-curator/**'
+      - '.github/workflows/knowledge-browser.yml'
   workflow_dispatch:
 permissions:
   contents: read
@@ -22,6 +28,8 @@ jobs:
         run: |
           npm install --no-save @playwright/test@1.56.1
           npx playwright install --with-deps chromium
+      - name: Run V0.5 Node regression tests
+        run: node --test knowledge-curator/tests/validation-v05.test.cjs
       - name: Serve local site and run browser checks
         run: |
           python3 -m http.server 8770 --bind 127.0.0.1 --directory knowledge-curator &

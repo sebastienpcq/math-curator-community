@@ -25,6 +25,12 @@ function persist(){
 function setStatus(id,status){progress[id]={status,updatedAt:new Date().toISOString()};persist();render();}
 function render(){
  history=readHistory();progress=derivedProgress();showHistory();
+ const dashboard=document.querySelector('#review-dashboard');dashboard.replaceChildren();
+ const weak=KnowledgeReview.weakSkills(data.paths[0],history);
+ const due=data.paths[0].steps.map(s=>({s,r:KnowledgeReview.reviewState(s,history)})).filter(x=>x.r.due);
+ const h=document.createElement('h3');h.textContent='Révisions et consolidation';dashboard.append(h);
+ const dueLine=document.createElement('p');dueLine.textContent=due.length?('À revoir : '+due.map(x=>x.s.title).join(', ')):'Aucune révision échue pour le moment.';dashboard.append(dueLine);
+ const err=document.createElement('p');err.textContent=weak.length?('À consolider selon les erreurs : '+weak.slice(0,3).map(x=>x.step.title+' ('+x.review.errors+')').join(', ')):'Aucune erreur enregistrée.';dashboard.append(err);
  steps.replaceChildren();let done=0;
  const path=data.paths[0],available=new Set(KnowledgeLearning.available(path,progress).map(s=>s.id));
  const exercises=new Map(data.exercises.map(e=>[e.id,e]));

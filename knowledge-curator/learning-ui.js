@@ -114,16 +114,20 @@ document.querySelector('#progress-import').addEventListener('change',async e=>{
  const file=e.target.files?.[0];if(!file)return;
  if(file.size>100000){msg.textContent='Fichier trop volumineux.';return;}
  try{const payload=JSON.parse(await file.text());if(![1,2].includes(payload.version)||!validProgress(payload.progress))throw Error('Format invalide');
-    const history=KnowledgeAttempts.read(localStorage);
-    if(payload.version===2){
-      if(!KnowledgeAttempts.validateHistory(payload.attempts))throw Error('Historique invalide');
-      KnowledgeAttempts.replace(localStorage,payload.attempts);
-    }
-    progress=payload.progress;
-    history=readHistory();progress=derivedProgress();
-    if(!persist()){
-      if(payload.version===2)KnowledgeAttempts.replace(localStorage,history);
-      throw Error('Sauvegarde indisponible');
+    const previousHistory=KnowledgeAttempts.read(localStorage);
+    const previousProgress=progress;
+    if(payload.version===2&&!KnowledgeAttempts.validateHistory(payload.attempts))throw Error('Historique invalide');
+    try {
+      if(payload.version===2)KnowledgeAttempts.replace(localStorage,payload.attempts);
+      progress=payload.progress;
+      history=readHistory();
+      progress=derivedProgress();
+      if(!persist())throw Error('Sauvegarde indisponible');
+    } catch(error) {
+      progress=previousProgress;
+      if(payload.version===2)KnowledgeAttempts.replace(localStorage,previousHistory);
+      history=previousHistory;
+      throw error;
     }
     render();msg.textContent='Progression importée.';}
  catch{msg.textContent='Import refusé : fichier non conforme.';}

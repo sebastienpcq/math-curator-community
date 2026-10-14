@@ -31,3 +31,9 @@ test('reject malformed events and imported history',()=>{
  assert.throws(()=>a.replace(s,[{bad:true}]));
  assert.deepEqual(a.read(s),[]);
 });
+
+test('rejects invalid timestamp without changing history',()=>{
+ const s=storage();const first=e('ex-fractions',true,'2026-10-14T12:00:00.000Z');a.append(s,first);
+ assert.throws(()=>a.append(s,e('ex-fractions',false,'invalid-date')),/invalide/);
+ assert.deepEqual(a.read(s),[first]);
+});

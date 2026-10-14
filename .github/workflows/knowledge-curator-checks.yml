@@ -20,6 +20,7 @@ jobs:
           node-version: '22'
       - run: |
           python3 -m py_compile knowledge-curator/agent/local_agent.py
+          python3 -m unittest discover -s knowledge-curator/agent -p 'test_*.py'
           node --check knowledge-curator/app.js
           node --check knowledge-curator/learning.cjs
           node --check knowledge-curator/learning-ui.js

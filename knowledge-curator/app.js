@@ -20,4 +20,4 @@ function paint(){
 }
 elements.form.addEventListener('input',paint);
 elements.form.addEventListener('reset',()=>setTimeout(paint,0));
-fetch('catalog.json').then(r=>{if(!r.ok)throw Error('Catalogue inaccessible');return r.json();}).then(c=>{resources=c.resources;paint();}).catch(()=>{elements.count.textContent='Erreur de chargement';elements.empty.hidden=false;elements.empty.textContent='Le catalogue doit être servi par un serveur local (voir README).';});
+fetch('catalog.json').then(r=>{if(!r.ok)throw Error('Catalogue inaccessible');return r.json();}).then(c=>{resources=c.resources;window.knowledgeCatalog=c;paint();}).catch(()=>{elements.count.textContent='Erreur de chargement';elements.empty.hidden=false;elements.empty.textContent='Le catalogue doit être servi par un serveur local (voir README).';});

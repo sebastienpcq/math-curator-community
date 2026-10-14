@@ -14,7 +14,7 @@
   const successive=ordered.slice().reverse().findIndex(e=>!e.correct);
   const streak=successive<0?ordered.length:successive;
   const stage=Math.min(Math.max(0,streak-1),INTERVALS.length-1);
-  const dueAt=lastCorrect?validDate(lastCorrect.timestamp)+INTERVALS[stage]*DAY:null;
+  const dueAt=lastCorrect?Math.max(last,validDate(lastCorrect.timestamp))+INTERVALS[stage]*DAY:null;
   return {errors,independent,stage,due:dueAt!==null&&now>=dueAt,nextAt:dueAt===null?null:new Date(dueAt).toISOString()};
  }
  function weakSkills(path,events){

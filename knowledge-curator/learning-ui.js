@@ -52,6 +52,14 @@ function render(){
     if(!unlocked){feedback.textContent='Valide d’abord les prérequis pour ce test.';return;}
     const ok=KnowledgeLearning.grade(exercise,input.value);
     feedback.textContent=(ok?'Réponse correcte. ':'Réponse à revoir. ')+exercise.explanation;
+    try {
+      KnowledgeAttempts.append(localStorage,{
+        skillId:s.id,exerciseId:exercise.id,correct:ok,timestamp:new Date().toISOString()
+      });
+    } catch(error) {
+      msg.textContent='Attention : tentative non enregistrée ('+error.message+').';
+      return;
+    }
     setStatus(s.id,ok?'demonstrated':'consolidate');
     msg.textContent=(ok?'Réponse correcte. ':'Réponse à revoir. ')+exercise.explanation;
    });
@@ -63,19 +71,30 @@ function render(){
  count.textContent=done+' / '+path.steps.length+' compétences démontrées';
 }
 document.querySelector('#progress-export').addEventListener('click',()=>{
- const blob=new Blob([JSON.stringify({version:1,progress},null,2)],{type:'application/json'});
+ const blob=new Blob([JSON.stringify({version:2,progress,attempts:KnowledgeAttempts.read(localStorage)},null,2)],{type:'application/json'});
  const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='knowledge-curator-progression.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 });
 document.querySelector('#progress-import').addEventListener('change',async e=>{
  const file=e.target.files?.[0];if(!file)return;
  if(file.size>100000){msg.textContent='Fichier trop volumineux.';return;}
- try{const payload=JSON.parse(await file.text());if(payload.version!==1||!validProgress(payload.progress))throw Error('Format invalide');progress=payload.progress;persist();render();msg.textContent='Progression importée.';}
+ try{const payload=JSON.parse(await file.text());if(![1,2].includes(payload.version)||!validProgress(payload.progress))throw Error('Format invalide');
+    const history=KnowledgeAttempts.read(localStorage);
+    if(payload.version===2){
+      if(!KnowledgeAttempts.validateHistory(payload.attempts))throw Error('Historique invalide');
+      KnowledgeAttempts.replace(localStorage,payload.attempts);
+    }
+    progress=payload.progress;
+    if(!persist()){
+      if(payload.version===2)KnowledgeAttempts.replace(localStorage,history);
+      throw Error('Sauvegarde indisponible');
+    }
+    render();msg.textContent='Progression importée.';}
  catch{msg.textContent='Import refusé : fichier non conforme.';}
  e.target.value='';
 });
 document.querySelector('#progress-reset').addEventListener('click',()=>{
  if(!confirm('Effacer toute la progression locale ?'))return;
- progress={};persist();render();msg.textContent='Progression réinitialisée.';
+ progress={};persist();KnowledgeAttempts.replace(localStorage,[]);render();msg.textContent='Progression réinitialisée.';
 });
 fetch('learning.json').then(r=>{if(!r.ok)throw Error('Impossible de charger le parcours');return r.json();}).then(d=>{
  const errors=KnowledgeLearning.validate(d);if(errors.length)throw Error(errors.join(', '));

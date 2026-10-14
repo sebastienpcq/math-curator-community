@@ -1,0 +1,170 @@
+{
+  "version": 1,
+  "paths": [
+    {
+      "id": "algebra-foundations",
+      "title": "De l'arithmétique aux logarithmes",
+      "discipline": "mathematics",
+      "goal": "Acquérir des notions fondamentales et vérifier les acquis.",
+      "steps": [
+        {
+          "id": "arithmetic",
+          "title": "Opérations arithmétiques",
+          "prerequisites": [],
+          "objective": "Savoir additionner, soustraire, multiplier et diviser.",
+          "resourceIds": [
+            "ka-basic"
+          ],
+          "exerciseIds": [
+            "ex-arithmetic"
+          ]
+        },
+        {
+          "id": "fractions",
+          "title": "Fractions et proportions",
+          "prerequisites": [
+            "arithmetic"
+          ],
+          "objective": "Calculer avec des fractions et comparer des proportions.",
+          "resourceIds": [],
+          "exerciseIds": [
+            "ex-fractions"
+          ]
+        },
+        {
+          "id": "powers",
+          "title": "Puissances",
+          "prerequisites": [
+            "arithmetic"
+          ],
+          "objective": "Manipuler les puissances d'exposants entiers.",
+          "resourceIds": [],
+          "exerciseIds": [
+            "ex-powers"
+          ]
+        },
+        {
+          "id": "symbols",
+          "title": "Calcul littéral",
+          "prerequisites": [
+            "fractions",
+            "powers"
+          ],
+          "objective": "Simplifier des expressions algébriques.",
+          "resourceIds": [
+            "ka-algebra"
+          ],
+          "exerciseIds": [
+            "ex-symbols"
+          ]
+        },
+        {
+          "id": "equations",
+          "title": "Équations du premier degré",
+          "prerequisites": [
+            "symbols"
+          ],
+          "objective": "Résoudre et vérifier une équation linéaire.",
+          "resourceIds": [
+            "ka-algebra"
+          ],
+          "exerciseIds": [
+            "ex-equations"
+          ]
+        },
+        {
+          "id": "functions",
+          "title": "Fonctions",
+          "prerequisites": [
+            "equations"
+          ],
+          "objective": "Interpréter une fonction et son graphique.",
+          "resourceIds": [
+            "ka-premiere"
+          ],
+          "exerciseIds": [
+            "ex-functions"
+          ]
+        },
+        {
+          "id": "logarithms",
+          "title": "Exponentielles et logarithmes",
+          "prerequisites": [
+            "functions",
+            "powers"
+          ],
+          "objective": "Comprendre l'inverse de l'exponentielle et les logarithmes.",
+          "resourceIds": [],
+          "exerciseIds": [
+            "ex-logarithms"
+          ]
+        }
+      ]
+    }
+  ],
+  "exercises": [
+    {
+      "id": "ex-arithmetic",
+      "skillId": "arithmetic",
+      "type": "numeric",
+      "question": "Combien vaut 8 × 7 ?",
+      "answer": 56,
+      "tolerance": 0,
+      "explanation": "8 × 7 = 56."
+    },
+    {
+      "id": "ex-fractions",
+      "skillId": "fractions",
+      "type": "numeric",
+      "question": "Combien vaut 1/2 + 1/4 ? Réponds en décimal.",
+      "answer": 0.75,
+      "tolerance": 0,
+      "explanation": "1/2 = 0,5 et 1/4 = 0,25, donc 0,75."
+    },
+    {
+      "id": "ex-powers",
+      "skillId": "powers",
+      "type": "numeric",
+      "question": "Combien vaut 2 puissance 5 ?",
+      "answer": 32,
+      "tolerance": 0,
+      "explanation": "2 × 2 × 2 × 2 × 2 = 32."
+    },
+    {
+      "id": "ex-symbols",
+      "skillId": "symbols",
+      "type": "numeric",
+      "question": "Pour x = 3, combien vaut 2x + 5 ?",
+      "answer": 11,
+      "tolerance": 0,
+      "explanation": "2 × 3 + 5 = 11."
+    },
+    {
+      "id": "ex-equations",
+      "skillId": "equations",
+      "type": "numeric",
+      "question": "Résous 3x + 2 = 14 : quelle valeur de x ?",
+      "answer": 4,
+      "tolerance": 0,
+      "explanation": "3x = 12, donc x = 4."
+    },
+    {
+      "id": "ex-functions",
+      "skillId": "functions",
+      "type": "numeric",
+      "question": "Si f(x) = 2x - 1, combien vaut f(5) ?",
+      "answer": 9,
+      "tolerance": 0,
+      "explanation": "f(5) = 10 - 1 = 9."
+    },
+    {
+      "id": "ex-logarithms",
+      "skillId": "logarithms",
+      "type": "numeric",
+      "question": "Combien vaut log10(1000) ?",
+      "answer": 3,
+      "tolerance": 0,
+      "explanation": "10³ = 1000, donc log10(1000) = 3."
+    }
+  ]
+}

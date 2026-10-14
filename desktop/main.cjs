@@ -46,7 +46,9 @@ function openYouTubeWindow() {
     webPreferences: {nodeIntegration: false, contextIsolation: true, sandbox: true}
   });
   win.webContents.setWindowOpenHandler(({url}) => {
-    if (isYouTube(url)) {
+    if (isGoogleSignIn(url)) {
+      openGoogleSignInTest(url);
+    } else if (isYouTube(url)) {
       win.loadURL(url);
     } else if (/^https:\/\//.test(url)) {
       shell.openExternal(url);
@@ -56,7 +58,8 @@ function openYouTubeWindow() {
   win.webContents.on('will-navigate', (event, url) => {
     if (!isYouTube(url)) {
       event.preventDefault();
-      if (url.startsWith('https://')) shell.openExternal(url);
+      if (isGoogleSignIn(url)) openGoogleSignInTest(url);
+      else if (url.startsWith('https://')) shell.openExternal(url);
     }
   });
   win.webContents.on('did-finish-load', async () => {

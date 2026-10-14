@@ -24,6 +24,7 @@ jobs:
           node --check knowledge-curator/app.js
           node --check knowledge-curator/learning.cjs
           node --check knowledge-curator/mastery.cjs
+          node --check knowledge-curator/review.cjs
           node --check knowledge-curator/attempts.cjs
           node --check knowledge-curator/learning-ui.js
           node --check knowledge-curator/schema.cjs

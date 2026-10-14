@@ -32,3 +32,15 @@ Il ne s'agit pas encore d'une boucle capable de coder, corriger et vérifier seu
 L'agent effectue au maximum deux tentatives par cycle. Si une proposition est rejetée, sa réponse brute est enregistrée localement dans `agent-reports/` au format texte pour diagnostic ; **ne publiez pas ce dossier** et vérifiez qu'il ne contient pas de secrets avant de partager un rapport. La seconde tentative utilise une consigne réduite. La limite de génération est de 450 tokens. Une proposition acceptée n'est validée que sur sa structure, pas sur sa pertinence scientifique ou technique.
 
 Commande : `python3 knowledge-curator/agent/local_agent.py --model qwen2.5-coder:0.5b --iterations 1`.
+
+## Expérience V0.5 — test de cas limite
+
+L'agent demande désormais au modèle local un seul **cas limite nouveau** sur l'API réelle de `attempts.cjs`, avec trois champs : `function`, `scenario` et `expected`. Le format est contraint par un schéma JSON à la génération, puis revérifié en Python. Les noms d'API inventés sont rejetés.
+
+Lancer :
+
+```bash
+python3 knowledge-curator/agent/local_agent.py --model qwen2.5-coder:1.5b --iterations 1 --timeout 180
+```
+
+Comparer la proposition à `tests/attempts.test.cjs` et `agent/REFERENCE_ATTEMPTS.md`. Une réponse acceptée sur la forme n'est **pas** automatiquement considérée comme un test pertinent ou original. Aucun code n'est appliqué.

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Agent local V0.3 : propositions courtes, validées, jamais appliquées."""
+"""Agent local V0.4 : propositions courtes, validées, jamais appliquées."""
 import argparse
 import datetime
 import json
@@ -25,7 +25,7 @@ MAX_SOURCE = 1100
 def query_ollama(prompt, model, timeout):
     payload = json.dumps({
         "model": model, "prompt": prompt, "stream": False,
-        "format": "json", "options": {"temperature": 0.1, "num_predict": 280}
+        "format": "json", "options": {"temperature": 0.1, "num_predict": 450}
     }).encode("utf-8")
     request = urllib.request.Request(
         "http://127.0.0.1:11434/api/generate", data=payload,
@@ -63,7 +63,7 @@ def validate_answer(raw, target):
     return value, None
 
 def main():
-    parser = argparse.ArgumentParser(description="Knowledge Curator : agent local V0.3")
+    parser = argparse.ArgumentParser(description="Knowledge Curator : agent local V0.4")
     parser.add_argument("--model", default="qwen2.5-coder:0.5b")
     parser.add_argument("--iterations", type=int, default=1)
     parser.add_argument("--timeout", type=int, default=90)
@@ -77,12 +77,14 @@ def main():
     if subprocess.run(["git", "status", "--porcelain"], cwd=ROOT,
                       capture_output=True, text=True, check=True).stdout.strip():
         sys.exit("Dépôt modifié : sauvegarder ou déplacer les fichiers non suivis.")
-    output = ["# Rapport Ollama — agent V0.3", "",
+    output = ["# Rapport Ollama — agent V0.4", "",
               "Propositions non vérifiées. Aucun code source n'est modifié.", ""]
     directory = PROJECT / "agent-reports"
     directory.mkdir(exist_ok=True)
-    destination = directory / ("proposal-v03-" +
+    destination = directory / ("proposal-v04-" +
         datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%d-%H%M%S") + ".md")
+    total_accepted = 0
+    total_attempts = 0
     try:
         for index in range(args.iterations):
             title, target, task = TASKS[index]
@@ -104,12 +106,34 @@ def main():
                 f"Le champ file doit être exactement {target}. "
                 f"Tâche précise : {task}\nDonne une action concrète et un cas de test avec résultat attendu.\nExtrait du fichier :\n{snippet}")
             print(f"[{index + 1}/{args.iterations}] Analyse Ollama : {title}...", flush=True)
-            try:
-                raw = query_ollama(prompt, args.model, args.timeout)
-                result, error = validate_answer(raw, target)
-            except (urllib.error.URLError, TimeoutError, KeyError, ValueError) as exc:
-                result, error = None, f"Erreur Ollama : {type(exc).__name__}"
+            result, error = None, "Aucune tentative"
             output.append(f"## Cycle {index + 1} — {title}")
+            for attempt in (1, 2):
+                total_attempts += 1
+                print(f"  Tentative {attempt}/2...", flush=True)
+                candidate_prompt = prompt if attempt == 1 else (
+                    "Réponds UNIQUEMENT par un JSON valide avec cinq chaînes "
+                    "objective, file, change, test, risk. "
+                    f"file doit être exactement {target}. "
+                    "Ne recopie aucun code. Sois précis, chaque champ distinct et non vide. "
+                    f"Objectif : {task}")
+                try:
+                    raw = query_ollama(candidate_prompt, args.model, args.timeout)
+                    result, error = validate_answer(raw, target)
+                    if error:
+                        # Diagnostic local uniquement. Ne jamais interpréter le texte comme du code.
+                        raw_path = directory / (destination.stem + f"-cycle{index+1}-attempt{attempt}.txt")
+                        raw_path.write_text(raw[:12000], encoding="utf-8")
+                        output.append(f"Tentative {attempt} rejetée : {error}. Réponse brute : {raw_path.name}")
+                    else:
+                        total_accepted += 1
+                        output.append(f"Tentative {attempt} acceptée sur la forme ; revue humaine nécessaire.")
+                        break
+                except (urllib.error.URLError, TimeoutError, KeyError, ValueError) as exc:
+                    result, error = None, f"Erreur Ollama : {type(exc).__name__}"
+                    output.append(f"Tentative {attempt} : {error}")
+                    if isinstance(exc, urllib.error.URLError):
+                        break
             if error:
                 output.append("Proposition rejetée : " + error)
             else:
@@ -120,6 +144,7 @@ def main():
         output.extend(["## Interruption", "Arrêt manuel demandé ; aucune modification appliquée."])
         print("Interruption demandée.", flush=True)
     finally:
+        output.append(f"\\nBilan : {total_accepted}/{args.iterations} cycles acceptés ; {total_attempts} tentatives.")
         destination.write_text("\n".join(output) + "\n", encoding="utf-8")
         print("Rapport :", destination.relative_to(ROOT), flush=True)
         print("Aucun code modifié et aucun commit publié.", flush=True)

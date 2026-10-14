@@ -19,3 +19,21 @@ test('réponse isolée ne valide pas la compétence',async({page})=>{
  await expect(first.locator('.study-status')).not.toContainText('Maîtrise provisoirement démontrée');
  await expect(page.locator('#review-dashboard')).toContainText('Aucune révision échue');
 });
+
+test('import V0.5 conserve les tentatives importées après rechargement',async({page})=>{
+ await page.goto('http://127.0.0.1:8770/');
+ const first=page.locator('.study-step').first();
+ await first.locator('form.exercise').first().locator('input').fill('999');
+ await first.locator('form.exercise').first().locator('button[type=submit]').click();
+ const payload={version:2,progress:{},attempts:[{
+  skillId:'arithmetic',exerciseId:'ex-arithmetic',correct:false,
+  timestamp:'2026-10-15T00:00:00.000Z'
+ }]};
+ await page.locator('#progress-import').setInputFiles({
+  name:'progress.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(payload))
+ });
+ await expect(page.locator('#study-message')).toContainText('Progression importée');
+ await page.reload();
+ await expect(page.locator('#attempt-history')).toContainText('incorrect');
+ await expect(page.locator('#review-dashboard')).toContainText('À consolider');
+});

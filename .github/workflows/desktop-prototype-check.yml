@@ -26,4 +26,7 @@ jobs:
           node --check desktop/main.cjs
           node --check desktop/preload.cjs
           node --check desktop/renderer.cjs
+          node --check desktop/filter-page.js
+          node --check src/config.js
+          node --check src/scoring.js
           node --test tests/community.test.cjs

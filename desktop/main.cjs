@@ -1,6 +1,7 @@
 'use strict';
 const {app, BrowserWindow, shell, ipcMain} = require('electron');
 const path = require('node:path');
+const fs = require('node:fs');
 
 function createMainWindow() {
   const win = new BrowserWindow({
@@ -16,20 +17,41 @@ function createMainWindow() {
   win.webContents.on('will-navigate', event => event.preventDefault());
 }
 
+const isYouTube = input => {
+  try { const u = new URL(input); return u.protocol === 'https:' && ['youtube.com','www.youtube.com','m.youtube.com'].includes(u.hostname); }
+  catch { return false; }
+};
 function openYouTubeWindow() {
   // Browser isolated from the local UI. No privileged preload or Node access.
   const win = new BrowserWindow({
     width: 1200, height: 820,
-    title: 'YouTube — Math Curator (sans filtrage)',
+    title: 'YouTube — Math Curator (filtrage expérimental)',
     webPreferences: {nodeIntegration: false, contextIsolation: true, sandbox: true}
   });
   win.webContents.setWindowOpenHandler(({url}) => {
-    if (/^https:\/\/(www\.)?youtube\.com\//.test(url)) {
+    if (isYouTube(url)) {
       win.loadURL(url);
     } else if (/^https:\/\//.test(url)) {
       shell.openExternal(url);
     }
     return {action: 'deny'};
+  });
+  win.webContents.on('will-navigate', (event, url) => {
+    if (!isYouTube(url)) {
+      event.preventDefault();
+      if (url.startsWith('https://')) shell.openExternal(url);
+    }
+  });
+  win.webContents.on('did-finish-load', async () => {
+    if (!isYouTube(win.webContents.getURL())) return;
+    try {
+      const assets = ['../src/config.js','../src/scoring.js','filter-page.js']
+        .map(file => fs.readFileSync(path.resolve(__dirname,file),'utf8')).join('\n');
+      await win.webContents.insertCSS('.math-curator-desktop-hidden{display:none!important}');
+      await win.webContents.executeJavaScript(assets);
+    } catch (error) {
+      console.error('Math Curator filtering injection failed:', error.message);
+    }
   });
   win.loadURL('https://www.youtube.com/');
 }

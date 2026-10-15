@@ -137,3 +137,30 @@ test('rollback failure retains journal and reports recoverability failure',()=>{
  })),/Rollback failed/);
  assert.notEqual(storage.getItem(boundary.JOURNAL),null);
 });
+
+test('invalid existing legacy archive blocks transaction before journal',()=>{
+ const storage=store();
+ storage.setItem('knowledge-curator-legacy-v1-archive','{"version":1,"progress":{}}');
+ const attempts={
+  KEY:'attempts',
+  read:s=>JSON.parse(s.getItem('attempts')||'[]'),
+  replace:(s,items)=>s.setItem('attempts',JSON.stringify(items)),
+  validateHistory:Array.isArray
+ };
+ assert.throws(()=>boundary.transaction(storage,attempts,valid,old=>old),/Invalid existing archive/);
+ assert.equal(storage.getItem(boundary.JOURNAL),null);
+ assert.equal(storage.getItem('knowledge-curator-legacy-v1-archive'),'{"version":1,"progress":{}}');
+});
+test('invalid new archive is rejected before any transaction write',()=>{
+ const storage=store();
+ const attempts={
+  KEY:'attempts',
+  read:s=>JSON.parse(s.getItem('attempts')||'[]'),
+  replace:(s,items)=>s.setItem('attempts',JSON.stringify(items)),
+  validateHistory:Array.isArray
+ };
+ assert.throws(()=>boundary.transaction(storage,attempts,valid,old=>({
+  ...old,legacyArchive:'not json'
+ })),/Invalid transaction state/);
+ assert.equal(storage.getItem(boundary.JOURNAL),null);
+});

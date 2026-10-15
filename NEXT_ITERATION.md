@@ -1,27 +1,19 @@
-# NEXT ITERATION — cycle 73 checkpoint
+# NEXT ITERATION — cycle 75 checkpoint
 
-## Verified CI
+## Verified results
 
-- Cycle 72 commit `e631a79`: Node checks and Chromium browser integration both successful.
-- MV3 suite: 9 passed; knowledge browser suite: 48 passed.
-- Instrumented 100-card fixture: 2 scans, ~2.2 ms cumulative in a single CI run.
+- Cycle 74 commit `f9d8e51`: Node and Chromium CI passed.
+- MV3: 10 passed; prototype browser: 48 passed.
+- Incremental cumulative-DOM benchmark: 100 / 500 / 1000 cards, respectively 6.2 / 7.8 / 9.4 ms (one scan per stage).
 
-## Priorities
+## Next engineering priorities
 
-1. Check CI on the latest cycle-73 documentation commit.
-2. Repeat performance measurements with 100, 500 and 1,000 cards; compare scan counts and timing across runs before optimizing.
-3. Audit DOM mutation observation for excessive work caused by attribute changes, especially in a real YouTube interface.
-4. Validate actual YouTube behavior manually or with an authorized real-site browser run; simulated fixtures cannot establish compatibility with every UI change.
-5. Keep IndexedDB experimental until concurrency and rollback gates are met.
+1. Verify CI on the final cycle-75 documentation commit.
+2. Repeat the benchmark across several independent Chromium profiles/runs, separating warmup from measurement and recording median and dispersion.
+3. If justified, add a separate test with continuously changing metadata (rather than only batch insertion) to detect rescans under sustained DOM churn.
+4. Avoid speculative optimization unless measurements demonstrate a meaningful bottleneck.
+5. Validate against live YouTube separately; fixture success cannot establish real-site compatibility.
 
-## Release gate
+## Safety gate
 
-No merge, release or activation without explicit authorization. `main` must remain unchanged.
-
-## Cycle 75 performance checkpoint
-
-- Verified CI on cycle-74 commit: 10 MV3 and 48 prototype browser tests passed.
-- Scan durations at 100/500/1000 cards: 6.2 / 7.8 / 9.4 ms (one run).
-- No performance change is justified by this sample alone.
-- Next: repeat the same benchmark across multiple runs, report median, range and variability, then evaluate mutations that modify existing cards rather than append batches.
-- Continue to protect `main`; no merge or release.
+Keep IndexedDB experimental; no merge, release, or main changes without explicit authorization.

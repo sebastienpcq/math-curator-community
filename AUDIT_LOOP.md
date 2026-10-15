@@ -467,3 +467,12 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Deux tests Node ajoutés à `storage-boundary.test.cjs` : récupération d'un ancien journal à deux clés sans toucher à l'archive V1, et deux échecs successifs suivis d'une récupération réussie.
 - Aucun changement du code de production ; les invariants de récupération sont vérifiés par tests.
 - CI cycle 57 à confirmer. IndexedDB reste expérimental et désactivé.
+
+## Cycle 58 — Centralisation des lectures de stockage
+
+- CI cycle 57 : contrôle général réussi ; navigateur en cours au relevé.
+- `learning-ui.js` passe désormais par `KnowledgeStorage.readProgress`, `readAttempts`, `readArchive` et `pending` pour ses lectures ordinaires.
+- Nouvelle API `readArchive` valide l'archive V1 avant retour et refuse toute lecture si une récupération est en attente.
+- Deux tests Node ajoutés : archive absente/corrompue et journal de récupération présent.
+- Le code d'import et de reset reste coordonné par `transaction` ; IndexedDB n'est pas activé.
+- CI cycle 58 à confirmer.

@@ -124,8 +124,20 @@ function render(){
  count.textContent=done+' / '+path.steps.length+' compétences démontrées';
 }
 document.querySelector('#progress-export').addEventListener('click',()=>{
- const blob=new Blob([JSON.stringify({version:2,progress,attempts:KnowledgeAttempts.read(localStorage)},null,2)],{type:'application/json'});
- const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='knowledge-curator-progression.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+ try {
+  if(localStorage.getItem('knowledge-curator-import-journal-v1')!==null)throw Error('Récupération en attente');
+  const attempts=KnowledgeAttempts.read(localStorage);
+  const raw=localStorage.getItem(KEY);
+  const saved=raw===null?{}:JSON.parse(raw);
+  if(!validProgress(saved))throw Error('Progression locale invalide');
+  const blob=new Blob([JSON.stringify({version:2,progress:saved,attempts},null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='knowledge-curator-progression.json';a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  msg.textContent='Export de la progression préparé.';
+ } catch(error) {
+  msg.textContent='Export impossible : données locales indisponibles ou récupération en attente. Aucune donnée modifiée.';
+ }
 });
 document.querySelector('#progress-import').addEventListener('change',async e=>{
  const file=e.target.files?.[0];if(!file)return;

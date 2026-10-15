@@ -81,3 +81,10 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Correctif : lecture et validation des deux valeurs persistées, refus si journal de récupération présent ; aucun fichier exporté en cas d'erreur.
 - Deux tests Chromium ajoutés : historique JSON corrompu et journal de récupération en attente.
 - Résultats CI du cycle 10 à confirmer.
+
+## Cycle 11 — Export/import aller-retour
+
+- CI cycle 10 : Node et Chromium réussis.
+- Test Playwright ajouté : réponse incorrecte, export JSON réel, comparaison avec le stockage, réinitialisation, réimportation et rechargement.
+- Vérifie l'égalité exacte des tentatives et de la progression avant/après l'aller-retour.
+- Résultat CI du cycle 11 à confirmer.

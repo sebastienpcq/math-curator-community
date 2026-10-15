@@ -908,3 +908,16 @@ test('V2 import and reset preserve consistency after storage boundary integratio
  expect(after.attempts).toEqual(snapshot.attempts);
  expect(after.journal).toBeNull();
 });
+
+test('pending recovery journal prevents new exercise attempt',async({page})=>{
+ await page.goto('http://127.0.0.1:8770/');
+ await expect(page.locator('#study-steps .study-step')).toHaveCount(7);
+ const before=await page.evaluate(()=>localStorage.getItem('knowledge-curator-attempts-v1'));
+ await page.evaluate(()=>localStorage.setItem('knowledge-curator-import-journal-v1','{"progress":null,"attempts":null}'));
+ const first=page.locator('.study-step').first();
+ await first.locator('form.exercise').first().locator('input').fill('999');
+ await first.locator('form.exercise').first().locator('button[type=submit]').click();
+ const after=await page.evaluate(()=>localStorage.getItem('knowledge-curator-attempts-v1'));
+ expect(after).toBe(before);
+ await expect(page.locator('#study-message')).toContainText('tentative non enregistrée');
+});

@@ -281,3 +281,12 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Critères de migration, sauvegarde et rollback explicites ; avertissement sur le retour arrière après nouvelles écritures IndexedDB.
 - Aucune activation, migration réelle ou suppression de clés héritées.
 - Attendre la validation CI du cycle 34 avant de développer le basculement.
+
+## Cycle 36 — Prévisualisation et confirmation volontaire de migration
+
+- CI cycle 35 : contrôle général réussi ; navigateur en cours au relevé.
+- API expérimentale `prepareMigration` / `confirmMigration` : prévisualisation sans écriture et confirmation explicite par l'appelant.
+- Garde-fou : comparaison du snapshot V0.5 entre prévisualisation et confirmation ; refus si les données ont changé.
+- Deux tests Playwright ajoutés : migration opt-in non destructive et refus si les données héritées ont changé.
+- Limite : la comparaison n'est pas un verrou atomique contre les écritures concurrentes de localStorage.
+- Aucune activation dans l'interface, aucune migration utilisateur.

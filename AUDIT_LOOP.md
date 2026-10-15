@@ -341,3 +341,12 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Deux tests Node ajoutés : délégation de l'écriture et refus si un journal de récupération existe.
 - Les imports et resets continuent d'utiliser des opérations directes pour leur séquence de restauration ; leur refactorisation doit conserver les invariants existants.
 - CI cycle 42 à confirmer. IndexedDB reste désactivé.
+
+## Cycle 43 — Régression import / journal de récupération
+
+- Contrôle général cycle 42 réussi ; navigateur en cours lors de l'inspection.
+- Défaut P1 identifié par analyse du code : `persist()` utilisait la frontière qui refuse toute écriture en présence du journal, alors que l'import doit écrire avant suppression du journal.
+- Correction : opération `writeDuringRecovery` réservée au code transactionnel, avec validation et exigence d'un journal présent ; l'import utilise cette opération.
+- Deux tests Node ajoutés : écriture autorisée dans la récupération, écriture ordinaire toujours bloquée, et refus sans journal.
+- Limite : un journal présent ne prouve pas l'identité de son propriétaire ; cette API reste interne et doit être remplacée lors du passage à IndexedDB.
+- CI cycle 43 à confirmer.

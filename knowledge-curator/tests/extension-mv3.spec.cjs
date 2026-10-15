@@ -74,3 +74,47 @@ test('MV3 hides Shorts and rescans dynamically inserted recommendations',async()
   fs.rmSync(profile,{recursive:true,force:true});
  }
 });
+
+test('MV3 reacts to SPA navigation and settings changes without reload',async()=>{
+ const profile=fs.mkdtempSync(path.join(os.tmpdir(),'math-curator-spa-'));
+ let context;
+ try{
+  context=await chromium.launchPersistentContext(profile,{
+   channel:'chromium',headless:true,
+   args:['--disable-extensions-except='+root,'--load-extension='+root]
+  });
+  let workers=context.serviceWorkers();
+  if(!workers.length)workers=[await context.waitForEvent('serviceworker',{timeout:15000})];
+  const page=await context.newPage();
+  await page.route('https://www.youtube.com/**',route=>route.fulfill({
+   status:200,contentType:'text/html',
+   body:'<!doctype html><html><body><main id="feed"><ytd-video-renderer><a id="video-title" href="/watch?v=abcdefghijk">Gaming highlights</a></ytd-video-renderer></main></body></html>'
+  }));
+  await page.goto('https://www.youtube.com/',{waitUntil:'domcontentloaded'});
+  await workers[0].evaluate(async()=>chrome.storage.local.set({
+   settings:{enabled:true,mode:'balanced'}
+  }));
+  await expect(page.locator('ytd-video-renderer')).toHaveClass(/math-curator-hidden/);
+  await page.evaluate(()=>{
+   history.pushState({},'','/results?search_query=math');
+   const feed=document.querySelector('#feed');
+   feed.replaceChildren();
+   const card=document.createElement('ytd-video-renderer');
+   card.innerHTML='<a id="video-title" href="/watch?v=bcdefghijkl">Gaming compilation</a>';
+   feed.append(card);
+   window.dispatchEvent(new Event('yt-navigate-finish'));
+  });
+  await expect(page.locator('ytd-video-renderer')).toHaveClass(/math-curator-hidden/);
+  await workers[0].evaluate(async()=>chrome.storage.local.set({
+   settings:{enabled:true,mode:'balanced',allowVideos:['bcdefghijkl']}
+  }));
+  await expect(page.locator('ytd-video-renderer')).not.toHaveClass(/math-curator-hidden/);
+  await workers[0].evaluate(async()=>chrome.storage.local.set({
+   settings:{enabled:true,mode:'balanced',allowVideos:[]}
+  }));
+  await expect(page.locator('ytd-video-renderer')).toHaveClass(/math-curator-hidden/);
+ }finally{
+  if(context)await context.close();
+  fs.rmSync(profile,{recursive:true,force:true});
+ }
+});

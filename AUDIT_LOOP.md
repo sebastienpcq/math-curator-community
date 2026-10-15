@@ -499,3 +499,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Ajout de `knowledge-curator/tests/extension-mv3.spec.cjs` : lancement d'un Chromium avec extension chargée, page YouTube simulée localement, contrôle du mode désactivé par défaut, activation du filtre puis désactivation.
 - Workflow navigateur étendu pour exécuter ce test. Le test n'utilise pas le site YouTube réel et ne couvre pas ses changements de DOM.
 - CI cycle 61 à confirmer ; aucun changement de `main`, aucune activation IndexedDB.
+
+## Cycle 62 — Shorts et recommandations dynamiques en MV3
+
+- CI cycle 61 : contrôles Node et Chromium réussis, y compris le chargement réel de l'extension MV3.
+- Nouveau test Playwright avec extension réellement chargée : masquage d'un Short, ajout dynamique d'une recommandation hors sujet, puis réapparition des éléments à la désactivation.
+- Le scénario exerce MutationObserver et la synchronisation des réglages Chrome Storage.
+- Limite : le DOM est simulé ; aucun test sur le site YouTube en direct.
+- CI cycle 62 à confirmer ; IndexedDB demeure expérimental.

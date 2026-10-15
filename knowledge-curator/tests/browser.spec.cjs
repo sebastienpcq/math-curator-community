@@ -852,3 +852,33 @@ test('cutover inspection detects legacy divergence without mutation',async({page
  expect(result.divergent).toEqual({ready:false,reason:'state-divergence'});
  expect(result.canonical.progress.arithmetic).toBeUndefined();
 });
+
+test('cutover gate detects legacy changes made by another active tab',async({context})=>{
+ const first=await context.newPage(),second=await context.newPage();
+ await Promise.all([first.goto('http://127.0.0.1:8770/'),second.goto('http://127.0.0.1:8770/')]);
+ await first.addScriptTag({url:'/state-v3.cjs'});
+ await first.addScriptTag({url:'/indexeddb-experimental.cjs'});
+ await first.evaluate(async()=>{
+  const adapter=window.KnowledgeIndexedDB,db=await adapter.open(indexedDB);
+  await adapter.migrateFromLegacy(db,localStorage,window.KnowledgeStateV3);
+  db.close();
+ });
+ const before=await first.evaluate(async()=>{
+  const adapter=window.KnowledgeIndexedDB,db=await adapter.open(indexedDB);
+  const result=await adapter.inspectCutover(db,localStorage,window.KnowledgeStateV3);
+  db.close();return result;
+ });
+ await second.evaluate(()=>{
+  localStorage.setItem('knowledge-curator-progress-v1',JSON.stringify({
+   arithmetic:{status:'in_progress',updatedAt:'2026-10-15T00:00:00.000Z'}
+  }));
+ });
+ const after=await first.evaluate(async()=>{
+  const adapter=window.KnowledgeIndexedDB,db=await adapter.open(indexedDB);
+  const result=await adapter.inspectCutover(db,localStorage,window.KnowledgeStateV3);
+  db.close();return result;
+ });
+ expect(before.ready).toBe(true);
+ expect(after).toEqual({ready:false,reason:'state-divergence'});
+ await Promise.all([first.close(),second.close()]);
+});

@@ -216,3 +216,10 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Correction : vérification explicite de présence et de validité au sein de la transaction `readwrite` ; aucune migration ne remplace un enregistrement déjà présent.
 - Test Chromium ajouté : deux migrations concurrentes depuis des instantanés différents doivent produire un seul état canonique identique pour les deux appels.
 - CI cycle 27 à confirmer. Aucun changement de l'interface active.
+
+## Cycle 28 — Migration depuis deux onglets réels
+
+- CI cycle 27 : Node et Chromium réussis.
+- Test Playwright ajouté : deux pages du même contexte Chromium démarrent une migration IndexedDB simultanée avec deux états hérités distincts.
+- Invariant : les deux appels et la relecture finale retournent le même enregistrement ; aucune migration concurrente ne remplace la première valeur.
+- CI cycle 28 en attente. Le stockage expérimental reste inactif dans l'interface.

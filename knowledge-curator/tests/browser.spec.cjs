@@ -939,3 +939,23 @@ test('transactional reset preserves legacy archive while clearing progress',asyn
  expect(result.journal).toBeNull();
  expect(result.attempts).toEqual([]);
 });
+
+test('transactional V1 import preserves legacy claim as archive',async({page})=>{
+ await page.goto('http://127.0.0.1:8770/');
+ await expect(page.locator('#study-steps .study-step')).toHaveCount(7);
+ const payload={version:1,progress:{arithmetic:{
+  status:'demonstrated',updatedAt:'2026-10-15T00:00:00.000Z'
+ }}};
+ await page.locator('#progress-import').setInputFiles({
+  name:'transaction-v1.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(payload))
+ });
+ await expect(page.locator('#study-message')).toContainText('Progression importée');
+ const result=await page.evaluate(()=>({
+  active:JSON.parse(localStorage.getItem('knowledge-curator-progress-v1')),
+  archive:JSON.parse(localStorage.getItem('knowledge-curator-legacy-v1-archive')),
+  journal:localStorage.getItem('knowledge-curator-import-journal-v1')
+ }));
+ expect(result.active.arithmetic.status).toBe('in_progress');
+ expect(result.archive.progress.arithmetic.status).toBe('demonstrated');
+ expect(result.journal).toBeNull();
+});

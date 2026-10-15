@@ -365,3 +365,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Deux tests Node ajoutés : commit cohérent et restauration après panne d'écriture.
 - Le coordinateur n'est pas encore branché aux handlers d'import/reset ; le risque de divergence est limité en conservant l'ancien comportement pendant validation.
 - CI cycle 45 à confirmer. Les opérations localStorage multi-clés ne sont toujours pas atomiques.
+
+## Cycle 46 — Réinitialisation via coordinateur commun
+
+- CI cycle 45 : contrôles généraux réussis ; navigateur en cours au relevé.
+- Handler `progress-reset` migré vers `KnowledgeStorage.transaction` : progression et tentatives vidées ensemble, archive V1 conservée, journal et rollback centralisés.
+- Test Playwright ajouté : reset réussi, journal absent, tentatives vides, archive préservée.
+- Tests historiques d'échec de reset restent indispensables pour la validation.
+- CI cycle 46 à confirmer ; import encore sur le mécanisme existant.

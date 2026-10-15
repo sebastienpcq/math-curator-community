@@ -200,3 +200,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Deux tests Playwright supplémentaires chargent réellement `indexeddb-experimental.cjs` : transactions concurrentes sur le même état et rejet sans commit d'un état invalide.
 - La migration depuis localStorage n'est toujours pas branchée dans l'interface.
 - CI cycle 25 à confirmer.
+
+## Cycle 26 — Migration expérimentale vers IndexedDB
+
+- CI cycle 25 : tests Node et Chromium réussis.
+- Adaptateur expérimental enrichi de lecture et migration non destructive depuis les clés V0.5 via `state-v3.cjs`.
+- Tests Playwright ajoutés : conservation des clés héritées, idempotence et refus de données invalides.
+- Migration non activée dans l'interface, sans suppression des données existantes.
+- CI cycle 26 à confirmer ; prochain audit : concurrence des migrations et validation du schéma complet.

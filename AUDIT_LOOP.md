@@ -58,3 +58,10 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Scénario corrigé : constater le journal conservé, lever la panne simulée, recharger, puis comparer exactement les deux valeurs antérieures.
 - Défaut supplémentaire : journal corrompu au démarrage pouvait être suivi d'une sauvegarde automatique écrasant la progression. Initialisation désormais interrompue sans écriture si la récupération échoue.
 - Tests du cycle 7 à confirmer sur GitHub Actions.
+
+## Cycle 8 — Redémarrages répétés avec journal invalide
+
+- Contrôle général du cycle 7 réussi ; navigateur en cours au relevé.
+- Nouveau test Playwright : trois rechargements successifs avec journal de récupération invalide, comparaison exacte de la progression et du journal avant/après.
+- Critère : aucune écriture automatique ne doit effacer le journal ni altérer la progression tant que la récupération est impossible.
+- CI du cycle 8 à vérifier ; aucune validation anticipée.

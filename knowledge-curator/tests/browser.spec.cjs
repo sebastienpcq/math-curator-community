@@ -319,3 +319,25 @@ test('legacy V1 mastery is archived without granting mastery',async({page})=>{
  expect(result.archive.progress.arithmetic.status).toBe('demonstrated');
  expect(result.active.arithmetic.status).toBe('in_progress');
 });
+
+test('legacy archive write failure prevents successful import',async({page})=>{
+ await page.goto('http://127.0.0.1:8770/');
+ await expect(page.locator('#study-steps .study-step')).toHaveCount(7);
+ await page.evaluate(()=>{
+  const original=Storage.prototype.setItem;
+  window.__restoreSetItem=original;
+  Storage.prototype.setItem=function(key,value){
+   if(key==='knowledge-curator-legacy-v1-archive')throw Error('archive unavailable');
+   return original.call(this,key,value);
+  };
+ });
+ const payload={version:1,progress:{arithmetic:{
+  status:'demonstrated',updatedAt:'2026-10-15T00:00:00.000Z'
+ }}};
+ await page.locator('#progress-import').setInputFiles({
+  name:'archive-failure.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(payload))
+ });
+ await expect(page.locator('#study-message')).toContainText('Import refusé');
+ expect(await page.evaluate(()=>localStorage.getItem('knowledge-curator-import-journal-v1'))).toBeNull();
+ await page.evaluate(()=>{Storage.prototype.setItem=window.__restoreSetItem;});
+});

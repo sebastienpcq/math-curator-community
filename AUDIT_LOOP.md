@@ -150,3 +150,13 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Test Playwright ajouté : journal trois clés, première reprise échouée par injection de faute, deuxième page sans panne, restauration exacte et suppression du journal.
 - Aucun changement du moteur métier ; vérification ciblée de récupérabilité après panne transitoire.
 - CI cycle 19 en attente ; ne pas considérer le stockage multi-clé comme atomique.
+
+## Cycle 20 — Prototype de stockage versionné
+
+- CI cycle 19 : contrôles Node et Chromium réussis.
+- Comparaison documentée entre journal multi-clé, enregistrement unique localStorage et IndexedDB.
+- Prototype opt-in `state-v3.cjs` sans branchement dans l'interface : lecture et migration non destructive des trois clés héritées.
+- Quatre tests Node : conservation, idempotence, refus de JSON invalide, panne d'écriture.
+- Workflow CI étendu pour exécuter ces tests.
+- Le prototype n'est pas activé en production ; aucune migration utilisateur n'est effectuée.
+- Validation CI du cycle 20 en attente.

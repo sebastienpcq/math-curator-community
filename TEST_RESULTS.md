@@ -9,3 +9,6 @@
 | Test réel Chrome | Non exécuté | À valider via CI/Chromium |
 | Persistance après fermeture navigateur | Non vérifiée | Test dédié requis |
 | Horloge simulée / révisions | Tests existants inspectés | Réexécution requise |
+
+| Tests révisions succès-erreur-succès | Ajoutés, non encore validés | Exécution CI à confirmer |
+| Intervalles [1,3,7,14,30] | Ajoutés, non encore validés | Exécution CI à confirmer |

@@ -543,3 +543,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Test MV3 ajouté : deux lots de 250 cartes YouTube simulées, dont la moitié hors sujet ; vérification de 250 cartes masquées sur 500, puis restauration complète après désactivation.
 - Ce test mesure la correction sous charge et impose un délai maximal de 15 secondes pour les assertions ; il ne constitue pas un benchmark précis de latence ou de mémoire.
 - CI cycle 67 à confirmer. Aucune modification de la logique de production.
+
+## Cycle 68 — Réduction des rescans liés aux badges
+
+- CI cycle 67 : Node et Chromium réussis, y compris le test à 500 cartes.
+- Analyse de `src/content.js` : les badges et dialogues ajoutés par l'extension déclenchaient le MutationObserver et planifiaient des rescans, même si les fingerprints évitaient un retraitement complet.
+- Correctif : ignorer les ajouts/suppressions de badges et dialogues propres à Math Curator dans le déclenchement des rescans.
+- Test MV3 ajouté : un badge apparaît puis une nouvelle vidéo hors sujet insérée dynamiquement reste correctement filtrée.
+- CI cycle 68 à confirmer ; aucune mesure instrumentée de latence/mémoire n'est encore disponible.

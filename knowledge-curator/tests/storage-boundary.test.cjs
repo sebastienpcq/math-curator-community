@@ -2,6 +2,8 @@
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const boundary=require('../storage-boundary.cjs');
+const schema=require('../state-v3.cjs');
+globalThis.KnowledgeStateV3=schema;
 function store(){
  const values=new Map();
  return {getItem:k=>values.has(k)?values.get(k):null,

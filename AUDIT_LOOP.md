@@ -248,3 +248,12 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Test Playwright ajouté ; validation CI en attente.
 - `TEST_RESULTS.md` et `NEXT_ITERATION.md` réactualisés : les risques non vérifiés sont explicités.
 - Aucun branchement du stockage expérimental à l'interface, aucune modification de main.
+
+## Cycle 32 — Validation profonde des transactions IndexedDB
+
+- CI cycle 31 : contrôle général réussi ; navigateur en cours au relevé.
+- Défaut : `transact` n'examinait que version, présence de tableau et objet de progression, sans contrôler les tentatives ni leurs dates.
+- Correctif : vérification approfondie des champs de progression, tentatives et archive avant commit.
+- Test Playwright : tentative incorrectement typée rejetée sans écriture.
+- Limite : le validateur local doit être unifié avec `state-v3.cjs` pour éviter une divergence de schéma.
+- CI cycle 32 à confirmer.

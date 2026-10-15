@@ -597,3 +597,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Enregistrement par palier du nombre de scans, de leur durée cumulée et de la durée maximale ; contrôle du nombre de cartes masquées.
 - Les durées seront disponibles dans les logs du workflow navigateur après exécution. Un seul run ne permet pas de conclure à un gain statistique.
 - CI cycle 74 à confirmer ; aucune optimisation spéculative du moteur.
+
+## Cycle 75 — Mesures du benchmark 100/500/1000
+
+- CI cycle 74 : Node et Chromium réussis ; 10 tests MV3 et 48 tests du prototype pédagogique validés.
+- Logs Chromium : 100 cartes = 1 scan / 6,2 ms ; 500 cartes = 1 scan / 7,8 ms ; 1 000 cartes = 1 scan / 9,4 ms.
+- Mesures issues d'un seul run ; aucune inférence robuste sur la complexité ni justification d'optimisation à ce stade.
+- Résultats enregistrés dans `TEST_RESULTS.md` et reprise actualisée dans `NEXT_ITERATION.md`.
+- CI cycle 75 à confirmer ; aucun changement de production.

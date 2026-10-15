@@ -256,3 +256,15 @@ test('repeated recovery failures retain journal until storage becomes writable',
  assert.equal(storage.getItem('attempts'),'[]');
  assert.equal(storage.getItem(boundary.JOURNAL),null);
 });
+
+test('validated archive read accepts absent and rejects corrupt archive',()=>{
+ const storage=store();
+ assert.equal(boundary.readArchive(storage,valid),null);
+ storage.setItem('knowledge-curator-legacy-v1-archive','{broken');
+ assert.throws(()=>boundary.readArchive(storage,valid),/Invalid existing archive/);
+});
+test('archive read is blocked during pending recovery',()=>{
+ const storage=store();
+ storage.setItem(boundary.JOURNAL,'{}');
+ assert.throws(()=>boundary.readArchive(storage,valid),/recovery pending/);
+});

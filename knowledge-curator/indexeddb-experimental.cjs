@@ -57,6 +57,10 @@
    if(!stateV3.validate(existing))throw Error('Invalid IndexedDB state');
    return existing;
   }
+  // A pending multi-key recovery means legacy data may be partially written.
+  // Do not migrate it until the legacy recovery procedure completes.
+  if(legacyStorage.getItem('knowledge-curator-import-journal-v1')!==null)
+   throw Error('Legacy recovery pending');
   const snapshot=stateV3.fromLegacy(legacyStorage);
   // Recheck atomically in the same write transaction; an empty
   // canonical record is still an existing record, not an absent one.

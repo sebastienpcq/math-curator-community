@@ -456,6 +456,7 @@ test('IndexedDB readwrite transactions preserve two concurrent updates',async({p
 
 test('experimental IndexedDB adapter preserves concurrent updates',async({page})=>{
  await page.goto('http://127.0.0.1:8770/');
+ await page.addScriptTag({url:'/state-v3.cjs'});
  await page.addScriptTag({url:'/indexeddb-experimental.cjs'});
  const result=await page.evaluate(async()=>{
   const adapter=window.KnowledgeIndexedDB;
@@ -485,6 +486,7 @@ test('experimental IndexedDB adapter preserves concurrent updates',async({page})
 });
 test('experimental IndexedDB adapter aborts invalid state without committing',async({page})=>{
  await page.goto('http://127.0.0.1:8770/');
+ await page.addScriptTag({url:'/state-v3.cjs'});
  await page.addScriptTag({url:'/indexeddb-experimental.cjs'});
  const result=await page.evaluate(async()=>{
   const adapter=window.KnowledgeIndexedDB;
@@ -580,7 +582,8 @@ test('two real Chromium tabs converge on one IndexedDB migration',async({context
  await Promise.all([a.goto('http://127.0.0.1:8770/'),b.goto('http://127.0.0.1:8770/')]);
  for(const page of [a,b]){
   await page.addScriptTag({url:'/state-v3.cjs'});
-  await page.addScriptTag({url:'/indexeddb-experimental.cjs'});
+  await page.addScriptTag({url:'/state-v3.cjs'});
+ await page.addScriptTag({url:'/indexeddb-experimental.cjs'});
  }
  const run=(page,skill)=>page.evaluate(async skill=>{
   const db=await window.KnowledgeIndexedDB.open(indexedDB);
@@ -604,6 +607,7 @@ test('two real Chromium tabs converge on one IndexedDB migration',async({context
 
 test('IndexedDB upgrade blocked by another connection is reported',async({page})=>{
  await page.goto('http://127.0.0.1:8770/');
+ await page.addScriptTag({url:'/state-v3.cjs'});
  await page.addScriptTag({url:'/indexeddb-experimental.cjs'});
  const result=await page.evaluate(async()=>{
   const adapter=window.KnowledgeIndexedDB;
@@ -627,6 +631,7 @@ test('IndexedDB upgrade blocked by another connection is reported',async({page})
 
 test('IndexedDB adapter aborts thrown callback without committing',async({page})=>{
  await page.goto('http://127.0.0.1:8770/');
+ await page.addScriptTag({url:'/state-v3.cjs'});
  await page.addScriptTag({url:'/indexeddb-experimental.cjs'});
  const result=await page.evaluate(async()=>{
   const adapter=window.KnowledgeIndexedDB;
@@ -645,6 +650,7 @@ test('IndexedDB adapter aborts thrown callback without committing',async({page})
 });
 test('IndexedDB adapter aborts invalid data without replacing committed state',async({page})=>{
  await page.goto('http://127.0.0.1:8770/');
+ await page.addScriptTag({url:'/state-v3.cjs'});
  await page.addScriptTag({url:'/indexeddb-experimental.cjs'});
  const result=await page.evaluate(async()=>{
   const adapter=window.KnowledgeIndexedDB;
@@ -666,6 +672,7 @@ test('IndexedDB adapter aborts invalid data without replacing committed state',a
 
 test('IndexedDB adapter propagates simulated quota error without commit',async({page})=>{
  await page.goto('http://127.0.0.1:8770/');
+ await page.addScriptTag({url:'/state-v3.cjs'});
  await page.addScriptTag({url:'/indexeddb-experimental.cjs'});
  const result=await page.evaluate(async()=>{
   const adapter=window.KnowledgeIndexedDB;
@@ -707,6 +714,7 @@ test('IndexedDB migration refuses legacy state with pending recovery journal',as
 
 test('IndexedDB rejects invalid attempt payload without commit',async({page})=>{
  await page.goto('http://127.0.0.1:8770/');
+ await page.addScriptTag({url:'/state-v3.cjs'});
  await page.addScriptTag({url:'/indexeddb-experimental.cjs'});
  const result=await page.evaluate(async()=>{
   const adapter=window.KnowledgeIndexedDB;

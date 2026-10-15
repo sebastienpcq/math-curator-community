@@ -135,3 +135,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - L'import V1 sauvegarde maintenant la valeur de l'archive existante et la restaure lors d'un rollback, afin de ne pas écraser silencieusement une archive plus ancienne.
 - Le journal ne capture toujours que progression et tentatives : interruption brutale entre écriture d'archive et suppression du journal à analyser avant toute validation finale.
 - Aucune fusion ; prochaine priorité : cohérence des trois clés après interruption.
+
+## Cycle 18 — Récupération cohérente de trois clés
+
+- CI cycle 17 : contrôles Node et navigateur réussis.
+- Défaut résiduel confirmé par inspection : le journal ne sauvegardait pas l'archive V1 alors que l'import la modifiait.
+- Correction : journal enrichi de `legacyArchive` et restauration de cette troisième clé au démarrage. Compatibilité maintenue avec les anciens journaux sans ce champ.
+- Test Chromium ajouté : interruption simulée, archive et progression modifiées, rechargement, comparaison exacte des trois clés et suppression du journal.
+- Validation CI du cycle 18 en attente. Limite : la restauration multi-clé n'est pas atomique en cas de pannes répétées.

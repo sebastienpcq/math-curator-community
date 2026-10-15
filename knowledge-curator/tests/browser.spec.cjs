@@ -416,3 +416,40 @@ test('recovery retry after a transient storage failure restores three keys',asyn
  expect(after.journal).toBeNull();
  await next.close();
 });
+
+test('IndexedDB readwrite transactions preserve two concurrent updates',async({page})=>{
+ await page.goto('http://127.0.0.1:8770/');
+ const result=await page.evaluate(async()=>{
+  const db=await new Promise((resolve,reject)=>{
+   const request=indexedDB.open('knowledge-curator-concurrency-test',1);
+   request.onupgradeneeded=()=>request.result.createObjectStore('state');
+   request.onsuccess=()=>resolve(request.result);
+   request.onerror=()=>reject(request.error);
+  });
+  const update=(field,value)=>new Promise((resolve,reject)=>{
+   const tx=db.transaction('state','readwrite');
+   const store=tx.objectStore('state');
+   const request=store.get('canonical');
+   request.onsuccess=()=>{
+    const previous=request.result||{attempts:[],progress:{}};
+    if(field==='attempts')previous.attempts.push(value);
+    else previous.progress.algebra=value;
+    store.put(previous,'canonical');
+   };
+   tx.oncomplete=resolve;
+   tx.onerror=()=>reject(tx.error);
+   tx.onabort=()=>reject(tx.error);
+  });
+  await Promise.all([update('attempts',{correct:false}),update('progress','in_progress')]);
+  const final=await new Promise((resolve,reject)=>{
+   const tx=db.transaction('state','readonly');
+   const request=tx.objectStore('state').get('canonical');
+   request.onsuccess=()=>resolve(request.result);
+   request.onerror=()=>reject(request.error);
+  });
+  db.close();
+  return final;
+ });
+ expect(result.attempts).toHaveLength(1);
+ expect(result.progress.algebra).toBe('in_progress');
+});

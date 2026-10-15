@@ -613,3 +613,10 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Benchmark cumulatif : 100 cartes, 1 scan / 6,2 ms ; 500 cartes, 1 scan / 7,8 ms ; 1 000 cartes, 1 scan / 9,4 ms.
 - Ces durées correspondent à une exécution CI unique sur DOM cumulatif, sans estimation de variance. Aucune optimisation du moteur n'est justifiée sur cette seule base.
 - `TEST_RESULTS.md` et `NEXT_ITERATION.md` mis à jour ; CI cycle 75 à confirmer.
+
+## Cycle 75 — Analyse du benchmark MV3
+
+- CI cycle 74 : Node et Chromium réussis (runs 38673457258 et 38673457256).
+- Résultats mesurés : 100 cartes = 6,2 ms ; 500 = 7,8 ms ; 1 000 = 9,4 ms, un scan par lot cumulé.
+- Aucune explosion du temps de traitement observée, mais échantillon unique insuffisant pour estimer la complexité ou affirmer une optimisation.
+- `TEST_RESULTS.md` et `NEXT_ITERATION.md` actualisés ; aucune modification fonctionnelle. CI cycle 75 à confirmer.

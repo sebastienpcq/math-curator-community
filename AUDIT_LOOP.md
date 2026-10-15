@@ -43,3 +43,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Test Playwright ajouté : interruption simulée après écriture partielle, puis rechargement et restauration.
 - Limite : localStorage n'offre pas de transaction multi-clé ; ce mécanisme vise la récupérabilité, pas une atomicité absolue.
 - CI du cycle 5 en attente de confirmation.
+
+## Cycle 6 — Validation du journal corrompu
+
+- Vérification de la CI du cycle 5 : contrôle général réussi, navigateur encore en cours au moment du relevé.
+- Correctif : valider types, JSON et schémas de progression/historique avant de restaurer un journal.
+- Test Chromium ajouté : journal corrompu, historique existant inchangé après rechargement.
+- Risque résiduel : récupération multi-clé non atomique et indisponibilité persistante du stockage.
+- Attendre les résultats CI de ce cycle avant validation.

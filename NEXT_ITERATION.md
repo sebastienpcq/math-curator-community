@@ -1,8 +1,20 @@
-# Resume point — Cycle 31
+# NEXT ITERATION — cycle 60 checkpoint
 
-1. Inspect CI for latest commit on `agent/recursive-audit`; inspect job logs if failure.
-2. Audit the experimental adapter's `transact` validator: it checks only a shallow schema, unlike `state-v3.cjs`.
-3. Test simultaneous writes to legacy localStorage during the migration snapshot. The pending-journal guard alone cannot prevent this race.
-4. Test durability after closing all Chromium pages and reopening a fresh browser context.
-5. Decide whether to use IndexedDB as the single authoritative store and provide a reversible migration plan; no UI activation until these pass.
-6. Keep PR #2 in draft; no merge or release without explicit approval.
+## Current state
+
+- Branch: `agent/recursive-audit`; PR #2.
+- Cycle 59 commit `a856e75`: Node and Chromium CI successful.
+- Cycle 60: documentation-only consolidation; CI on the final cycle-60 commit must be checked.
+- IndexedDB remains experimental and is not the authoritative UI store.
+
+## Priorities
+
+1. Verify both workflows on the latest cycle-60 commit; inspect failed job logs before any further changes.
+2. Audit consistency of V0.5 persistence and recovery, especially partial failures and old two-key journals.
+3. Validate the entire Chrome extension in a real Manifest V3 browser environment. The web prototype alone is insufficient.
+4. If IndexedDB activation is still desired, first implement an explicit cutover protocol that coordinates legacy tabs and defines rollback after new writes.
+5. Evaluate whether additional refactoring reduces complexity measurably; stop if no significant benefit is demonstrated.
+
+## Release gate
+
+No merge, release or activation of experimental storage without explicit authorization. Keep `main` unchanged.

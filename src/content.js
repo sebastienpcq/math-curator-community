@@ -1,6 +1,9 @@
 (()=>{'use strict';
 const cardSelector=['ytd-rich-grid-media','ytd-video-renderer','ytd-compact-video-renderer','ytd-grid-video-renderer','ytd-playlist-video-renderer','ytd-rich-item-renderer','ytd-reel-item-renderer'].join(',');
 let settings={...MathConfig.DEFAULTS};let observer=null,timer=null;const results=new WeakMap();
+const metrics={scans:0,totalMs:0,maxMs:0,lastMs:0};
+// Read-only diagnostics; no user content is collected or transmitted.
+Object.defineProperty(window,'__mathCuratorMetrics',{value:metrics,configurable:false});
 const txt=(node)=>node?.textContent?.trim()||'';
 function extract(card){
  const anchor=card.querySelector('a#video-title-link, a#video-title, a[href*="watch?v="], a[href*="/shorts/"]');
@@ -38,9 +41,10 @@ function process(card){
  badge.onclick=e=>{e.preventDefault();e.stopPropagation();showDialog(video,ev);};
  if(!old){const place=card.querySelector('#details, #meta, #metadata, #text')||card;place.append(badge);}
 }
-function scan(){if(!document.documentElement)return;document.querySelectorAll(cardSelector).forEach(process);
+function scan(){if(!document.documentElement)return;const started=performance.now();document.querySelectorAll(cardSelector).forEach(process);
  document.querySelectorAll('ytd-rich-shelf-renderer[is-shorts], ytd-reel-shelf-renderer').forEach(el=>{el.classList.toggle('math-curator-hidden',settings.enabled&&settings.hideShorts);});
  const distractions=['ytd-merch-shelf-renderer','ytd-brand-video-shelf-renderer'];for(const q of distractions)document.querySelectorAll(q).forEach(el=>el.classList.toggle('math-curator-hidden',settings.enabled&&settings.hideDistractions));
+ const duration=performance.now()-started;metrics.scans++;metrics.lastMs=duration;metrics.totalMs+=duration;metrics.maxMs=Math.max(metrics.maxMs,duration);
 }
 function schedule(){if(timer)return;timer=setTimeout(()=>{timer=null;scan();},180);}
 chrome.storage.local.get('settings').then(data=>{settings={...MathConfig.DEFAULTS,...data.settings};scan();observer=new MutationObserver(records=>{

@@ -290,3 +290,12 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Deux tests Playwright ajoutés : migration opt-in non destructive et refus si les données héritées ont changé.
 - Limite : la comparaison n'est pas un verrou atomique contre les écritures concurrentes de localStorage.
 - Aucune activation dans l'interface, aucune migration utilisateur.
+
+## Cycle 37 — Confirmation de migration et snapshot approuvé
+
+- CI cycle 36 : contrôle général réussi ; navigateur en cours au relevé.
+- Défaut de cohérence : la confirmation vérifiait un snapshot puis relisait les anciennes clés via `migrateFromLegacy`, autorisant une nouvelle version non prévisualisée à être engagée.
+- Correctif : la transaction IndexedDB enregistre exclusivement `prepared.snapshot` après contrôle préalable, sans nouvelle lecture de l'ancien stockage pendant la transaction.
+- Test Playwright ajouté pour vérifier l'égalité exacte du snapshot prévisualisé et de l'état engagé.
+- Limite persistante : aucune exclusion mutuelle atomique avec les écritures de localStorage ; phase 1 reste expérimentale.
+- CI cycle 37 à confirmer.

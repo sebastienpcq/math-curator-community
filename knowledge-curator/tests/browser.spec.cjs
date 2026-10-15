@@ -735,3 +735,24 @@ test('IndexedDB rejects invalid attempt payload without commit',async({page})=>{
  expect(result.rejected).toBe(true);
  expect(result.after).toEqual(result.before);
 });
+
+test('IndexedDB and V3 validator reject the same malformed archive',async({page})=>{
+ await page.goto('http://127.0.0.1:8770/');
+ await page.addScriptTag({url:'/state-v3.cjs'});
+ await page.addScriptTag({url:'/indexeddb-experimental.cjs'});
+ const result=await page.evaluate(async()=>{
+  const db=await window.KnowledgeIndexedDB.open(indexedDB);
+  const invalid={version:3,progress:{},attempts:[],
+   legacyArchive:JSON.stringify({version:1,importedAt:'invalid',progress:{}})};
+  const schemaValid=window.KnowledgeStateV3.validate(invalid);
+  let rejected=false;
+  try{await window.KnowledgeIndexedDB.transact(db,()=>invalid);}
+  catch{rejected=true;}
+  const stored=await window.KnowledgeIndexedDB.read(db);
+  db.close();
+  return {schemaValid,rejected,stored};
+ });
+ expect(result.schemaValid).toBe(false);
+ expect(result.rejected).toBe(true);
+ expect(result.stored).toBeNull();
+});

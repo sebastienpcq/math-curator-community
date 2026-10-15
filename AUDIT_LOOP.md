@@ -265,3 +265,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - `transact` utilise désormais `KnowledgeStateV3.validate` comme source unique de validation.
 - Tests Chromium adaptés pour charger explicitement `state-v3.cjs` avant l'adaptateur ; scénario ajouté sur archive V1 malformée.
 - CI cycle 33 à confirmer ; aucune activation du module expérimental.
+
+## Cycle 34 — Persistance après redémarrage complet de Chromium
+
+- CI cycle 33 : contrôle général réussi ; navigateur encore en cours au relevé.
+- Un contexte Playwright éphémère ne convient pas pour tester la persistance inter-session : utilisation d'un profil Chromium persistant.
+- Nouveau script `tests/indexeddb-persistence.cjs` : ouvrir Chromium avec un profil temporaire, écrire via l'adaptateur, fermer le navigateur, rouvrir le même profil et comparer les données.
+- Workflow navigateur étendu pour lancer ce scénario.
+- Résultats CI du cycle 34 en attente ; aucun changement du stockage de production.

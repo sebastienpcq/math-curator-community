@@ -605,3 +605,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Mesures issues d'un seul run ; aucune inférence robuste sur la complexité ni justification d'optimisation à ce stade.
 - Résultats enregistrés dans `TEST_RESULTS.md` et reprise actualisée dans `NEXT_ITERATION.md`.
 - CI cycle 75 à confirmer ; aucun changement de production.
+
+## Cycle 75 — Analyse des performances mesurées
+
+- CI cycle 74 : Node et Chromium réussis (runs 38673457258 et 38673457256).
+- Suite MV3 : 10/10 ; prototype navigateur : 48/48.
+- Benchmark cumulatif : 100 cartes, 1 scan / 6,2 ms ; 500 cartes, 1 scan / 7,8 ms ; 1 000 cartes, 1 scan / 9,4 ms.
+- Ces durées correspondent à une exécution CI unique sur DOM cumulatif, sans estimation de variance. Aucune optimisation du moteur n'est justifiée sur cette seule base.
+- `TEST_RESULTS.md` et `NEXT_ITERATION.md` mis à jour ; CI cycle 75 à confirmer.

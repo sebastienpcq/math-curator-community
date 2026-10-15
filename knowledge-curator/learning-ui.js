@@ -170,7 +170,38 @@ document.querySelector('#progress-import').addEventListener('change',async e=>{
 });
 document.querySelector('#progress-reset').addEventListener('click',()=>{
  if(!confirm('Effacer toute la progression locale ?'))return;
- progress={};KnowledgeAttempts.replace(localStorage,[]);history=[];persist();render();msg.textContent='Progression réinitialisée.';
+ const JOURNAL='knowledge-curator-import-journal-v1';
+ try {
+  if(localStorage.getItem(JOURNAL)!==null){
+   msg.textContent='Réinitialisation refusée : une récupération de données est en attente.';
+   return;
+  }
+  const oldProgress=localStorage.getItem(KEY);
+  const oldAttempts=localStorage.getItem(KnowledgeAttempts.KEY);
+  localStorage.setItem(JOURNAL,JSON.stringify({progress:oldProgress,attempts:oldAttempts}));
+  try {
+   KnowledgeAttempts.replace(localStorage,[]);
+   localStorage.setItem(KEY,'{}');
+   localStorage.removeItem(JOURNAL);
+   progress={};history=[];render();
+   msg.textContent='Progression réinitialisée.';
+  } catch(error) {
+   try {
+    if(oldAttempts===null)localStorage.removeItem(KnowledgeAttempts.KEY);
+    else localStorage.setItem(KnowledgeAttempts.KEY,oldAttempts);
+    if(oldProgress===null)localStorage.removeItem(KEY);
+    else localStorage.setItem(KEY,oldProgress);
+    localStorage.removeItem(JOURNAL);
+    history=KnowledgeAttempts.read(localStorage);
+    load();render();
+    msg.textContent='Réinitialisation annulée : les données précédentes sont conservées.';
+   } catch(rollbackError) {
+    msg.textContent='Réinitialisation interrompue : récupération requise au prochain démarrage. Ne vide pas le stockage.';
+   }
+  }
+ } catch(error) {
+  msg.textContent='Réinitialisation impossible : stockage indisponible.';
+ }
 });
 fetch('learning.json').then(r=>{if(!r.ok)throw Error('Impossible de charger le parcours');return r.json();}).then(d=>{
  const errors=KnowledgeLearning.validate(d);if(errors.length)throw Error(errors.join(', '));

@@ -175,33 +175,27 @@ document.querySelector('#progress-import').addEventListener('change',async e=>{
       ]));
     }
     if(payload.version===2&&!KnowledgeAttempts.validateHistory(payload.attempts))throw Error('Historique invalide');
-    // A pending journal is written before either legacy key changes.
-    // On next launch, recover the original state if an interruption occurred.
-    const JOURNAL='knowledge-curator-import-journal-v1';
-    const originalProgressRaw=localStorage.getItem(KEY);
-    const originalAttemptsRaw=localStorage.getItem(KnowledgeAttempts.KEY);
-    const journal={progress:originalProgressRaw,attempts:originalAttemptsRaw,legacyArchive:previousLegacyArchive};
-    localStorage.setItem(JOURNAL,JSON.stringify(journal));
     try {
-      if(payload.version===2)KnowledgeAttempts.replace(localStorage,payload.attempts);
-      progress=payload.progress;
-      history=KnowledgeAttempts.read(localStorage);
-      progress=derivedProgress();
-      KnowledgeStorage.writeDuringRecovery(localStorage,progress,validProgress);
-      if(legacyArchive!==null)localStorage.setItem('knowledge-curator-legacy-v1-archive',legacyArchive);
-      localStorage.removeItem(JOURNAL);
+      const next=KnowledgeStorage.transaction(localStorage,KnowledgeAttempts,validProgress,old=>{
+        const importedHistory=payload.version===2?payload.attempts:old.attempts;
+        const nextProgress={...payload.progress};
+        for(const step of data.paths[0].steps){
+          const status=KnowledgeMastery.status(step,importedHistory);
+          if(status!=='not_started')nextProgress[step.id]={
+            status,updatedAt:nextProgress[step.id]?.updatedAt||new Date().toISOString()
+          };
+          else if(['demonstrated','consolidate'].includes(nextProgress[step.id]?.status))
+            nextProgress[step.id]={status:'in_progress',updatedAt:new Date().toISOString()};
+        }
+        return {progress:nextProgress,attempts:importedHistory,
+          legacyArchive:legacyArchive===null?old.legacyArchive:legacyArchive};
+      });
+      progress=next.progress;
+      history=next.attempts;
     } catch(error) {
       progress=previousProgress;
       history=previousHistory;
-      try {
-        if(originalAttemptsRaw===null)localStorage.removeItem(KnowledgeAttempts.KEY);
-        else localStorage.setItem(KnowledgeAttempts.KEY,originalAttemptsRaw);
-        if(originalProgressRaw===null)localStorage.removeItem(KEY);
-        else localStorage.setItem(KEY,originalProgressRaw);
-        if(previousLegacyArchive===null)localStorage.removeItem('knowledge-curator-legacy-v1-archive');
-        else localStorage.setItem('knowledge-curator-legacy-v1-archive',previousLegacyArchive);
-        localStorage.removeItem(JOURNAL);
-      } catch(rollbackError) {
+      if(error.message.includes('Rollback failed')){
         msg.textContent='Import interrompu : restauration impossible. Le journal de récupération est conservé. Ne réinitialise pas le stockage.';
         e.target.value='';
         return;

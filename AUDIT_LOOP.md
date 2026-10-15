@@ -567,3 +567,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Test MV3 ajouté sur 100 cartes : vérifie la présence des métriques, leur cohérence et une limite conservatrice sur le nombre de scans après un lot de mutations.
 - Aucun titre ni identifiant vidéo n'est collecté par cette instrumentation ; pas de transmission réseau.
 - CI cycle 70 à confirmer. Les chiffres mesurés en CI ne doivent pas être présentés comme représentatifs de tous les appareils.
+
+## Cycle 71 — Diagnostic métriques MV3 et isolation JavaScript
+
+- CI cycle 70 : Node réussi ; Chromium 8/9, échec du test de métriques (compteur lu à 0 dans le contexte de page).
+- Cause probable : les variables de content script appartiennent au monde isolé MV3 et ne sont pas accessibles via `page.evaluate`.
+- Correction : publier uniquement les compteurs agrégés de scan sur `document.documentElement.dataset` et lire ces attributs dans le test Playwright.
+- Aucune donnée de vidéo ou identifiant n'est exposé. L'instrumentation reste locale.
+- CI cycle 71 à confirmer ; aucun merge ni activation IndexedDB.

@@ -536,3 +536,10 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Test MV3 ajouté : une carte initialement masquée devient un cours mathématique et doit réapparaître, puis redevient hors sujet et doit être masquée ; une carte sans métadonnées reste visible en mode équilibré mais est masquée en mode strict.
 - Le test couvre le cache de fingerprint, les mutations DOM et les comportements `unknown`.
 - CI cycle 66 à confirmer. Aucun changement de production avant résultat du test.
+
+## Cycle 67 — Charge DOM sur 500 recommandations
+
+- CI cycle 66 : Node et Chromium réussis.
+- Test MV3 ajouté : deux lots de 250 cartes YouTube simulées, dont la moitié hors sujet ; vérification de 250 cartes masquées sur 500, puis restauration complète après désactivation.
+- Ce test mesure la correction sous charge et impose un délai maximal de 15 secondes pour les assertions ; il ne constitue pas un benchmark précis de latence ou de mémoire.
+- CI cycle 67 à confirmer. Aucune modification de la logique de production.

@@ -315,3 +315,12 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Protocole de basculement documenté : API de stockage centralisée, source unique de vérité, traitement des anciens onglets non coopératifs et retour arrière explicite.
 - Aucune activation IndexedDB dans l'interface ; ce test démontre une détection, pas un verrouillage.
 - CI cycle 39 à confirmer.
+
+## Cycle 40 — Frontière de stockage commune
+
+- CI cycle 39 : contrôle général réussi ; navigateur en cours au relevé.
+- Ajout d'un module `storage-boundary.cjs` centralisant la lecture/écriture de progression et des tentatives héritées, avec refus d'écriture si récupération en attente.
+- Trois tests Node ajoutés et intégrés au workflow CI.
+- Ce module n'est pas encore branché à `learning-ui.js` ; il prépare la refactorisation sans modifier le comportement de production.
+- Les anciens onglets non coopératifs restent un risque bloquant pour le basculement.
+- CI cycle 40 à confirmer.

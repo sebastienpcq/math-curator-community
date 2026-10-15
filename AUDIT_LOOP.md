@@ -396,3 +396,10 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - La sémantique reste un historique vide ; assertion modifiée pour comparer le tableau décodé à `[]`.
 - Le scénario de non-régression global ajouté dans ce cycle doit encore être exécuté.
 - Aucune preuve de corruption ou perte de données dans cet échec ; CI du dernier commit en attente.
+
+## Cycle 49 — Vérification de la CI et rollback du coordinateur
+
+- CI du commit 3af6bb2 : contrôles Node réussis ; Chromium encore en cours au premier relevé.
+- Deux tests Node ajoutés au coordinateur : refus d'un historique préexistant corrompu avant création du journal ; panne de restauration conservant le journal et signalant `Rollback failed`.
+- Aucun changement de code métier ni d'activation IndexedDB.
+- Validation des nouveaux tests et de la CI navigateur à confirmer avant toute qualification de stabilité.

@@ -187,7 +187,7 @@ document.querySelector('#progress-import').addEventListener('change',async e=>{
       progress=payload.progress;
       history=KnowledgeAttempts.read(localStorage);
       progress=derivedProgress();
-      if(!persist())throw Error('Sauvegarde indisponible');
+      KnowledgeStorage.writeDuringRecovery(localStorage,progress,validProgress);
       if(legacyArchive!==null)localStorage.setItem('knowledge-curator-legacy-v1-archive',legacyArchive);
       localStorage.removeItem(JOURNAL);
     } catch(error) {

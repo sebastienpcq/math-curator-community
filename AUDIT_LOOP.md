@@ -460,3 +460,10 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Deux tests Node ajoutés : restauration cohérente et refus d'une archive malformée sans mutation.
 - La restauration demeure multi-clé et non atomique ; en cas de panne, le journal est conservé pour une reprise.
 - CI cycle 56 à confirmer ; IndexedDB non activé.
+
+## Cycle 57 — Compatibilité journaux historiques et reprise répétée
+
+- CI cycle 56 : Node et Chromium réussis.
+- Deux tests Node ajoutés à `storage-boundary.test.cjs` : récupération d'un ancien journal à deux clés sans toucher à l'archive V1, et deux échecs successifs suivis d'une récupération réussie.
+- Aucun changement du code de production ; les invariants de récupération sont vérifiés par tests.
+- CI cycle 57 à confirmer. IndexedDB reste expérimental et désactivé.

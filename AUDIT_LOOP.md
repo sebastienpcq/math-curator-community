@@ -634,3 +634,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Mesures sur 500 cartes, profils indépendants : 16,3 ms ; 21,3 ms ; 13,6 ms ; médiane 16,3 ms, étendue 13,6–21,3 ms.
 - La variabilité est significative et les conditions diffèrent du benchmark cumulatif des cycles 74–75 ; aucune conclusion de gain/régression n'est justifiée.
 - `TEST_RESULTS.md` et `NEXT_ITERATION.md` actualisés ; aucune modification de production. CI cycle 77 à confirmer.
+
+## Cycle 78 — Premier scan et rescan avec cache
+
+- CI cycle 77 : Node et Chromium réussis.
+- Test MV3 ajouté sur 500 cartes : mesure du premier scan après insertion, puis déclenchement d'un rescan via `yt-navigate-finish` sans changement des cartes.
+- Le test publie les durées et nombres de scans des deux phases, et vérifie la stabilité des 250 décisions de masquage.
+- Ce scénario compare un traitement initial et un rescan chaud dans la même session ; il ne mesure pas un vrai redémarrage navigateur.
+- CI cycle 78 à confirmer ; aucun changement du moteur de production.

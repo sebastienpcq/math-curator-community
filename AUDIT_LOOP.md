@@ -350,3 +350,10 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Deux tests Node ajoutés : écriture autorisée dans la récupération, écriture ordinaire toujours bloquée, et refus sans journal.
 - Limite : un journal présent ne prouve pas l'identité de son propriétaire ; cette API reste interne et doit être remplacée lors du passage à IndexedDB.
 - CI cycle 43 à confirmer.
+
+## Cycle 44 — Validation intégrée après frontière de stockage
+
+- CI cycle 43 : contrôles Node réussis ; navigateur en cours au relevé.
+- Deux tests Playwright ajoutés : import V2 suivi d'un rechargement avec comparaison de progression/historique, et refus d'enregistrer une tentative si un journal de récupération est présent.
+- Les tests couvrent l'interaction entre `storage-boundary.cjs` et `learning-ui.js`.
+- CI cycle 44 à confirmer ; aucune migration IndexedDB active.

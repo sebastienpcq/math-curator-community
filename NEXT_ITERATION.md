@@ -1,20 +1,19 @@
-# NEXT ITERATION — cycle 60 checkpoint
+# NEXT ITERATION — cycle 73 checkpoint
 
-## Current state
+## Verified CI
 
-- Branch: `agent/recursive-audit`; PR #2.
-- Cycle 59 commit `a856e75`: Node and Chromium CI successful.
-- Cycle 60: documentation-only consolidation; CI on the final cycle-60 commit must be checked.
-- IndexedDB remains experimental and is not the authoritative UI store.
+- Cycle 72 commit `e631a79`: Node checks and Chromium browser integration both successful.
+- MV3 suite: 9 passed; knowledge browser suite: 48 passed.
+- Instrumented 100-card fixture: 2 scans, ~2.2 ms cumulative in a single CI run.
 
 ## Priorities
 
-1. Verify both workflows on the latest cycle-60 commit; inspect failed job logs before any further changes.
-2. Audit consistency of V0.5 persistence and recovery, especially partial failures and old two-key journals.
-3. Validate the entire Chrome extension in a real Manifest V3 browser environment. The web prototype alone is insufficient.
-4. If IndexedDB activation is still desired, first implement an explicit cutover protocol that coordinates legacy tabs and defines rollback after new writes.
-5. Evaluate whether additional refactoring reduces complexity measurably; stop if no significant benefit is demonstrated.
+1. Check CI on the latest cycle-73 documentation commit.
+2. Repeat performance measurements with 100, 500 and 1,000 cards; compare scan counts and timing across runs before optimizing.
+3. Audit DOM mutation observation for excessive work caused by attribute changes, especially in a real YouTube interface.
+4. Validate actual YouTube behavior manually or with an authorized real-site browser run; simulated fixtures cannot establish compatibility with every UI change.
+5. Keep IndexedDB experimental until concurrency and rollback gates are met.
 
 ## Release gate
 
-No merge, release or activation of experimental storage without explicit authorization. Keep `main` unchanged.
+No merge, release or activation without explicit authorization. `main` must remain unchanged.

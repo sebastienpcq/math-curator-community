@@ -53,7 +53,7 @@
   if(!confirmed)throw Error('Migration not persisted');
   return confirmed;
  }
- const api={KEY,VERSION,validate,fromLegacy,read,migrate};
+ const api={KEY,VERSION,validate,validProgress,validLegacyArchive,fromLegacy,read,migrate};
  if(typeof module!=='undefined'&&module.exports)module.exports=api;
  if(root)root.KnowledgeStateV3=api;
 })(typeof window!=='undefined'?window:globalThis);

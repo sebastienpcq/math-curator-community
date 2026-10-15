@@ -96,3 +96,10 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Mesure conservatrice : refuser l'import V1 lorsque des tentatives existent déjà, avec indication d'export préalable.
 - Test Playwright ajouté : historique existant, import V1, refus et conservation exacte des deux clés.
 - CI du cycle 12 à confirmer.
+
+## Cycle 13 — Import V1 sur installation vierge
+
+- CI cycle 12 : contrôles généraux et navigateur réussis.
+- Nouveau test Playwright : importer un fichier V1 valide sans historique existant, recharger, vérifier la compétence en cours et l'absence de tentatives artificielles.
+- Compatibilité historique vérifiée uniquement si le nouveau test passe en CI.
+- Suite : tester V1 avec progression de maîtrise ancienne sans preuves d'exercices.

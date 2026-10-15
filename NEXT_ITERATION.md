@@ -1,18 +1,17 @@
-# NEXT ITERATION — cycle 77 checkpoint
+# NEXT ITERATION — cycle 79 checkpoint
 
-## Verified
+## Verified CI
 
-- Cycle 76 commit `874deed`: both Node and Chromium workflows successful.
-- 11 MV3 tests and 48 knowledge browser tests passed.
-- Independent 500-card Chromium runs: 16.3, 21.3, 13.6 ms; median 16.3 ms.
-- The cumulative benchmark from cycles 74–75 uses different conditions and is not directly comparable.
+Cycle 78 commit `f714cdf`: both workflows successful.
+500-card simulated feed: first scan 17.8 ms, cached rescan 4.1 ms, one scan each.
+12 MV3 and 48 knowledge-browser tests passed.
 
-## Next priority
+## Priority
 
-1. Verify CI for the cycle-77 documentation commit.
-2. Add a controlled, repeatable performance experiment that separates cold start, first scan and warm rescan, ideally with a baseline version and several runs.
-3. Investigate whether DOM-wide queries become a bottleneck only if reproducible measurements show it.
-4. Validate actual YouTube interface behavior separately from simulated fixtures.
-5. Keep IndexedDB disabled until multi-tab cutover and rollback are demonstrated.
+1. Verify CI on latest cycle-79 documentation commit.
+2. Replicate initial/cached comparisons across independent profiles before making performance claims.
+3. Examine if observing attributes and text mutations leads to unnecessary work on real YouTube pages.
+4. Validate real-site filtering in a suitable browser environment; simulated DOM is insufficient for full compatibility.
+5. Preserve IndexedDB as experimental until safe cutover and rollback are verified.
 
-No merge or release without explicit authorization. Keep `main` unchanged.
+Stop adding speculative performance optimizations. No merge or release without authorization.

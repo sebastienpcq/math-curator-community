@@ -72,3 +72,30 @@ test('failed second storage write restores prior imported history',async({page})
  await page.reload();
  await expect(page.locator('#attempt-history')).toContainText('incorrect');
 });
+
+test('failed rollback reports an explicit warning',async({page})=>{
+ await page.goto('http://127.0.0.1:8770/');
+ await expect(page.locator('#study-steps .study-step')).toHaveCount(7);
+ await page.evaluate(()=>{
+  const original=Storage.prototype.setItem;
+  let attemptsWrites=0;
+  window.__restoreSetItem=original;
+  Storage.prototype.setItem=function(key,value){
+   if(key==='knowledge-curator-attempts-v1'){
+    attemptsWrites++;
+    if(attemptsWrites>=2)throw Error('simulated rollback failure');
+   }
+   if(key==='knowledge-curator-progress-v1')throw Error('simulated progress failure');
+   return original.call(this,key,value);
+  };
+ });
+ const payload={version:2,progress:{},attempts:[{
+  skillId:'arithmetic',exerciseId:'ex-arithmetic',correct:false,
+  timestamp:'2026-10-15T00:00:00.000Z'
+ }]};
+ await page.locator('#progress-import').setInputFiles({
+  name:'rollback.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(payload))
+ });
+ await expect(page.locator('#study-message')).toContainText('restauration de l’historique impossible');
+ await page.evaluate(()=>{Storage.prototype.setItem=window.__restoreSetItem;});
+});

@@ -99,3 +99,33 @@ test('failed rollback reports an explicit warning',async({page})=>{
  await expect(page.locator('#study-message')).toContainText('restauration de l’historique impossible');
  await page.evaluate(()=>{Storage.prototype.setItem=window.__restoreSetItem;});
 });
+
+test('interrupted import journal restores original state on reload',async({page})=>{
+ await page.goto('http://127.0.0.1:8770/');
+ await expect(page.locator('#study-steps .study-step')).toHaveCount(7);
+ await page.locator('.study-step').first().locator('form.exercise').first().locator('input').fill('999');
+ await page.locator('.study-step').first().locator('form.exercise').first().locator('button[type=submit]').click();
+ const baseline=await page.evaluate(()=>({
+  attempts:localStorage.getItem('knowledge-curator-attempts-v1'),
+  progress:localStorage.getItem('knowledge-curator-progress-v1')
+ }));
+ await page.evaluate(()=>{
+  const attemptsKey='knowledge-curator-attempts-v1';
+  const progressKey='knowledge-curator-progress-v1';
+  localStorage.setItem('knowledge-curator-import-journal-v1',JSON.stringify({
+   attempts:localStorage.getItem(attemptsKey),progress:localStorage.getItem(progressKey)
+  }));
+  localStorage.setItem(attemptsKey,'[]');
+  localStorage.setItem(progressKey,'{}');
+ });
+ await page.reload();
+ const restored=await page.evaluate(()=>({
+  attempts:localStorage.getItem('knowledge-curator-attempts-v1'),
+  progress:localStorage.getItem('knowledge-curator-progress-v1'),
+  journal:localStorage.getItem('knowledge-curator-import-journal-v1')
+ }));
+ expect(restored.attempts).toBe(baseline.attempts);
+ expect(restored.progress).toBe(baseline.progress);
+ expect(restored.journal).toBeNull();
+ await expect(page.locator('#attempt-history')).toContainText('incorrect');
+});

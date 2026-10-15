@@ -150,6 +150,15 @@ document.querySelector('#progress-import').addEventListener('change',async e=>{
       e.target.value='';
       return;
     }
+    // Legacy V1 mastery assertions lack supporting attempts: preserve learning
+    // activity without treating them as independently demonstrated mastery.
+    if(payload.version===1){
+      payload.progress=Object.fromEntries(Object.entries(payload.progress).map(([id,value])=>[
+        id,value.status==='demonstrated'||value.status==='consolidate'
+          ?{...value,status:'in_progress'}
+          :value
+      ]));
+    }
     if(payload.version===2&&!KnowledgeAttempts.validateHistory(payload.attempts))throw Error('Historique invalide');
     // A pending journal is written before either legacy key changes.
     // On next launch, recover the original state if an interruption occurred.

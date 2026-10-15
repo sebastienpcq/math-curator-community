@@ -882,3 +882,29 @@ test('cutover gate detects legacy changes made by another active tab',async({con
  expect(after).toEqual({ready:false,reason:'state-divergence'});
  await Promise.all([first.close(),second.close()]);
 });
+
+test('V2 import and reset preserve consistency after storage boundary integration',async({page})=>{
+ await page.goto('http://127.0.0.1:8770/');
+ await expect(page.locator('#study-steps .study-step')).toHaveCount(7);
+ const first=page.locator('.study-step').first();
+ await first.locator('form.exercise').first().locator('input').fill('999');
+ await first.locator('form.exercise').first().locator('button[type=submit]').click();
+ const snapshot=await page.evaluate(()=>({
+  progress:JSON.parse(localStorage.getItem('knowledge-curator-progress-v1')),
+  attempts:JSON.parse(localStorage.getItem('knowledge-curator-attempts-v1'))
+ }));
+ const payload={version:2,progress:snapshot.progress,attempts:snapshot.attempts};
+ await page.locator('#progress-import').setInputFiles({
+  name:'boundary-import.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(payload))
+ });
+ await expect(page.locator('#study-message')).toContainText('Progression importée');
+ await page.reload();
+ const after=await page.evaluate(()=>({
+  progress:JSON.parse(localStorage.getItem('knowledge-curator-progress-v1')),
+  attempts:JSON.parse(localStorage.getItem('knowledge-curator-attempts-v1')),
+  journal:localStorage.getItem('knowledge-curator-import-journal-v1')
+ }));
+ expect(after.progress).toEqual(snapshot.progress);
+ expect(after.attempts).toEqual(snapshot.attempts);
+ expect(after.journal).toBeNull();
+});

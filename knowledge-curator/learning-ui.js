@@ -93,7 +93,7 @@ function render(){
     const ok=KnowledgeLearning.grade(exercise,input.value);
     feedback.textContent=(ok?'Réponse correcte. ':'Réponse à revoir. ')+exercise.explanation;
     try {
-      KnowledgeAttempts.append(localStorage,{
+      KnowledgeStorage.appendAttempt(localStorage,KnowledgeAttempts,{
         skillId:s.id,exerciseId:exercise.id,correct:ok,timestamp:new Date().toISOString()
       });
     } catch(error) {
@@ -122,7 +122,7 @@ function render(){
     form.addEventListener('submit',event=>{
      event.preventDefault();
      const ok=KnowledgeLearning.grade(ex,input.value);
-     try {KnowledgeAttempts.append(localStorage,{skillId:s.id,exerciseId:ex.id,correct:ok,timestamp:new Date().toISOString()});}
+     try {KnowledgeStorage.appendAttempt(localStorage,KnowledgeAttempts,{skillId:s.id,exerciseId:ex.id,correct:ok,timestamp:new Date().toISOString()});}
      catch(error){msg.textContent='Révision non enregistrée : '+error.message;return;}
      msg.textContent=(ok?'Rappel correct. ':'Rappel à consolider. ')+ex.explanation;
      render();

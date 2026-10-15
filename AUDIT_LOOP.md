@@ -129,3 +129,9 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Test Playwright ajouté : panne ciblée sur l'archive V1, refus d'import et absence de journal résiduel.
 - Limite : une archive V1 antérieure peut encore être remplacée lors d'une nouvelle importation ; stratégie de conservation multi-versions à auditer.
 - CI du cycle 16 à confirmer.
+
+## Cycle 17 — Rollback de l'archive antérieure
+
+- L'import V1 sauvegarde maintenant la valeur de l'archive existante et la restaure lors d'un rollback, afin de ne pas écraser silencieusement une archive plus ancienne.
+- Le journal ne capture toujours que progression et tentatives : interruption brutale entre écriture d'archive et suppression du journal à analyser avant toute validation finale.
+- Aucune fusion ; prochaine priorité : cohérence des trois clés après interruption.

@@ -273,3 +273,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Nouveau script `tests/indexeddb-persistence.cjs` : ouvrir Chromium avec un profil temporaire, écrire via l'adaptateur, fermer le navigateur, rouvrir le même profil et comparer les données.
 - Workflow navigateur étendu pour lancer ce scénario.
 - Résultats CI du cycle 34 en attente ; aucun changement du stockage de production.
+
+## Cycle 35 — Stratégie de déploiement progressif
+
+- CI cycle 34 : contrôle général réussi ; test navigateur avec profil persistant encore en cours au relevé.
+- Plan de déploiement par phases documenté dans `STORAGE_ARCHITECTURE.md` : expérimentation, opt-in, lecture contrôlée, déploiement limité, généralisation.
+- Critères de migration, sauvegarde et rollback explicites ; avertissement sur le retour arrière après nouvelles écritures IndexedDB.
+- Aucune activation, migration réelle ou suppression de clés héritées.
+- Attendre la validation CI du cycle 34 avant de développer le basculement.

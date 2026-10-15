@@ -55,3 +55,13 @@ Verified on cycle-74 commit `f9d8e516057baa25c94a965c4653bb11620055e1`:
 - Cumulative feed at 1,000 cards: 1 scan, 9.4 ms.
 
 Measurements were taken from the GitHub Actions log of one Chromium CI run. Each duration is the additional scan duration at that cumulative feed size, not total wall-clock loading time. They are not enough to infer asymptotic complexity or device-independent performance.
+
+## Cycle 75 — Three-scale MV3 benchmark (verified)
+
+Commit `f9d8e516057baa25c94a965c4653bb11620055e1`:
+- General checks run 38673457258: **SUCCESS**.
+- Browser integration run 38673457256: **SUCCESS**.
+- MV3 suite: **10 passed**; prototype browser suite: **48 passed**.
+- Cumulative card fixture, per-stage delta: 100 cards — 1 scan, 6.2 ms; 500 cards — 1 scan, 7.8 ms; 1,000 cards — 1 scan, 9.4 ms.
+
+The per-stage figures measure incremental additions to a growing DOM, not independent full-page baselines. One run only; no confidence interval or device-level performance guarantee. No engine optimization justified on this evidence alone.

@@ -522,3 +522,10 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Correctif : une entrée explicite `blockVideos` conserve la priorité, y compris pour les Shorts ; le masquage Shorts par défaut est préservé.
 - Test Playwright MV3 ajouté : conflit allow/block sur vidéo classique et Short, puis levée du blocage.
 - CI cycle 64 à confirmer ; aucune activation IndexedDB.
+
+## Cycle 65 — Matrice de priorité vidéo / chaîne / mode strict
+
+- CI cycle 64 : contrôles Node et Chromium réussis.
+- Inspection de `MathScoring.decide` : blocage vidéo > autorisation vidéo > blocage chaîne > autorisation chaîne > règles pédagogiques. Le correctif Shorts du cycle 64 préserve le blocage explicite.
+- Test Chromium MV3 ajouté pour vérifier ces priorités sur une page YouTube simulée, y compris le retour au filtrage strict lorsque les exceptions sont retirées.
+- Aucun changement de logique métier faute d'anomalie supplémentaire démontrée ; CI cycle 65 à confirmer.

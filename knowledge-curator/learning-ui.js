@@ -19,7 +19,12 @@ function load(){
   const pending=localStorage.getItem('knowledge-curator-import-journal-v1');
   if(pending!==null){
    const snapshot=JSON.parse(pending);
-   if(!snapshot||typeof snapshot!=='object'||!Object.hasOwn(snapshot,'progress')||!Object.hasOwn(snapshot,'attempts'))throw Error('Journal de récupération invalide');
+   if(!snapshot||typeof snapshot!=='object'||!Object.hasOwn(snapshot,'progress')||!Object.hasOwn(snapshot,'attempts')||
+      (snapshot.progress!==null&&typeof snapshot.progress!=='string')||
+      (snapshot.attempts!==null&&typeof snapshot.attempts!=='string'))throw Error('Journal de récupération invalide');
+   const restoredProgress=snapshot.progress===null?{}:JSON.parse(snapshot.progress);
+   const restoredAttempts=snapshot.attempts===null?[]:JSON.parse(snapshot.attempts);
+   if(!validProgress(restoredProgress)||!KnowledgeAttempts.validateHistory(restoredAttempts))throw Error('Journal de récupération invalide');
    if(snapshot.attempts===null)localStorage.removeItem(KnowledgeAttempts.KEY);
    else localStorage.setItem(KnowledgeAttempts.KEY,snapshot.attempts);
    if(snapshot.progress===null)localStorage.removeItem(KEY);

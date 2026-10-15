@@ -12,3 +12,7 @@ Dans `knowledge-curator/learning-ui.js`, le gestionnaire d'import déclarait `co
 - Robustesse de la sauvegarde en cas d'erreur `localStorage`.
 
 Aucune de ces vérifications supplémentaires n'est déclarée réussie sans exécution.
+
+## P1 — Planification obsolète après une erreur
+
+`review.cjs` utilisait la dernière réussite pour calculer une échéance même lorsque la tentative la plus récente était incorrecte. Après une erreur, la prochaine révision doit être recalculée après une nouvelle réussite ; les erreurs restent comptabilisées dans le tableau de consolidation.

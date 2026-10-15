@@ -504,3 +504,27 @@ test('experimental IndexedDB adapter aborts invalid state without committing',as
  expect(result.rejected).toBe(true);
  expect(result.unchanged).toBe(true);
 });
+
+test('IndexedDB migration preserves legacy storage and is idempotent',async({page})=>{
+ await page.goto('http://127.0.0.1:8770/');
+ await page.addScriptTag({url:'/state-v3.cjs'});
+ await page.addScriptTag({url:'/indexeddb-experimental.cjs'});
+ const result=await page.evaluate(async()=>{
+  const attemptsKey='knowledge-curator-attempts-v1';
+  const progressKey='knowledge-curator-progress-v1';
+  const initial={progress:localStorage.getItem(progressKey),attempts:localStorage.getItem(attemptsKey)};
+  const adapter=window.KnowledgeIndexedDB;
+  const db=await adapter.open(indexedDB);
+  const first=await adapter.migrateFromLegacy(db,localStorage,window.KnowledgeStateV3);
+  const second=await adapter.migrateFromLegacy(db,localStorage,window.KnowledgeStateV3);
+  const persisted=await adapter.read(db);
+  db.close();
+  return {first,second,persisted,initial,after:{
+   progress:localStorage.getItem(progressKey),attempts:localStorage.getItem(attemptsKey)
+  }};
+ });
+ expect(result.first).toEqual(result.second);
+ expect(result.first).toEqual(result.persisted);
+ expect(result.after).toEqual(result.initial);
+ expect(result.persisted.version).toBe(3);
+});

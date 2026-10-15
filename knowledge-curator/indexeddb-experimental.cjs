@@ -13,6 +13,7 @@
    };
    request.onsuccess=()=>resolve(request.result);
    request.onerror=()=>reject(request.error||Error('IndexedDB open failed'));
+   request.onblocked=()=>reject(Error('IndexedDB upgrade blocked by another tab'));
   });
  }
  function transact(db,change){

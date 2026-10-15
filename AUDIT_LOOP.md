@@ -223,3 +223,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Test Playwright ajouté : deux pages du même contexte Chromium démarrent une migration IndexedDB simultanée avec deux états hérités distincts.
 - Invariant : les deux appels et la relecture finale retournent le même enregistrement ; aucune migration concurrente ne remplace la première valeur.
 - CI cycle 28 en attente. Le stockage expérimental reste inactif dans l'interface.
+
+## Cycle 29 — Ouverture IndexedDB bloquée
+
+- CI cycle 28 : Node et Chromium réussis.
+- Gestion explicite de `onblocked` dans l'ouverture de l'adaptateur expérimental.
+- Test Playwright : une connexion ouverte bloque une mise à niveau de version, puis sa fermeture permet la reprise.
+- Limite : le test d'upgrade valide le comportement natif IndexedDB ; les erreurs quota et abort de l'adaptateur restent à tester directement.
+- CI cycle 29 à confirmer ; aucune activation du stockage expérimental.

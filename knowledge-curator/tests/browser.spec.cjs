@@ -373,3 +373,46 @@ test('interrupted V1 import restores legacy archive and progress',async({page})=
  expect(after.archive).toBe(original.archive);
  expect(after.journal).toBeNull();
 });
+
+test('recovery retry after a transient storage failure restores three keys',async({page})=>{
+ await page.goto('http://127.0.0.1:8770/');
+ await expect(page.locator('#study-steps .study-step')).toHaveCount(7);
+ const before=await page.evaluate(()=>{
+  const archive=JSON.stringify({version:1,importedAt:'2026-10-15T00:00:00.000Z',progress:{}});
+  localStorage.setItem('knowledge-curator-legacy-v1-archive',archive);
+  const snapshot={
+   progress:localStorage.getItem('knowledge-curator-progress-v1'),
+   attempts:localStorage.getItem('knowledge-curator-attempts-v1'),
+   legacyArchive:archive
+  };
+  localStorage.setItem('knowledge-curator-import-journal-v1',JSON.stringify(snapshot));
+  localStorage.setItem('knowledge-curator-progress-v1','{}');
+  localStorage.setItem('knowledge-curator-legacy-v1-archive','{"version":1,"progress":{}}');
+  return snapshot;
+ });
+ await page.addInitScript(()=>{
+  const original=Storage.prototype.setItem;
+  Storage.prototype.setItem=function(key,value){
+   if(key==='knowledge-curator-progress-v1')throw Error('transient recovery failure');
+   return original.call(this,key,value);
+  };
+ });
+ await page.reload();
+ await expect(page.locator('#study-message')).toContainText('Impossible de lire la progression');
+ expect(await page.evaluate(()=>localStorage.getItem('knowledge-curator-import-journal-v1'))).not.toBeNull();
+ // New browser page simulates a restart with the transient failure removed.
+ const next=await page.context().newPage();
+ await next.goto('http://127.0.0.1:8770/');
+ await expect(next.locator('#study-steps .study-step')).toHaveCount(7);
+ const after=await next.evaluate(()=>({
+  progress:localStorage.getItem('knowledge-curator-progress-v1'),
+  attempts:localStorage.getItem('knowledge-curator-attempts-v1'),
+  legacyArchive:localStorage.getItem('knowledge-curator-legacy-v1-archive'),
+  journal:localStorage.getItem('knowledge-curator-import-journal-v1')
+ }));
+ expect(after.progress).toBe(before.progress);
+ expect(after.attempts).toBe(before.attempts);
+ expect(after.legacyArchive).toBe(before.legacyArchive);
+ expect(after.journal).toBeNull();
+ await next.close();
+});

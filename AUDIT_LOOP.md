@@ -324,3 +324,12 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Ce module n'est pas encore branché à `learning-ui.js` ; il prépare la refactorisation sans modifier le comportement de production.
 - Les anciens onglets non coopératifs restent un risque bloquant pour le basculement.
 - CI cycle 40 à confirmer.
+
+## Cycle 41 — Première intégration de la frontière de stockage
+
+- CI cycle 40 : contrôle général réussi ; navigateur en cours au relevé.
+- `index.html` charge désormais `storage-boundary.cjs` avant `learning-ui.js`.
+- `persist()` et `readHistory()` passent par l'interface centralisée.
+- Les opérations de reset, import et append ne sont pas encore migrées vers cette frontière ; la transition est partielle.
+- Risque : le garde-fou journal doit être validé dans les tests d'import et de récupération existants.
+- CI cycle 41 à confirmer ; IndexedDB reste désactivé.

@@ -627,3 +627,10 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Test MV3 ajouté : trois exécutions indépendantes sur 500 cartes, chaque fois avec un nouveau profil Chromium.
 - Le test publie les trois durées, la médiane, l'étendue et le nombre de scans ; chaque essai vérifie que 250 recommandations hors sujet sont masquées.
 - Pas de changement de production ni d'optimisation spéculative. CI cycle 76 à confirmer.
+
+## Cycle 77 — Analyse des trois profils indépendants
+
+- CI cycle 76 : Node et Chromium réussis (runs 38673942252 et 38673942207), 11 tests MV3 et 48 tests du prototype.
+- Mesures sur 500 cartes, profils indépendants : 16,3 ms ; 21,3 ms ; 13,6 ms ; médiane 16,3 ms, étendue 13,6–21,3 ms.
+- La variabilité est significative et les conditions diffèrent du benchmark cumulatif des cycles 74–75 ; aucune conclusion de gain/régression n'est justifiée.
+- `TEST_RESULTS.md` et `NEXT_ITERATION.md` actualisés ; aucune modification de production. CI cycle 77 à confirmer.

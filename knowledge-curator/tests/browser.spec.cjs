@@ -453,3 +453,54 @@ test('IndexedDB readwrite transactions preserve two concurrent updates',async({p
  expect(result.attempts).toHaveLength(1);
  expect(result.progress.algebra).toBe('in_progress');
 });
+
+test('experimental IndexedDB adapter preserves concurrent updates',async({page})=>{
+ await page.goto('http://127.0.0.1:8770/');
+ await page.addScriptTag({url:'/indexeddb-experimental.cjs'});
+ const result=await page.evaluate(async()=>{
+  const adapter=window.KnowledgeIndexedDB;
+  const db=await adapter.open(indexedDB);
+  await Promise.all([
+   adapter.transact(db,state=>{
+    state.attempts.push({skillId:'arithmetic',exerciseId:'ex-arithmetic',
+     correct:false,timestamp:'2026-10-15T00:00:00.000Z'});
+    return state;
+   }),
+   adapter.transact(db,state=>{
+    state.progress.arithmetic={status:'in_progress',updatedAt:'2026-10-15T00:00:00.000Z'};
+    return state;
+   })
+  ]);
+  const final=await new Promise((resolve,reject)=>{
+   const tx=db.transaction(adapter.STORE,'readonly');
+   const request=tx.objectStore(adapter.STORE).get(adapter.KEY);
+   request.onsuccess=()=>resolve(request.result);
+   request.onerror=()=>reject(request.error);
+  });
+  db.close();
+  return final;
+ });
+ expect(result.attempts).toHaveLength(1);
+ expect(result.progress.arithmetic.status).toBe('in_progress');
+});
+test('experimental IndexedDB adapter aborts invalid state without committing',async({page})=>{
+ await page.goto('http://127.0.0.1:8770/');
+ await page.addScriptTag({url:'/indexeddb-experimental.cjs'});
+ const result=await page.evaluate(async()=>{
+  const adapter=window.KnowledgeIndexedDB;
+  const db=await adapter.open(indexedDB);
+  let rejected=false;
+  try{await adapter.transact(db,()=>({version:2,progress:{},attempts:[]}));}
+  catch{rejected=true;}
+  const value=await new Promise((resolve,reject)=>{
+   const tx=db.transaction(adapter.STORE,'readonly');
+   const request=tx.objectStore(adapter.STORE).get(adapter.KEY);
+   request.onsuccess=()=>resolve(request.result);
+   request.onerror=()=>reject(request.error);
+  });
+  db.close();
+  return {rejected,unchanged:value===undefined};
+ });
+ expect(result.rejected).toBe(true);
+ expect(result.unchanged).toBe(true);
+});

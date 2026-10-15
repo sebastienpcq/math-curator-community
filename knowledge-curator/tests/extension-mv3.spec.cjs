@@ -423,3 +423,65 @@ test('MV3 benchmark: cumulative batches of 100, 500 and 1000 cards',async()=>{
   fs.rmSync(profile,{recursive:true,force:true});
  }
 });
+
+test('MV3 repeated independent 500-card scan timings',async()=>{
+ const samples=[];
+ for(let run=0;run<3;run++){
+  const profile=fs.mkdtempSync(path.join(os.tmpdir(),'math-curator-repeat-'));
+  let context;
+  try{
+   context=await chromium.launchPersistentContext(profile,{
+    channel:'chromium',headless:true,
+    args:['--disable-extensions-except='+root,'--load-extension='+root]
+   });
+   let workers=context.serviceWorkers();
+   if(!workers.length)workers=[await context.waitForEvent('serviceworker',{timeout:15000})];
+   const page=await context.newPage();
+   await page.route('https://www.youtube.com/**',route=>route.fulfill({
+    status:200,contentType:'text/html',
+    body:'<!doctype html><html><body><main id="feed"></main></body></html>'
+   }));
+   await page.goto('https://www.youtube.com/',{waitUntil:'domcontentloaded'});
+   await workers[0].evaluate(async()=>chrome.storage.local.set({
+    settings:{enabled:true,mode:'balanced',showBadges:false}
+   }));
+   const baseline=await page.evaluate(()=>({
+    scans:Number(document.documentElement.dataset.mathCuratorScans||0),
+    ms:Number(document.documentElement.dataset.mathCuratorTotalMs||0)
+   }));
+   await page.evaluate(()=>{
+    const fragment=document.createDocumentFragment();
+    for(let i=0;i<500;i++){
+     const card=document.createElement('ytd-video-renderer');
+     const a=document.createElement('a');
+     a.id='video-title';
+     a.href='/watch?v='+String(i).padStart(11,'0');
+     a.textContent=i%2?'Cours de mathématiques débutant fractions':'Gaming highlights';
+     card.append(a);fragment.append(card);
+    }
+    document.querySelector('#feed').append(fragment);
+   });
+   await expect.poll(()=>page.locator('ytd-video-renderer.math-curator-hidden').count(),{
+    timeout:15000
+   }).toBe(250);
+   const after=await page.evaluate(()=>({
+    scans:Number(document.documentElement.dataset.mathCuratorScans||0),
+    ms:Number(document.documentElement.dataset.mathCuratorTotalMs||0)
+   }));
+   samples.push({run:run+1,scans:after.scans-baseline.scans,
+    ms:Number((after.ms-baseline.ms).toFixed(3))});
+  }finally{
+   if(context)await context.close();
+   fs.rmSync(profile,{recursive:true,force:true});
+  }
+ }
+ const ordered=samples.map(s=>s.ms).sort((a,b)=>a-b);
+ console.log('Math Curator replicated benchmark',JSON.stringify({
+  samples,medianMs:ordered[1],rangeMs:[ordered[0],ordered[2]]
+ }));
+ expect(samples).toHaveLength(3);
+ for(const sample of samples){
+  expect(sample.scans).toBeGreaterThan(0);
+  expect(sample.ms).toBeGreaterThanOrEqual(0);
+ }
+});

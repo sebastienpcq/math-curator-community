@@ -169,3 +169,10 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Trois tests Node ajoutés : archive invalide, migration idempotente après corruption du format hérité, état canonique invalide conservé sans remplacement silencieux.
 - Module toujours expérimental et non connecté à l'interface.
 - CI cycle 21 à confirmer.
+
+## Cycle 22 — Quota et échecs répétés de migration V3
+
+- CI cycle 21 : Node et Chromium réussis.
+- Trois tests Node ajoutés au prototype V3 : quota dépassé sans écriture canonique, reprise après échec transitoire, lecture canonique indépendante des clés héritées.
+- Aucun branchement du prototype à l'interface ; les données réelles ne sont pas migrées.
+- CI cycle 22 à confirmer ; ensuite auditer la concurrence entre onglets et le contrôle des écritures.

@@ -143,3 +143,10 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Correction : journal enrichi de `legacyArchive` et restauration de cette troisième clé au démarrage. Compatibilité maintenue avec les anciens journaux sans ce champ.
 - Test Chromium ajouté : interruption simulée, archive et progression modifiées, rechargement, comparaison exacte des trois clés et suppression du journal.
 - Validation CI du cycle 18 en attente. Limite : la restauration multi-clé n'est pas atomique en cas de pannes répétées.
+
+## Cycle 19 — Panne transitoire pendant la récupération
+
+- CI cycle 18 : contrôles généraux et navigateur réussis.
+- Test Playwright ajouté : journal trois clés, première reprise échouée par injection de faute, deuxième page sans panne, restauration exacte et suppression du journal.
+- Aucun changement du moteur métier ; vérification ciblée de récupérabilité après panne transitoire.
+- CI cycle 19 en attente ; ne pas considérer le stockage multi-clé comme atomique.

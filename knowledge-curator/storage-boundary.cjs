@@ -43,6 +43,8 @@
  // Transaction coordinator for the three legacy keys. The journal is
  // retained if rollback fails, allowing the existing startup recovery.
  function transaction(storage,attemptsModule,validate,mutate){
+  if(typeof root.KnowledgeStateV3?.validLegacyArchive!=='function')
+   throw Error('Canonical archive validator unavailable');
   if(pending(storage))throw Error('Legacy recovery pending');
   const ATTEMPTS=attemptsModule.KEY;
   const ARCHIVE='knowledge-curator-legacy-v1-archive';

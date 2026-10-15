@@ -77,3 +77,17 @@ Verified commit `f9d8e516057baa25c94a965c4653bb11620055e1`:
   - 1,000 cards: 1 scan, 9.4 ms cumulative.
 
 **Interpretation:** one scan per insertion batch. Timing grows with DOM size, but these data do not establish asymptotic complexity or general performance guarantees. The incremental differences (1.6 ms and 1.6 ms) are not independent benchmark measurements. No optimization is justified by these results alone.
+
+## Cycle 77 — Independent 500-card Chromium profiles
+
+Verified on cycle-76 commit `874deed58cbad143f62d8a6047b895e942bbaed3`:
+
+- General checks run 38673942252: **SUCCESS**.
+- Browser integration run 38673942207: **SUCCESS**, 11 MV3 tests and 48 knowledge-browser tests.
+- Three fresh Chromium profiles, each with 500 simulated cards and one scan:
+  - Run 1: 16.3 ms
+  - Run 2: 21.3 ms
+  - Run 3: 13.6 ms
+  - Median: **16.3 ms**, observed range: **13.6–21.3 ms**.
+
+The variation is material. These measurements cannot be directly equated with the incremental 500-card stage in the cumulative benchmark (7.8–7.9 ms), because the experimental conditions differ. Do not infer a speedup or regression without controlled comparison.

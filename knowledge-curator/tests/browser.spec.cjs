@@ -105,6 +105,11 @@ test('interrupted import journal restores original state on reload',async({page}
  await expect(page.locator('#study-steps .study-step')).toHaveCount(7);
  await page.locator('.study-step').first().locator('form.exercise').first().locator('input').fill('999');
  await page.locator('.study-step').first().locator('form.exercise').first().locator('button[type=submit]').click();
+ await expect.poll(()=>page.evaluate(()=>{
+  const raw=localStorage.getItem('knowledge-curator-attempts-v1');
+  try{return raw?JSON.parse(raw).length:0;}catch{return 0;}
+ })).toBeGreaterThan(0);
+ await expect(page.locator('#attempt-history')).toContainText('incorrect');
  const baseline=await page.evaluate(()=>({
   attempts:localStorage.getItem('knowledge-curator-attempts-v1'),
   progress:localStorage.getItem('knowledge-curator-progress-v1')

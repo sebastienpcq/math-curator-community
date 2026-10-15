@@ -34,3 +34,12 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Deux tests Playwright ajoutés : échec de la seconde écriture (progression), et échec de la restauration de l'historique.
 - Les tests capturent l'état initial et vérifient sa conservation, ou l'alerte explicite en cas de restauration impossible.
 - Exécution CI du cycle 4 à confirmer ; aucune garantie transactionnelle multi-clé n'est revendiquée.
+
+## Cycle 5 — Journal de récupération
+
+- GitHub Actions du cycle 4 : Node et Chromium réussis.
+- Implémentation d'un journal de pré-import contenant les deux valeurs de stockage antérieures.
+- Au chargement suivant, un journal en attente déclenche une restauration avant lecture de la progression.
+- Test Playwright ajouté : interruption simulée après écriture partielle, puis rechargement et restauration.
+- Limite : localStorage n'offre pas de transaction multi-clé ; ce mécanisme vise la récupérabilité, pas une atomicité absolue.
+- CI du cycle 5 en attente de confirmation.

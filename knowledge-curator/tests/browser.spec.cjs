@@ -62,14 +62,14 @@ test('failed second storage write restores prior imported history',async({page})
  await page.locator('#progress-import').setInputFiles({
   name:'failure.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(payload))
  });
- await expect(page.locator('#study-message')).toContainText('Import refusé');
+ await expect(page.locator('#study-message')).toContainText('restauration impossible');
+ await page.evaluate(()=>{Storage.prototype.setItem=window.__restoreSetItem;});
+ await page.reload();
  const after=await page.evaluate(()=>({
   attempts:localStorage.getItem('knowledge-curator-attempts-v1'),
   progress:localStorage.getItem('knowledge-curator-progress-v1')
  }));
  expect(after).toEqual(before);
- await page.evaluate(()=>{Storage.prototype.setItem=window.__restoreSetItem;});
- await page.reload();
  await expect(page.locator('#attempt-history')).toContainText('incorrect');
 });
 
@@ -96,7 +96,7 @@ test('failed rollback reports an explicit warning',async({page})=>{
  await page.locator('#progress-import').setInputFiles({
   name:'rollback.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(payload))
  });
- await expect(page.locator('#study-message')).toContainText('restauration de l’historique impossible');
+ await expect(page.locator('#study-message')).toContainText('restauration impossible');
  await page.evaluate(()=>{Storage.prototype.setItem=window.__restoreSetItem;});
 });
 

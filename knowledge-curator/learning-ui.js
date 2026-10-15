@@ -28,8 +28,9 @@ function load(){
    if(Object.hasOwn(snapshot,'legacyArchive')){
     if(snapshot.legacyArchive!==null&&typeof snapshot.legacyArchive!=='string')throw Error('Archive de récupération invalide');
     if(snapshot.legacyArchive!==null){
-     const archive=JSON.parse(snapshot.legacyArchive);
-     if(!archive||typeof archive!=='object'||archive.version!==1||typeof archive.importedAt!=='string'||!Number.isFinite(Date.parse(archive.importedAt))||!validProgress(archive.progress))throw Error('Archive de récupération invalide');
+     if(!KnowledgeStateV3.validLegacyArchive(snapshot.legacyArchive)||
+        !validProgress(JSON.parse(snapshot.legacyArchive).progress))
+      throw Error('Archive de récupération invalide');
     }
    }
    if(Object.hasOwn(snapshot,'legacyArchive')){

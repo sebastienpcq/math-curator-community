@@ -88,3 +88,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Test Playwright ajouté : réponse incorrecte, export JSON réel, comparaison avec le stockage, réinitialisation, réimportation et rechargement.
 - Vérifie l'égalité exacte des tentatives et de la progression avant/après l'aller-retour.
 - Résultat CI du cycle 11 à confirmer.
+
+## Cycle 12 — Compatibilité des imports V1/V2
+
+- CI cycle 11 : contrôle général réussi ; navigateur en cours lors du relevé.
+- Défaut P1 : un import V1 ne contient pas l'historique ; l'appliquer avec un historique récent pouvait créer une progression incohérente.
+- Mesure conservatrice : refuser l'import V1 lorsque des tentatives existent déjà, avec indication d'export préalable.
+- Test Playwright ajouté : historique existant, import V1, refus et conservation exacte des deux clés.
+- CI du cycle 12 à confirmer.

@@ -59,3 +59,10 @@ test('chronological ordering governs review, not insertion order',()=>{
  const later=at('ex-arithmetic-v2',false,'2026-10-16T00:00:00.000Z');
  assert.deepEqual(review.reviewState(step,[later,earlier],Date.parse('2026-10-17T00:00:00.000Z')),review.reviewState(step,[earlier,later],Date.parse('2026-10-17T00:00:00.000Z')));
 });
+
+test('same-time events use insertion order',()=>{
+ const stamp='2026-10-15T00:00:00.000Z';
+ const ok=at('ex-arithmetic',true,stamp),bad=at('ex-arithmetic-v2',false,stamp);
+ assert.equal(review.reviewState(step,[ok,bad],Date.parse(stamp)).nextAt,null);
+ assert.equal(review.reviewState(step,[bad,ok],Date.parse(stamp)).nextAt,'2026-10-16T00:00:00.000Z');
+});

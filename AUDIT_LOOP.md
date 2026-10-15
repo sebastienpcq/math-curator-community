@@ -642,3 +642,10 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Le test publie les durées et nombres de scans des deux phases, et vérifie la stabilité des 250 décisions de masquage.
 - Ce scénario compare un traitement initial et un rescan chaud dans la même session ; il ne mesure pas un vrai redémarrage navigateur.
 - CI cycle 78 à confirmer ; aucun changement du moteur de production.
+
+## Cycle 79 — Premier scan vs rescan en cache
+
+- CI cycle 78 : Node et Chromium réussis (runs 38674365317 et 38674365257), 12 tests MV3 et 48 tests pédagogiques.
+- Benchmark sur 500 cartes simulées : premier scan 17,8 ms, rescan avec cache 4,1 ms, un scan par phase ; différence observée ~77 %.
+- Résultat limité à une session Chromium ; aucune preuve de gain général ni nécessité d'optimisation supplémentaire.
+- `TEST_RESULTS.md` et `NEXT_ITERATION.md` actualisés. CI cycle 79 à confirmer ; aucune modification fonctionnelle.

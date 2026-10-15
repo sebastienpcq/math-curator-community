@@ -451,3 +451,12 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Cause : une archive `null` contournait la vérification de dépendance dans `validArchive` ; la transaction pouvait réussir sans schéma chargé.
 - Correctif : imposer la disponibilité de `KnowledgeStateV3.validLegacyArchive` au début de toute transaction, avant journal ou écriture.
 - CI cycle 55 à confirmer ; aucun merge et aucun basculement IndexedDB.
+
+## Cycle 56 — Récupération centralisée
+
+- CI cycle 55 : contrôles Node et Chromium réussis.
+- Nouvelle API `KnowledgeStorage.recover` : validation préalable du journal, des tentatives et de l'archive V1, restauration des trois clés puis suppression du journal.
+- `learning-ui.js` délègue maintenant la récupération au démarrage à cette API.
+- Deux tests Node ajoutés : restauration cohérente et refus d'une archive malformée sans mutation.
+- La restauration demeure multi-clé et non atomique ; en cas de panne, le journal est conservé pour une reprise.
+- CI cycle 56 à confirmer ; IndexedDB non activé.

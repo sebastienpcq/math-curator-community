@@ -444,3 +444,10 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Les tests Node chargent explicitement le schéma canonique. Test ajouté : en l'absence du validateur, la transaction échoue avant toute écriture.
 - `index.html` charge déjà le schéma V3 avant la frontière de stockage.
 - CI cycle 54 à confirmer ; aucune migration IndexedDB active.
+
+## Cycle 55 — Réparation CI du validateur canonique
+
+- CI cycle 54 : les deux workflows ont échoué sur le même test `missing canonical validator fails closed before transaction writes` (erreur `Missing expected exception`).
+- Cause : une archive `null` contournait la vérification de dépendance dans `validArchive` ; la transaction pouvait réussir sans schéma chargé.
+- Correctif : imposer la disponibilité de `KnowledgeStateV3.validLegacyArchive` au début de toute transaction, avant journal ou écriture.
+- CI cycle 55 à confirmer ; aucun merge et aucun basculement IndexedDB.

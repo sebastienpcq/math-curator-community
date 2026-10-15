@@ -684,3 +684,23 @@ test('IndexedDB adapter propagates simulated quota error without commit',async({
  expect(result.name).toBe('QuotaExceededError');
  expect(result.after).toEqual(result.before);
 });
+
+test('IndexedDB migration refuses legacy state with pending recovery journal',async({page})=>{
+ await page.goto('http://127.0.0.1:8770/');
+ await page.addScriptTag({url:'/state-v3.cjs'});
+ await page.addScriptTag({url:'/indexeddb-experimental.cjs'});
+ const result=await page.evaluate(async()=>{
+  const adapter=window.KnowledgeIndexedDB;
+  const db=await adapter.open(indexedDB);
+  const store={getItem:key=>key==='knowledge-curator-import-journal-v1'
+   ?'{"progress":null,"attempts":null}':null};
+  let error='';
+  try{await adapter.migrateFromLegacy(db,store,window.KnowledgeStateV3);}
+  catch(e){error=e.message;}
+  const saved=await adapter.read(db);
+  db.close();
+  return {error,saved};
+ });
+ expect(result.error).toBe('Legacy recovery pending');
+ expect(result.saved).toBeNull();
+});

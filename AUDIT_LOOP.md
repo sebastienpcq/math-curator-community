@@ -657,3 +657,12 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Le test publie les six durées, les nombres de scans et les médianes par phase. Il vérifie la conservation des 250 masquages.
 - Aucun seuil de gain n'est imposé : les mesures sont exploratoires et ne doivent pas rendre la CI instable.
 - CI cycle 80 à confirmer ; aucun changement du moteur de production.
+
+## Cycle 81 — Échec intermittent de récupération au navigateur
+
+- CI cycle 80 : Node réussi ; MV3 13/13 réussi ; prototype navigateur 47/48, échec du test `interrupted import journal restores original state on reload`.
+- Le journal du test montre `baseline.attempts` contenant une tentative incorrecte et `restored.attempts` égal à `[]` après rechargement.
+- Hypothèse à vérifier : course entre l'enregistrement de la tentative, la construction du journal et les mises à jour asynchrones de l'interface. Ce n'est pas une cause confirmée.
+- Test renforcé : attendre explicitement la tentative persistée et son affichage avant de créer le journal simulant la panne.
+- Si le test échoue encore, inspecter les mutations du stockage et la routine `recover` ; ne pas conclure à une simple instabilité de test.
+- CI cycle 81 à confirmer. Aucune modification du code de production.

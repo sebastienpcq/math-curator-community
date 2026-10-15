@@ -266,3 +266,22 @@ test('V1 import refuses to overwrite progress with recent attempt history',async
  }));
  expect(after).toEqual(before);
 });
+
+test('legacy V1 import on fresh storage remains compatible',async({page})=>{
+ await page.goto('http://127.0.0.1:8770/');
+ await expect(page.locator('#study-steps .study-step')).toHaveCount(7);
+ const payload={version:1,progress:{arithmetic:{
+  status:'in_progress',updatedAt:'2026-10-15T00:00:00.000Z'
+ }}};
+ await page.locator('#progress-import').setInputFiles({
+  name:'legacy-fresh.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(payload))
+ });
+ await expect(page.locator('#study-message')).toContainText('Progression importée');
+ await page.reload();
+ const result=await page.evaluate(()=>({
+  progress:JSON.parse(localStorage.getItem('knowledge-curator-progress-v1')),
+  attempts:localStorage.getItem('knowledge-curator-attempts-v1')
+ }));
+ expect(result.progress.arithmetic.status).toBe('in_progress');
+ expect(result.attempts).toBeNull();
+});

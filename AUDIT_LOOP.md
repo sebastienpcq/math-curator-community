@@ -176,3 +176,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Trois tests Node ajoutés au prototype V3 : quota dépassé sans écriture canonique, reprise après échec transitoire, lecture canonique indépendante des clés héritées.
 - Aucun branchement du prototype à l'interface ; les données réelles ne sont pas migrées.
 - CI cycle 22 à confirmer ; ensuite auditer la concurrence entre onglets et le contrôle des écritures.
+
+## Cycle 23 — Concurrence et mises à jour perdues
+
+- CI cycle 22 : tests Node et Chromium réussis.
+- Test Node ajouté : deux instantanés V3 obsolètes, deux écritures successives, perte démontrable de la première tentative.
+- Ce test est une reproduction volontaire du défaut, pas une correction ; la CI doit le confirmer.
+- Décision : ne pas activer V3 ; préparer un module IndexedDB transactionnel et des tests de concurrence avant migration.
+- Aucun changement des données utilisateurs ni de l'interface.

@@ -34,3 +34,9 @@ Derived from `agent/recursive-audit` to preserve cycles 1–6 and `AUDIT_LOOP.md
 
 ## Next audit target
 Validate cycle 6 CI and corrupted recovery journal tests. Do not claim atomicity for multi-key localStorage updates.
+
+## Implemented in this PR
+- `scripts/autonomous_audit.py`: bounded, read-only OpenAI Responses API analysis of up to 24 tracked source/config files (120 KB total); validates report structure.
+- `.github/workflows/agent-audit-readonly.yml`: manual-only audit, read-only token, report artifact. Requires `OPENAI_API_KEY` Actions secret and API billing.
+- The agent does **not** edit code, rerun itself, or open PRs. The next phase must add an isolated correction runner after dry-run validation.
+- GitHub may require a workflow file on the default branch before the manual Run workflow button is available; do not merge this preparation PR just to bypass branch protections.

@@ -234,3 +234,55 @@ test('MV3 reevaluates reused video cards and handles missing metadata',async()=>
   fs.rmSync(profile,{recursive:true,force:true});
  }
 });
+
+test('MV3 processes a large recommendation feed and dynamic batch',async()=>{
+ const profile=fs.mkdtempSync(path.join(os.tmpdir(),'math-curator-load-'));
+ let context;
+ try{
+  context=await chromium.launchPersistentContext(profile,{
+   channel:'chromium',headless:true,
+   args:['--disable-extensions-except='+root,'--load-extension='+root]
+  });
+  let workers=context.serviceWorkers();
+  if(!workers.length)workers=[await context.waitForEvent('serviceworker',{timeout:15000})];
+  const page=await context.newPage();
+  await page.route('https://www.youtube.com/**',route=>route.fulfill({
+   status:200,contentType:'text/html',
+   body:'<!doctype html><html><body><main id="feed"></main></body></html>'
+  }));
+  await page.goto('https://www.youtube.com/',{waitUntil:'domcontentloaded'});
+  await workers[0].evaluate(async()=>chrome.storage.local.set({
+   settings:{enabled:true,mode:'balanced',hideShorts:true}
+  }));
+  const createBatch=async(start,count)=>page.evaluate(({start,count})=>{
+   const fragment=document.createDocumentFragment();
+   for(let i=start;i<start+count;i++){
+    const card=document.createElement('ytd-video-renderer');
+    const a=document.createElement('a');
+    a.id='video-title';
+    a.href='/watch?v='+String(i).padStart(11,'0');
+    a.textContent=i%2===0?'Gaming highlights':'Cours de mathématiques débutant fractions';
+    card.append(a);fragment.append(card);
+   }
+   document.querySelector('#feed').append(fragment);
+  },{start,count});
+  await createBatch(0,250);
+  await expect.poll(()=>page.locator('ytd-video-renderer.math-curator-hidden').count(),{
+   timeout:15000
+  }).toBe(125);
+  await createBatch(250,250);
+  await expect.poll(()=>page.locator('ytd-video-renderer.math-curator-hidden').count(),{
+   timeout:15000
+  }).toBe(250);
+  expect(await page.locator('ytd-video-renderer').count()).toBe(500);
+  await workers[0].evaluate(async()=>chrome.storage.local.set({
+   settings:{enabled:false}
+  }));
+  await expect.poll(()=>page.locator('ytd-video-renderer.math-curator-hidden').count(),{
+   timeout:15000
+  }).toBe(0);
+ }finally{
+  if(context)await context.close();
+  fs.rmSync(profile,{recursive:true,force:true});
+ }
+});

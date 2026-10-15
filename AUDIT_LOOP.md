@@ -27,3 +27,10 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Convention de tri explicitée : à horodatage identique, l'ordre d'enregistrement est conservé par le tri stable de JavaScript.
 - Deux tests ajoutés : événements simultanés et refus d'un historique invalide.
 - La simulation d'échec de stockage dans l'interface et la vérification des tests de ce cycle restent à effectuer.
+
+## Cycle 4 — Injection de fautes localStorage
+
+- CI cycle 3 : Node et navigateur réussis.
+- Deux tests Playwright ajoutés : échec de la seconde écriture (progression), et échec de la restauration de l'historique.
+- Les tests capturent l'état initial et vérifient sa conservation, ou l'alerte explicite en cas de restauration impossible.
+- Exécution CI du cycle 4 à confirmer ; aucune garantie transactionnelle multi-clé n'est revendiquée.

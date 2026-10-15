@@ -31,7 +31,46 @@
   if(pending(storage))throw Error('Legacy recovery pending');
   return attemptsModule.append(storage,attempt);
  }
- const api={PROGRESS,JOURNAL,pending,readProgress,writeProgress,writeDuringRecovery,readAttempts,appendAttempt};
+ // Transaction coordinator for the three legacy keys. The journal is
+ // retained if rollback fails, allowing the existing startup recovery.
+ function transaction(storage,attemptsModule,validate,mutate){
+  if(pending(storage))throw Error('Legacy recovery pending');
+  const ATTEMPTS=attemptsModule.KEY;
+  const ARCHIVE='knowledge-curator-legacy-v1-archive';
+  const snapshot={progress:storage.getItem(PROGRESS),attempts:storage.getItem(ATTEMPTS),
+   legacyArchive:storage.getItem(ARCHIVE)};
+  const before={
+   progress:snapshot.progress===null?{}:JSON.parse(snapshot.progress),
+   attempts:attemptsModule.read(storage),
+   legacyArchive:snapshot.legacyArchive
+  };
+  if(!validate(before.progress))throw Error('Invalid existing progress');
+  const next=mutate(structuredClone(before));
+  if(!next||!validate(next.progress)||!attemptsModule.validateHistory(next.attempts)||
+     !(next.legacyArchive===null||typeof next.legacyArchive==='string'))
+   throw Error('Invalid transaction state');
+  storage.setItem(JOURNAL,JSON.stringify(snapshot));
+  try{
+   attemptsModule.replace(storage,next.attempts);
+   writeDuringRecovery(storage,next.progress,validate);
+   if(next.legacyArchive===null)storage.removeItem(ARCHIVE);
+   else storage.setItem(ARCHIVE,next.legacyArchive);
+   storage.removeItem(JOURNAL);
+   return next;
+  }catch(error){
+   try{
+    for(const [key,value] of [[ATTEMPTS,snapshot.attempts],[PROGRESS,snapshot.progress],[ARCHIVE,snapshot.legacyArchive]]){
+     if(value===null)storage.removeItem(key);
+     else storage.setItem(key,value);
+    }
+    storage.removeItem(JOURNAL);
+   }catch(rollbackError){
+    throw Error('Rollback failed; recovery journal retained',{cause:rollbackError});
+   }
+   throw error;
+  }
+ }
+ const api={PROGRESS,JOURNAL,pending,readProgress,writeProgress,writeDuringRecovery,readAttempts,appendAttempt,transaction};
  if(typeof module!=='undefined'&&module.exports)module.exports=api;
  if(root)root.KnowledgeStorage=api;
 })(typeof window!=='undefined'?window:globalThis);

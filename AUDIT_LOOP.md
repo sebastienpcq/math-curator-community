@@ -357,3 +357,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Deux tests Playwright ajoutés : import V2 suivi d'un rechargement avec comparaison de progression/historique, et refus d'enregistrer une tentative si un journal de récupération est présent.
 - Les tests couvrent l'interaction entre `storage-boundary.cjs` et `learning-ui.js`.
 - CI cycle 44 à confirmer ; aucune migration IndexedDB active.
+
+## Cycle 45 — Coordinateur transactionnel hérité
+
+- CI cycle 44 : contrôles généraux réussis ; navigateur en cours au relevé.
+- Nouveau `KnowledgeStorage.transaction` : snapshot de progression/tentatives/archive, validation avant écriture, journal, commit et rollback en cas d'erreur.
+- Deux tests Node ajoutés : commit cohérent et restauration après panne d'écriture.
+- Le coordinateur n'est pas encore branché aux handlers d'import/reset ; le risque de divergence est limité en conservant l'ancien comportement pendant validation.
+- CI cycle 45 à confirmer. Les opérations localStorage multi-clés ne sont toujours pas atomiques.

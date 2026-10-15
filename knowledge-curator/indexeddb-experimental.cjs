@@ -111,9 +111,28 @@
   const current=stateV3.fromLegacy(legacyStorage);
   if(JSON.stringify(current)!==JSON.stringify(prepared.snapshot))
    throw Error('Legacy data changed since preview');
-  const migrated=await migrateFromLegacy(db,legacyStorage,stateV3);
-  if(!stateV3.validate(migrated))throw Error('Invalid migrated state');
-  return migrated;
+  // Commit the exact approved snapshot; do not reread legacy data during
+  // the transaction, which could otherwise import an unreviewed revision.
+  return new Promise((resolve,reject)=>{
+   const tx=db.transaction(STORE,'readwrite');
+   const store=tx.objectStore(STORE);
+   const request=store.get(KEY);
+   let result,changeError=null;
+   request.onsuccess=()=>{
+    try{
+     if(request.result!==undefined){
+      if(!stateV3.validate(request.result))throw Error('Invalid IndexedDB state');
+      result=request.result;
+     }else{
+      result=prepared.snapshot;
+      store.put(result,KEY);
+     }
+    }catch(error){changeError=error;tx.abort();}
+   };
+   tx.oncomplete=()=>resolve(result);
+   tx.onabort=()=>reject(changeError||tx.error||Error('Migration aborted'));
+   tx.onerror=()=>reject(tx.error||Error('Migration failed'));
+  });
  }
  const api={DB_NAME,STORE,KEY,open,transact,read,migrateFromLegacy,prepareMigration,confirmMigration};
  if(typeof module!=='undefined'&&module.exports)module.exports=api;

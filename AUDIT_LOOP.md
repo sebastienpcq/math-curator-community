@@ -299,3 +299,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Test Playwright ajouté pour vérifier l'égalité exacte du snapshot prévisualisé et de l'état engagé.
 - Limite persistante : aucune exclusion mutuelle atomique avec les écritures de localStorage ; phase 1 reste expérimentale.
 - CI cycle 37 à confirmer.
+
+## Cycle 38 — Préconditions de basculement
+
+- CI cycle 37 : contrôle général réussi ; navigateur en cours au relevé.
+- Ajout d'une inspection en lecture seule `inspectCutover` : refus si journal en attente, état canonique absent/invalide, état hérité invalide ou divergence.
+- Test Playwright ajouté : les états égaux sont détectés et une modification de localStorage après migration interdit le basculement.
+- La vérification n'est pas un verrou transactionnel ; aucune activation de l'interface ni migration réelle.
+- CI cycle 38 à confirmer.

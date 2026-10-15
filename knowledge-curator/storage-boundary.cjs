@@ -16,6 +16,13 @@
   if(!validate(value))throw Error('Invalid progress');
   storage.setItem(PROGRESS,JSON.stringify(value));
  }
+ // Only the import/reset transaction owner may call this while its
+ // recovery journal is present. Ordinary writes remain blocked.
+ function writeDuringRecovery(storage,value,validate){
+  if(!pending(storage))throw Error('Recovery journal required');
+  if(!validate(value))throw Error('Invalid progress');
+  storage.setItem(PROGRESS,JSON.stringify(value));
+ }
  function readAttempts(storage,attemptsModule){
   if(pending(storage))throw Error('Legacy recovery pending');
   return attemptsModule.read(storage);
@@ -24,7 +31,7 @@
   if(pending(storage))throw Error('Legacy recovery pending');
   return attemptsModule.append(storage,attempt);
  }
- const api={PROGRESS,JOURNAL,pending,readProgress,writeProgress,readAttempts,appendAttempt};
+ const api={PROGRESS,JOURNAL,pending,readProgress,writeProgress,writeDuringRecovery,readAttempts,appendAttempt};
  if(typeof module!=='undefined'&&module.exports)module.exports=api;
  if(root)root.KnowledgeStorage=api;
 })(typeof window!=='undefined'?window:globalThis);

@@ -24,3 +24,16 @@ Ne pas remplacer immédiatement le stockage en production. Construire d'abord un
 
 ## Limites
 Un enregistrement unique n'assure ni synchronisation multi-appareils ni protection contre l'effacement volontaire du stockage. Une migration automatique sans sauvegarde serait prématurée.
+
+## Cycle 23 — Concurrence entre onglets
+
+Un test déterministe reproduit une perte de mise à jour : deux onglets lisent la même valeur V3 ; le premier ajoute une tentative et sauvegarde ; le second écrit ensuite son ancien instantané avec une modification de progression. La tentative du premier onglet disparaît.
+
+Ce test **documente un défaut architectural**, il ne constitue pas une correction. Une propriété `revision` comparée avant écriture ne résout pas le problème à elle seule : la lecture et l'écriture ne sont pas une opération atomique dans localStorage. `storage` events et BroadcastChannel peuvent aider à détecter les changements mais n'offrent pas de garantie transactionnelle.
+
+### Orientation
+
+- Garder V3 expérimental et inactif.
+- Privilégier une transaction IndexedDB `readwrite` pour des modifications concurrentes.
+- Ajouter des tests à deux onglets et de conflits avant toute migration active.
+- Préserver les clés historiques et l'export V2 pendant la transition.

@@ -31,6 +31,16 @@
   if(pending(storage))throw Error('Legacy recovery pending');
   return attemptsModule.append(storage,attempt);
  }
+ function validArchive(raw,validate){
+  if(raw===null)return true;
+  if(typeof raw!=='string')return false;
+  try{
+   const archive=JSON.parse(raw);
+   return archive!==null&&typeof archive==='object'&&!Array.isArray(archive)&&
+    archive.version===1&&typeof archive.importedAt==='string'&&
+    Number.isFinite(Date.parse(archive.importedAt))&&validate(archive.progress);
+  }catch{return false;}
+ }
  // Transaction coordinator for the three legacy keys. The journal is
  // retained if rollback fails, allowing the existing startup recovery.
  function transaction(storage,attemptsModule,validate,mutate){
@@ -45,9 +55,10 @@
    legacyArchive:snapshot.legacyArchive
   };
   if(!validate(before.progress))throw Error('Invalid existing progress');
+  if(!validArchive(before.legacyArchive,validate))throw Error('Invalid existing archive');
   const next=mutate(structuredClone(before));
   if(!next||!validate(next.progress)||!attemptsModule.validateHistory(next.attempts)||
-     !(next.legacyArchive===null||typeof next.legacyArchive==='string'))
+     !validArchive(next.legacyArchive,validate))
    throw Error('Invalid transaction state');
   storage.setItem(JOURNAL,JSON.stringify(snapshot));
   try{

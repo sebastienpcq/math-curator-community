@@ -11,6 +11,12 @@
   if(!validate(value))throw Error('Invalid progress');
   return value;
  }
+ function readArchive(storage,validate){
+  if(pending(storage))throw Error('Legacy recovery pending');
+  const raw=storage.getItem('knowledge-curator-legacy-v1-archive');
+  if(!validArchive(raw,validate))throw Error('Invalid existing archive');
+  return raw;
+ }
  function writeProgress(storage,value,validate){
   if(pending(storage))throw Error('Legacy recovery pending');
   if(!validate(value))throw Error('Invalid progress');
@@ -113,7 +119,7 @@
    throw error;
   }
  }
- const api={PROGRESS,JOURNAL,pending,readProgress,writeProgress,writeDuringRecovery,readAttempts,appendAttempt,transaction,recover};
+ const api={PROGRESS,JOURNAL,pending,readProgress,readArchive,writeProgress,writeDuringRecovery,readAttempts,appendAttempt,transaction,recover};
  if(typeof module!=='undefined'&&module.exports)module.exports=api;
  if(root)root.KnowledgeStorage=api;
 })(typeof window!=='undefined'?window:globalThis);

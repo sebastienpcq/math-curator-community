@@ -155,6 +155,7 @@ document.querySelector('#progress-import').addEventListener('change',async e=>{
     const legacyArchive=payload.version===1
       ?JSON.stringify({version:1,importedAt:new Date().toISOString(),progress:payload.progress})
       :null;
+    const previousLegacyArchive=localStorage.getItem('knowledge-curator-legacy-v1-archive');
     if(payload.version===1){
       payload.progress=Object.fromEntries(Object.entries(payload.progress).map(([id,value])=>[
         id,value.status==='demonstrated'||value.status==='consolidate'
@@ -186,6 +187,8 @@ document.querySelector('#progress-import').addEventListener('change',async e=>{
         else localStorage.setItem(KnowledgeAttempts.KEY,originalAttemptsRaw);
         if(originalProgressRaw===null)localStorage.removeItem(KEY);
         else localStorage.setItem(KEY,originalProgressRaw);
+        if(previousLegacyArchive===null)localStorage.removeItem('knowledge-curator-legacy-v1-archive');
+        else localStorage.setItem('knowledge-curator-legacy-v1-archive',previousLegacyArchive);
         localStorage.removeItem(JOURNAL);
       } catch(rollbackError) {
         msg.textContent='Import interrompu : restauration impossible. Le journal de récupération est conservé. Ne réinitialise pas le stockage.';

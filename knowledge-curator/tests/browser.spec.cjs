@@ -244,3 +244,25 @@ test('export and reimport preserve attempts after reload',async({page})=>{
  }));
  expect(restored).toEqual(original);
 });
+
+test('V1 import refuses to overwrite progress with recent attempt history',async({page})=>{
+ await page.goto('http://127.0.0.1:8770/');
+ await expect(page.locator('#study-steps .study-step')).toHaveCount(7);
+ const first=page.locator('.study-step').first();
+ await first.locator('form.exercise').first().locator('input').fill('999');
+ await first.locator('form.exercise').first().locator('button[type=submit]').click();
+ const before=await page.evaluate(()=>({
+  progress:localStorage.getItem('knowledge-curator-progress-v1'),
+  attempts:localStorage.getItem('knowledge-curator-attempts-v1')
+ }));
+ const payload={version:1,progress:{}};
+ await page.locator('#progress-import').setInputFiles({
+  name:'legacy.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(payload))
+ });
+ await expect(page.locator('#study-message')).toContainText('Import V1 refusé');
+ const after=await page.evaluate(()=>({
+  progress:localStorage.getItem('knowledge-curator-progress-v1'),
+  attempts:localStorage.getItem('knowledge-curator-attempts-v1')
+ }));
+ expect(after).toEqual(before);
+});

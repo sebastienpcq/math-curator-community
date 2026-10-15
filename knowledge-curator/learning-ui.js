@@ -15,7 +15,19 @@ function validProgress(p){
  return Object.entries(p).every(([id,value])=>allowed.has(id)&&value&&typeof value==='object'&&['in_progress','consolidate','demonstrated'].includes(value.status)&&typeof value.updatedAt==='string');
 }
 function load(){
- try {const raw=localStorage.getItem(KEY);const p=raw?JSON.parse(raw):{};progress=validProgress(p)?p:{};}
+ try {
+  const pending=localStorage.getItem('knowledge-curator-import-journal-v1');
+  if(pending!==null){
+   const snapshot=JSON.parse(pending);
+   if(!snapshot||typeof snapshot!=='object'||!Object.hasOwn(snapshot,'progress')||!Object.hasOwn(snapshot,'attempts'))throw Error('Journal de récupération invalide');
+   if(snapshot.attempts===null)localStorage.removeItem(KnowledgeAttempts.KEY);
+   else localStorage.setItem(KnowledgeAttempts.KEY,snapshot.attempts);
+   if(snapshot.progress===null)localStorage.removeItem(KEY);
+   else localStorage.setItem(KEY,snapshot.progress);
+   localStorage.removeItem('knowledge-curator-import-journal-v1');
+   msg.textContent='Import interrompu récupéré depuis la sauvegarde locale.';
+  }
+  const raw=localStorage.getItem(KEY);const p=raw?JSON.parse(raw):{};progress=validProgress(p)?p:{};}
  catch {progress={};msg.textContent='Impossible de lire la progression enregistrée.';}
 }
 function persist(){
@@ -117,22 +129,33 @@ document.querySelector('#progress-import').addEventListener('change',async e=>{
     const previousHistory=KnowledgeAttempts.read(localStorage);
     const previousProgress=progress;
     if(payload.version===2&&!KnowledgeAttempts.validateHistory(payload.attempts))throw Error('Historique invalide');
+    // A pending journal is written before either legacy key changes.
+    // On next launch, recover the original state if an interruption occurred.
+    const JOURNAL='knowledge-curator-import-journal-v1';
+    const originalProgressRaw=localStorage.getItem(KEY);
+    const originalAttemptsRaw=localStorage.getItem(KnowledgeAttempts.KEY);
+    const journal={progress:originalProgressRaw,attempts:originalAttemptsRaw};
+    localStorage.setItem(JOURNAL,JSON.stringify(journal));
     try {
       if(payload.version===2)KnowledgeAttempts.replace(localStorage,payload.attempts);
       progress=payload.progress;
-      history=readHistory();
+      history=KnowledgeAttempts.read(localStorage);
       progress=derivedProgress();
       if(!persist())throw Error('Sauvegarde indisponible');
+      localStorage.removeItem(JOURNAL);
     } catch(error) {
       progress=previousProgress;
       history=previousHistory;
-      if(payload.version===2){
-        try {KnowledgeAttempts.replace(localStorage,previousHistory);}
-        catch(rollbackError){
-          msg.textContent='Import interrompu : restauration de l’historique impossible. Ne recharge pas la page ; exporte ou sauvegarde les données avant toute autre action.';
-          e.target.value='';
-          return;
-        }
+      try {
+        if(originalAttemptsRaw===null)localStorage.removeItem(KnowledgeAttempts.KEY);
+        else localStorage.setItem(KnowledgeAttempts.KEY,originalAttemptsRaw);
+        if(originalProgressRaw===null)localStorage.removeItem(KEY);
+        else localStorage.setItem(KEY,originalProgressRaw);
+        localStorage.removeItem(JOURNAL);
+      } catch(rollbackError) {
+        msg.textContent='Import interrompu : restauration impossible. Le journal de récupération est conservé. Ne réinitialise pas le stockage.';
+        e.target.value='';
+        return;
       }
       throw error;
     }

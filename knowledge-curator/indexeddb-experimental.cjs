@@ -21,6 +21,7 @@
    const store=tx.objectStore(STORE);
    const request=store.get(KEY);
    let result;
+   let changeError=null;
    request.onsuccess=()=>{
     try{
      const previous=request.result||{version:3,progress:{},attempts:[],legacyArchive:null};
@@ -30,11 +31,12 @@
      result=next;
      store.put(next,KEY);
     }catch(error){
+     changeError=error;
      tx.abort();
     }
    };
    tx.oncomplete=()=>resolve(result);
-   tx.onabort=()=>reject(tx.error||Error('IndexedDB transaction aborted'));
+   tx.onabort=()=>reject(changeError||tx.error||Error('IndexedDB transaction aborted'));
    tx.onerror=()=>reject(tx.error||Error('IndexedDB transaction failed'));
   });
  }

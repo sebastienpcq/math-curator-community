@@ -42,3 +42,16 @@ Verified on commit `e631a79cf4da198c0d6b7031fdb59d6c6e57f62c`:
 - Instrumented 100-card fixture: **2 scans**, **2.2 ms cumulative**, **2.1 ms maximum** (Chromium CI, one sample; rounded).
 
 These timings are a single CI sample, not a statistically reliable benchmark or a cross-device performance guarantee. No additional optimization is justified solely by this observation. Repeat measurements under varied load before claiming improvement.
+
+## Cycle 75 — Three-scale MV3 benchmark
+
+Verified on cycle-74 commit `f9d8e516057baa25c94a965c4653bb11620055e1`:
+
+- General checks run 38673457258: **SUCCESS**.
+- Chromium integration run 38673457256: **SUCCESS**.
+- MV3 tests: **10 passed**; learning prototype browser tests: **48 passed**.
+- Cumulative feed at 100 cards: 1 scan, 6.2 ms.
+- Cumulative feed at 500 cards: 1 scan, 7.8 ms.
+- Cumulative feed at 1,000 cards: 1 scan, 9.4 ms.
+
+Measurements were taken from the GitHub Actions log of one Chromium CI run. Each duration is the additional scan duration at that cumulative feed size, not total wall-clock loading time. They are not enough to infer asymptotic complexity or device-independent performance.

@@ -191,3 +191,29 @@ test('missing canonical validator fails closed before transaction writes',()=>{
   globalThis.KnowledgeStateV3=previous;
  }
 });
+
+test('common recovery restores three keys and clears journal',()=>{
+ const storage=store();
+ const attempts={KEY:'attempts',validateHistory:Array.isArray};
+ const archive=JSON.stringify({version:1,importedAt:'2026-10-15T00:00:00.000Z',progress:{}});
+ storage.setItem(boundary.JOURNAL,JSON.stringify({
+  progress:'{}',attempts:'[]',legacyArchive:archive
+ }));
+ assert.equal(boundary.recover(storage,attempts,valid),true);
+ assert.equal(storage.getItem(boundary.PROGRESS),'{}');
+ assert.equal(storage.getItem('attempts'),'[]');
+ assert.equal(storage.getItem('knowledge-curator-legacy-v1-archive'),archive);
+ assert.equal(storage.getItem(boundary.JOURNAL),null);
+ assert.equal(boundary.recover(storage,attempts,valid),false);
+});
+test('common recovery refuses malformed archive without changing values',()=>{
+ const storage=store();
+ const attempts={KEY:'attempts',validateHistory:Array.isArray};
+ storage.setItem(boundary.PROGRESS,'{"existing":{}}');
+ storage.setItem(boundary.JOURNAL,JSON.stringify({
+  progress:'{}',attempts:'[]',legacyArchive:'{bad'
+ }));
+ assert.throws(()=>boundary.recover(storage,attempts,valid),/Invalid recovery archive/);
+ assert.equal(storage.getItem(boundary.PROGRESS),'{"existing":{}}');
+ assert.notEqual(storage.getItem(boundary.JOURNAL),null);
+});

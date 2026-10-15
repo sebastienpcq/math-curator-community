@@ -575,3 +575,9 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Correction : publier uniquement les compteurs agrégés de scan sur `document.documentElement.dataset` et lire ces attributs dans le test Playwright.
 - Aucune donnée de vidéo ou identifiant n'est exposé. L'instrumentation reste locale.
 - CI cycle 71 à confirmer ; aucun merge ni activation IndexedDB.
+
+## Cycle 72 — Correction du dernier accès isolé aux métriques
+
+- CI cycle 71 : Node réussi ; Chromium 8/9, échec dans le test de métriques à la ligne 350 (`window.__mathCuratorMetrics` inaccessible depuis `page.evaluate`).
+- Correctif ciblé : remplacer le dernier accès direct à la variable du monde isolé par `document.documentElement.dataset.mathCuratorScans`.
+- Aucun changement du moteur de filtrage ; CI cycle 72 à confirmer.

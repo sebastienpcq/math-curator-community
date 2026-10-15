@@ -192,3 +192,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Test Chromium ajouté : deux modifications concurrentes dans le même magasin, conservation de la tentative et de la progression.
 - Le test utilise IndexedDB natif pour établir la propriété de transaction ; l'intégration du module expérimental et la migration V3 restent non vérifiées.
 - CI cycle 24 à confirmer.
+
+## Cycle 25 — Tests directs de l'adaptateur IndexedDB
+
+- CI cycle 24 : contrôle général réussi ; navigateur en cours au relevé.
+- Amélioration : conserver l'erreur du callback transactionnel lors d'un abort.
+- Deux tests Playwright supplémentaires chargent réellement `indexeddb-experimental.cjs` : transactions concurrentes sur le même état et rejet sans commit d'un état invalide.
+- La migration depuis localStorage n'est toujours pas branchée dans l'interface.
+- CI cycle 25 à confirmer.

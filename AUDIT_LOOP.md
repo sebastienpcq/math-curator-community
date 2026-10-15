@@ -666,3 +666,10 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Test renforcé : attendre explicitement la tentative persistée et son affichage avant de créer le journal simulant la panne.
 - Si le test échoue encore, inspecter les mutations du stockage et la routine `recover` ; ne pas conclure à une simple instabilité de test.
 - CI cycle 81 à confirmer. Aucune modification du code de production.
+
+## Cycle 82 — Répétition de la récupération après import interrompu
+
+- CI cycle 81 : contrôles Node et Chromium réussis (runs 38675345412 et 38675345372).
+- Le test de récupération précédemment défaillant passe après synchronisation explicite avec l'historique enregistré. Cela suggère une course de test, sans prouver l'absence d'anomalie métier.
+- Test Playwright ajouté : tentative incorrecte enregistrée, puis trois cycles successifs de journal d'import interrompu, corruption simulée des deux clés, rechargement et comparaison exacte de progression/historique.
+- Aucun changement du code de production ; CI cycle 82 à confirmer.

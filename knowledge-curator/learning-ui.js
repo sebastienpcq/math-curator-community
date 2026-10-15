@@ -220,27 +220,18 @@ document.querySelector('#progress-reset').addEventListener('click',()=>{
    msg.textContent='Réinitialisation refusée : une récupération de données est en attente.';
    return;
   }
-  const oldProgress=localStorage.getItem(KEY);
-  const oldAttempts=localStorage.getItem(KnowledgeAttempts.KEY);
-  localStorage.setItem(JOURNAL,JSON.stringify({progress:oldProgress,attempts:oldAttempts}));
   try {
-   KnowledgeAttempts.replace(localStorage,[]);
-   localStorage.setItem(KEY,'{}');
-   localStorage.removeItem(JOURNAL);
+   KnowledgeStorage.transaction(localStorage,KnowledgeAttempts,validProgress,old=>({
+    progress:{},attempts:[],legacyArchive:old.legacyArchive
+   }));
    progress={};history=[];render();
    msg.textContent='Progression réinitialisée.';
   } catch(error) {
-   try {
-    if(oldAttempts===null)localStorage.removeItem(KnowledgeAttempts.KEY);
-    else localStorage.setItem(KnowledgeAttempts.KEY,oldAttempts);
-    if(oldProgress===null)localStorage.removeItem(KEY);
-    else localStorage.setItem(KEY,oldProgress);
-    localStorage.removeItem(JOURNAL);
-    history=KnowledgeAttempts.read(localStorage);
-    load();render();
-    msg.textContent='Réinitialisation annulée : les données précédentes sont conservées.';
-   } catch(rollbackError) {
+   if(error.message.includes('Rollback failed')){
     msg.textContent='Réinitialisation interrompue : récupération requise au prochain démarrage. Ne vide pas le stockage.';
+   } else {
+    load();history=readHistory();render();
+    msg.textContent='Réinitialisation annulée : les données précédentes sont conservées.';
    }
   }
  } catch(error) {

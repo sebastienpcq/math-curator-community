@@ -24,7 +24,7 @@
    let changeError=null;
    request.onsuccess=()=>{
     try{
-     const previous=request.result||{version:3,progress:{},attempts:[],legacyArchive:null};
+     const previous=request.result===undefined?{version:3,progress:{},attempts:[],legacyArchive:null}:request.result;
      const next=change(structuredClone(previous));
      if(!next||next.version!==3||!Array.isArray(next.attempts)||!next.progress||
         typeof next.progress!=='object'||Array.isArray(next.progress))throw Error('Invalid state');
@@ -57,11 +57,27 @@
    return existing;
   }
   const snapshot=stateV3.fromLegacy(legacyStorage);
-  // Recheck within the write transaction to avoid concurrent migrations.
-  return transact(db,previous=>{
-   if(previous.attempts.length||Object.keys(previous.progress).length||previous.legacyArchive!==null)
-    return previous;
-   return snapshot;
+  // Recheck atomically in the same write transaction; an empty
+  // canonical record is still an existing record, not an absent one.
+  return new Promise((resolve,reject)=>{
+   const tx=db.transaction(STORE,'readwrite');
+   const store=tx.objectStore(STORE);
+   const request=store.get(KEY);
+   let result,changeError=null;
+   request.onsuccess=()=>{
+    try {
+     if(request.result!==undefined){
+      if(!stateV3.validate(request.result))throw Error('Invalid IndexedDB state');
+      result=request.result;
+     } else {
+      result=snapshot;
+      store.put(snapshot,KEY);
+     }
+    } catch(error) {changeError=error;tx.abort();}
+   };
+   tx.oncomplete=()=>resolve(result);
+   tx.onabort=()=>reject(changeError||tx.error||Error('Migration aborted'));
+   tx.onerror=()=>reject(tx.error||Error('Migration failed'));
   });
  }
  const api={DB_NAME,STORE,KEY,open,transact,read,migrateFromLegacy};

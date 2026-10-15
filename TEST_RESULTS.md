@@ -65,3 +65,15 @@ Commit `f9d8e516057baa25c94a965c4653bb11620055e1`:
 - Cumulative card fixture, per-stage delta: 100 cards — 1 scan, 6.2 ms; 500 cards — 1 scan, 7.8 ms; 1,000 cards — 1 scan, 9.4 ms.
 
 The per-stage figures measure incremental additions to a growing DOM, not independent full-page baselines. One run only; no confidence interval or device-level performance guarantee. No engine optimization justified on this evidence alone.
+
+## Cycle 75 — 100/500/1000-card MV3 benchmark
+
+Verified commit `f9d8e516057baa25c94a965c4653bb11620055e1`:
+- General checks: run 38673457258 **SUCCESS**.
+- Browser integration: run 38673457256 **SUCCESS**, 10 MV3 tests and 48 knowledge browser tests passed.
+- MV3 benchmark (single cumulative run, simulated YouTube DOM):
+  - 100 cards: 1 scan, 6.2 ms cumulative.
+  - 500 cards: 1 scan, 7.8 ms cumulative.
+  - 1,000 cards: 1 scan, 9.4 ms cumulative.
+
+**Interpretation:** one scan per insertion batch. Timing grows with DOM size, but these data do not establish asymptotic complexity or general performance guarantees. The incremental differences (1.6 ms and 1.6 ms) are not independent benchmark measurements. No optimization is justified by these results alone.

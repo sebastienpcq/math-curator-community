@@ -827,3 +827,28 @@ test('confirmed migration commits the exact previewed snapshot',async({page})=>{
  expect(result.stored).toEqual(result.result);
  expect(result.reads).toBe(2);
 });
+
+test('cutover inspection detects legacy divergence without mutation',async({page})=>{
+ await page.goto('http://127.0.0.1:8770/');
+ await page.addScriptTag({url:'/state-v3.cjs'});
+ await page.addScriptTag({url:'/indexeddb-experimental.cjs'});
+ const result=await page.evaluate(async()=>{
+  const adapter=window.KnowledgeIndexedDB;
+  const db=await adapter.open(indexedDB);
+  await adapter.migrateFromLegacy(db,localStorage,window.KnowledgeStateV3);
+  const matching=await adapter.inspectCutover(db,localStorage,window.KnowledgeStateV3);
+  const key='knowledge-curator-progress-v1';
+  const original=localStorage.getItem(key);
+  localStorage.setItem(key,JSON.stringify({arithmetic:{
+   status:'in_progress',updatedAt:'2026-10-15T00:00:00.000Z'
+  }}));
+  const divergent=await adapter.inspectCutover(db,localStorage,window.KnowledgeStateV3);
+  const canonical=await adapter.read(db);
+  if(original===null)localStorage.removeItem(key);else localStorage.setItem(key,original);
+  db.close();
+  return {matching,divergent,canonical};
+ });
+ expect(result.matching).toEqual({ready:true,reason:'states-match'});
+ expect(result.divergent).toEqual({ready:false,reason:'state-divergence'});
+ expect(result.canonical.progress.arithmetic).toBeUndefined();
+});

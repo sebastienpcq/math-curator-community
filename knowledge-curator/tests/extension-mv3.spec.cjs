@@ -153,3 +153,39 @@ test('MV3 explicit video block wins over allowlist and Shorts exception',async()
   fs.rmSync(profile,{recursive:true,force:true});
  }
 });
+
+test('MV3 video-specific rules override channel rules and strict filtering',async()=>{
+ const profile=fs.mkdtempSync(path.join(os.tmpdir(),'math-curator-rules-'));
+ let context;
+ try{
+  context=await chromium.launchPersistentContext(profile,{
+   channel:'chromium',headless:true,
+   args:['--disable-extensions-except='+root,'--load-extension='+root]
+  });
+  let workers=context.serviceWorkers();
+  if(!workers.length)workers=[await context.waitForEvent('serviceworker',{timeout:15000})];
+  const page=await context.newPage();
+  await page.route('https://www.youtube.com/**',route=>route.fulfill({
+   status:200,contentType:'text/html',
+   body:'<!doctype html><html><body><main><ytd-video-renderer><a id="video-title" href="/watch?v=abcdefghijk">Gaming compilation</a><ytd-channel-name><a>Example Channel</a></ytd-channel-name></ytd-video-renderer></main></body></html>'
+  }));
+  await page.goto('https://www.youtube.com/',{waitUntil:'domcontentloaded'});
+  const card=page.locator('ytd-video-renderer');
+  const set=async settings=>workers[0].evaluate(async value=>{
+   await chrome.storage.local.set({settings:value});
+  },settings);
+  await set({enabled:true,mode:'strict',allowChannels:['Example Channel'],blockVideos:['abcdefghijk']});
+  await expect(card).toHaveClass(/math-curator-hidden/);
+  await set({enabled:true,mode:'strict',blockChannels:['Example Channel'],allowVideos:['abcdefghijk']});
+  await expect(card).not.toHaveClass(/math-curator-hidden/);
+  await set({enabled:true,mode:'strict',allowChannels:['Example Channel'],blockChannels:['Example Channel']});
+  await expect(card).toHaveClass(/math-curator-hidden/);
+  await set({enabled:true,mode:'strict',allowChannels:['Example Channel']});
+  await expect(card).not.toHaveClass(/math-curator-hidden/);
+  await set({enabled:true,mode:'strict'});
+  await expect(card).toHaveClass(/math-curator-hidden/);
+ }finally{
+  if(context)await context.close();
+  fs.rmSync(profile,{recursive:true,force:true});
+ }
+});

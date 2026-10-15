@@ -144,3 +144,21 @@ test('corrupt recovery journal does not overwrite existing history',async({page}
  expect(after).toBe(before);
  await expect(page.locator('#study-message')).toContainText('Impossible de lire la progression');
 });
+
+test('corrupt journal remains untouched after repeated reloads',async({page})=>{
+ await page.goto('http://127.0.0.1:8770/');
+ await expect(page.locator('#study-steps .study-step')).toHaveCount(7);
+ const baseline=await page.evaluate(()=>localStorage.getItem('knowledge-curator-progress-v1'));
+ const bad='{"progress":"not-json","attempts":"[]"}';
+ await page.evaluate(value=>localStorage.setItem('knowledge-curator-import-journal-v1',value),bad);
+ for(let i=0;i<3;i++){
+  await page.reload();
+  const state=await page.evaluate(()=>({
+   journal:localStorage.getItem('knowledge-curator-import-journal-v1'),
+   progress:localStorage.getItem('knowledge-curator-progress-v1')
+  }));
+  expect(state.journal).toBe(bad);
+  expect(state.progress).toBe(baseline);
+  await expect(page.locator('#study-message')).toContainText('Impossible de lire la progression');
+ }
+});

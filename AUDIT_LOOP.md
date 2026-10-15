@@ -73,3 +73,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Correction : journal de récupération partagé, refus si récupération en attente, rollback et alerte en cas d'échec.
 - Test Playwright : panne simulée pendant reset, comparaison des valeurs avant/après, puis rechargement.
 - Validation cycle 9 en attente de CI.
+
+## Cycle 10 — Export sûr
+
+- CI cycle 9 : Node et Playwright réussis.
+- Risque P1 : export fondé sur un état mémoire pouvant diverger du stockage, ou export pendant récupération incomplète.
+- Correctif : lecture et validation des deux valeurs persistées, refus si journal de récupération présent ; aucun fichier exporté en cas d'erreur.
+- Deux tests Chromium ajoutés : historique JSON corrompu et journal de récupération en attente.
+- Résultats CI du cycle 10 à confirmer.

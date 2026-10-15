@@ -40,7 +40,31 @@
    tx.onerror=()=>reject(tx.error||Error('IndexedDB transaction failed'));
   });
  }
- const api={DB_NAME,STORE,KEY,open,transact};
+ function read(db){
+  return new Promise((resolve,reject)=>{
+   const tx=db.transaction(STORE,'readonly');
+   const request=tx.objectStore(STORE).get(KEY);
+   request.onsuccess=()=>resolve(request.result===undefined?null:request.result);
+   request.onerror=()=>reject(request.error||Error('IndexedDB read failed'));
+   tx.onabort=()=>reject(tx.error||Error('IndexedDB read aborted'));
+  });
+ }
+ async function migrateFromLegacy(db,legacyStorage,stateV3){
+  // Never delete or rewrite legacy keys. Existing canonical data wins.
+  const existing=await read(db);
+  if(existing!==null){
+   if(!stateV3.validate(existing))throw Error('Invalid IndexedDB state');
+   return existing;
+  }
+  const snapshot=stateV3.fromLegacy(legacyStorage);
+  // Recheck within the write transaction to avoid concurrent migrations.
+  return transact(db,previous=>{
+   if(previous.attempts.length||Object.keys(previous.progress).length||previous.legacyArchive!==null)
+    return previous;
+   return snapshot;
+  });
+ }
+ const api={DB_NAME,STORE,KEY,open,transact,read,migrateFromLegacy};
  if(typeof module!=='undefined'&&module.exports)module.exports=api;
  if(root)root.KnowledgeIndexedDB=api;
 })(typeof window!=='undefined'?window:globalThis);

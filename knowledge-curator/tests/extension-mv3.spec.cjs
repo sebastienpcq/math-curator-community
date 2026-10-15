@@ -347,7 +347,7 @@ test('MV3 exposes scan counts and timing without content telemetry',async()=>{
    }
    document.querySelector('#feed').append(fragment);
   });
-  await expect.poll(()=>page.evaluate(()=>window.__mathCuratorMetrics.scans)).toBeGreaterThan(before);
+  await expect.poll(()=>page.evaluate(()=>Number(document.documentElement.dataset.mathCuratorScans||0))).toBeGreaterThan(before);
   const metrics=await page.evaluate(()=>{
    const d=document.documentElement.dataset;
    return {scans:Number(d.mathCuratorScans),lastMs:Number(d.mathCuratorLastMs),

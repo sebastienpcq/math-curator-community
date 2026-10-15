@@ -118,3 +118,38 @@ test('MV3 reacts to SPA navigation and settings changes without reload',async()=
   fs.rmSync(profile,{recursive:true,force:true});
  }
 });
+
+test('MV3 explicit video block wins over allowlist and Shorts exception',async()=>{
+ const profile=fs.mkdtempSync(path.join(os.tmpdir(),'math-curator-priority-'));
+ let context;
+ try{
+  context=await chromium.launchPersistentContext(profile,{
+   channel:'chromium',headless:true,
+   args:['--disable-extensions-except='+root,'--load-extension='+root]
+  });
+  let workers=context.serviceWorkers();
+  if(!workers.length)workers=[await context.waitForEvent('serviceworker',{timeout:15000})];
+  const page=await context.newPage();
+  await page.route('https://www.youtube.com/**',route=>route.fulfill({
+   status:200,contentType:'text/html',
+   body:'<!doctype html><html><body><main><ytd-video-renderer><a id="video-title" href="/watch?v=abcdefghijk">Cours de mathématiques débutant</a></ytd-video-renderer><ytd-reel-item-renderer><a href="/shorts/bcdefghijkl">Short</a></ytd-reel-item-renderer></main></body></html>'
+  }));
+  await page.goto('https://www.youtube.com/',{waitUntil:'domcontentloaded'});
+  await workers[0].evaluate(async()=>chrome.storage.local.set({settings:{
+   enabled:true,mode:'balanced',hideShorts:true,
+   allowVideos:['abcdefghijk','bcdefghijkl'],
+   blockVideos:['abcdefghijk','bcdefghijkl']
+  }}));
+  await expect(page.locator('ytd-video-renderer')).toHaveClass(/math-curator-hidden/);
+  await expect(page.locator('ytd-reel-item-renderer')).toHaveClass(/math-curator-hidden/);
+  await workers[0].evaluate(async()=>chrome.storage.local.set({settings:{
+   enabled:true,mode:'balanced',hideShorts:true,
+   allowVideos:['abcdefghijk','bcdefghijkl'],blockVideos:[]
+  }}));
+  await expect(page.locator('ytd-video-renderer')).not.toHaveClass(/math-curator-hidden/);
+  await expect(page.locator('ytd-reel-item-renderer')).not.toHaveClass(/math-curator-hidden/);
+ }finally{
+  if(context)await context.close();
+  fs.rmSync(profile,{recursive:true,force:true});
+ }
+});

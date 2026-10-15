@@ -40,6 +40,37 @@
   if(!schema.validLegacyArchive(raw))return false;
   return validate(JSON.parse(raw).progress);
  }
+ function recover(storage,attemptsModule,validate){
+  const raw=storage.getItem(JOURNAL);
+  if(raw===null)return false;
+  const schema=root.KnowledgeStateV3;
+  if(typeof schema?.validLegacyArchive!=='function')
+   throw Error('Canonical archive validator unavailable');
+  const snapshot=JSON.parse(raw);
+  if(!snapshot||typeof snapshot!=='object'||Array.isArray(snapshot)||
+     !Object.hasOwn(snapshot,'progress')||!Object.hasOwn(snapshot,'attempts')||
+     (snapshot.progress!==null&&typeof snapshot.progress!=='string')||
+     (snapshot.attempts!==null&&typeof snapshot.attempts!=='string'))
+   throw Error('Invalid recovery journal');
+  const progress=snapshot.progress===null?{}:JSON.parse(snapshot.progress);
+  const attempts=snapshot.attempts===null?[]:JSON.parse(snapshot.attempts);
+  if(!validate(progress)||!attemptsModule.validateHistory(attempts))
+   throw Error('Invalid recovery journal');
+  if(Object.hasOwn(snapshot,'legacyArchive')&&
+     !validArchive(snapshot.legacyArchive,validate))
+   throw Error('Invalid recovery archive');
+  const operations=[
+   ...(Object.hasOwn(snapshot,'legacyArchive')
+    ?[['knowledge-curator-legacy-v1-archive',snapshot.legacyArchive]]:[]),
+   [attemptsModule.KEY,snapshot.attempts],[PROGRESS,snapshot.progress]
+  ];
+  for(const [key,value] of operations){
+   if(value===null)storage.removeItem(key);
+   else storage.setItem(key,value);
+  }
+  storage.removeItem(JOURNAL);
+  return true;
+ }
  // Transaction coordinator for the three legacy keys. The journal is
  // retained if rollback fails, allowing the existing startup recovery.
  function transaction(storage,attemptsModule,validate,mutate){
@@ -82,7 +113,7 @@
    throw error;
   }
  }
- const api={PROGRESS,JOURNAL,pending,readProgress,writeProgress,writeDuringRecovery,readAttempts,appendAttempt,transaction};
+ const api={PROGRESS,JOURNAL,pending,readProgress,writeProgress,writeDuringRecovery,readAttempts,appendAttempt,transaction,recover};
  if(typeof module!=='undefined'&&module.exports)module.exports=api;
  if(root)root.KnowledgeStorage=api;
 })(typeof window!=='undefined'?window:globalThis);

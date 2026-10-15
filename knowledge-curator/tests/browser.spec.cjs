@@ -663,3 +663,24 @@ test('IndexedDB adapter aborts invalid data without replacing committed state',a
  expect(result.rejected).toBe(true);
  expect(result.after).toEqual(result.initial);
 });
+
+test('IndexedDB adapter propagates simulated quota error without commit',async({page})=>{
+ await page.goto('http://127.0.0.1:8770/');
+ await page.addScriptTag({url:'/indexeddb-experimental.cjs'});
+ const result=await page.evaluate(async()=>{
+  const adapter=window.KnowledgeIndexedDB;
+  const db=await adapter.open(indexedDB);
+  const before=await adapter.read(db);
+  let name='';
+  try{
+   await adapter.transact(db,()=>{
+    throw new DOMException('Simulated quota exhaustion','QuotaExceededError');
+   });
+  }catch(error){name=error.name;}
+  const after=await adapter.read(db);
+  db.close();
+  return {name,before,after};
+ });
+ expect(result.name).toBe('QuotaExceededError');
+ expect(result.after).toEqual(result.before);
+});

@@ -99,3 +99,41 @@ test('transaction rolls back failed progress write',()=>{
  })),/write failure/);
  assert.deepEqual(Object.fromEntries(values),before);
 });
+
+test('transaction refuses malformed previous attempts before journal creation',()=>{
+ const storage=store();
+ storage.setItem('attempts','{bad');
+ const attempts={
+  KEY:'attempts',
+  read:s=>JSON.parse(s.getItem('attempts')),
+  replace:(s,items)=>s.setItem('attempts',JSON.stringify(items)),
+  validateHistory:Array.isArray
+ };
+ assert.throws(()=>boundary.transaction(storage,attempts,valid,old=>old),SyntaxError);
+ assert.equal(storage.getItem(boundary.JOURNAL),null);
+ assert.equal(storage.getItem('attempts'),'{bad');
+});
+test('rollback failure retains journal and reports recoverability failure',()=>{
+ const values=new Map([[boundary.PROGRESS,'{}'],['attempts','[]']]);
+ let failProgress=true;
+ const storage={
+  getItem:k=>values.has(k)?values.get(k):null,
+  setItem:(k,v)=>{
+   if(k===boundary.PROGRESS&&failProgress){failProgress=false;throw Error('progress failure');}
+   if(k==='attempts'&&v==='[]'&&values.has(boundary.JOURNAL))
+    throw Error('rollback failure');
+   values.set(k,v);
+  },
+  removeItem:k=>values.delete(k)
+ };
+ const attempts={
+  KEY:'attempts',
+  read:s=>JSON.parse(s.getItem('attempts')||'[]'),
+  replace:(s,items)=>s.setItem('attempts',JSON.stringify(items)),
+  validateHistory:Array.isArray
+ };
+ assert.throws(()=>boundary.transaction(storage,attempts,valid,()=>({
+  progress:{arithmetic:{}},attempts:[{correct:false}],legacyArchive:null
+ })),/Rollback failed/);
+ assert.notEqual(storage.getItem(boundary.JOURNAL),null);
+});

@@ -574,3 +574,30 @@ test('concurrent migrations preserve first committed canonical state',async({pag
  expect(result.second).toEqual(result.stored);
  expect(Object.keys(result.stored.progress)).toHaveLength(1);
 });
+
+test('two real Chromium tabs converge on one IndexedDB migration',async({context})=>{
+ const a=await context.newPage(),b=await context.newPage();
+ await Promise.all([a.goto('http://127.0.0.1:8770/'),b.goto('http://127.0.0.1:8770/')]);
+ for(const page of [a,b]){
+  await page.addScriptTag({url:'/state-v3.cjs'});
+  await page.addScriptTag({url:'/indexeddb-experimental.cjs'});
+ }
+ const run=(page,skill)=>page.evaluate(async skill=>{
+  const db=await window.KnowledgeIndexedDB.open(indexedDB);
+  const snapshot={getItem:key=>key==='knowledge-curator-progress-v1'
+   ?JSON.stringify({[skill]:{status:'in_progress',updatedAt:'2026-10-15T00:00:00.000Z'}}):null};
+  const value=await window.KnowledgeIndexedDB.migrateFromLegacy(db,snapshot,window.KnowledgeStateV3);
+  db.close();
+  return value;
+ },skill);
+ const [left,right]=await Promise.all([run(a,'arithmetic'),run(b,'algebra')]);
+ expect(left).toEqual(right);
+ const final=await a.evaluate(async()=>{
+  const db=await window.KnowledgeIndexedDB.open(indexedDB);
+  const state=await window.KnowledgeIndexedDB.read(db);
+  db.close();return state;
+ });
+ expect(final).toEqual(left);
+ expect(Object.keys(final.progress)).toHaveLength(1);
+ await Promise.all([a.close(),b.close()]);
+});

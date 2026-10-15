@@ -14,7 +14,11 @@
   const successive=ordered.slice().reverse().findIndex(e=>!e.correct);
   const streak=successive<0?ordered.length:successive;
   const stage=Math.min(Math.max(0,streak-1),INTERVALS.length-1);
-  const dueAt=lastCorrect?Math.max(last,validDate(lastCorrect.timestamp))+INTERVALS[stage]*DAY:null;
+  // An incorrect answer invalidates the pending successful-review schedule.
+  // The skill remains in weakSkills; a new success starts a fresh interval.
+  const dueAt=latest.correct&&lastCorrect!==undefined
+   ?last+INTERVALS[stage]*DAY
+   :null;
   return {errors,independent,stage,due:dueAt!==null&&now>=dueAt,nextAt:dueAt===null?null:new Date(dueAt).toISOString()};
  }
  function weakSkills(path,events){

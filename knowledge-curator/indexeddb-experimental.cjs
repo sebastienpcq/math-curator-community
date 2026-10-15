@@ -17,25 +17,9 @@
   });
  }
  function validState(record){
-  if(!record||typeof record!=='object'||Array.isArray(record)||record.version!==3)return false;
-  if(!record.progress||typeof record.progress!=='object'||Array.isArray(record.progress))return false;
-  if(!Object.entries(record.progress).every(([id,v])=>
-    /^[a-z0-9-]{1,80}$/.test(id)&&v&&typeof v==='object'&&!Array.isArray(v)&&
-    ['in_progress','consolidate','demonstrated'].includes(v.status)&&
-    typeof v.updatedAt==='string'&&Number.isFinite(Date.parse(v.updatedAt))))return false;
-  if(!Array.isArray(record.attempts)||!record.attempts.every(e=>
-    e&&typeof e==='object'&&!Array.isArray(e)&&
-    typeof e.skillId==='string'&&/^[a-z0-9-]{1,80}$/.test(e.skillId)&&
-    typeof e.exerciseId==='string'&&/^[a-z0-9-]{1,80}$/.test(e.exerciseId)&&
-    typeof e.correct==='boolean'&&typeof e.timestamp==='string'&&Number.isFinite(Date.parse(e.timestamp))))return false;
-  if(record.legacyArchive!==null){
-    if(typeof record.legacyArchive!=='string')return false;
-    try {
-      const archive=JSON.parse(record.legacyArchive);
-      if(!archive||archive.version!==1||!archive.progress||typeof archive.progress!=='object')return false;
-    }catch{return false;}
-  }
-  return true;
+  if(typeof root.KnowledgeStateV3?.validate!=='function')
+   throw Error('State V3 validator unavailable');
+  return root.KnowledgeStateV3.validate(record);
  }
  function transact(db,change){
   return new Promise((resolve,reject)=>{

@@ -45,6 +45,13 @@ function scan(){if(!document.documentElement)return;const started=performance.no
  document.querySelectorAll('ytd-rich-shelf-renderer[is-shorts], ytd-reel-shelf-renderer').forEach(el=>{el.classList.toggle('math-curator-hidden',settings.enabled&&settings.hideShorts);});
  const distractions=['ytd-merch-shelf-renderer','ytd-brand-video-shelf-renderer'];for(const q of distractions)document.querySelectorAll(q).forEach(el=>el.classList.toggle('math-curator-hidden',settings.enabled&&settings.hideDistractions));
  const duration=performance.now()-started;metrics.scans++;metrics.lastMs=duration;metrics.totalMs+=duration;metrics.maxMs=Math.max(metrics.maxMs,duration);
+ // Content scripts run in an isolated world: expose aggregate-only diagnostics
+ // on the DOM for browser tests. No video metadata or identifiers are exposed.
+ const el=document.documentElement;
+ el.dataset.mathCuratorScans=String(metrics.scans);
+ el.dataset.mathCuratorLastMs=String(metrics.lastMs);
+ el.dataset.mathCuratorTotalMs=String(metrics.totalMs);
+ el.dataset.mathCuratorMaxMs=String(metrics.maxMs);
 }
 function schedule(){if(timer)return;timer=setTimeout(()=>{timer=null;scan();},180);}
 chrome.storage.local.get('settings').then(data=>{settings={...MathConfig.DEFAULTS,...data.settings};scan();observer=new MutationObserver(records=>{

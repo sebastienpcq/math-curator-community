@@ -34,6 +34,9 @@
  function validArchive(raw,validate){
   if(raw===null)return true;
   if(typeof raw!=='string')return false;
+  // The legacy UI additionally restricts skills to its current curriculum.
+  if(typeof root.KnowledgeStateV3?.validLegacyArchive==='function')
+   return root.KnowledgeStateV3.validLegacyArchive(raw)&&validate(JSON.parse(raw).progress);
   try{
    const archive=JSON.parse(raw);
    return archive!==null&&typeof archive==='object'&&!Array.isArray(archive)&&

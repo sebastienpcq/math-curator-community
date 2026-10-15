@@ -589,3 +589,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Mesure observée dans les logs : 2 scans, 2,2 ms cumulés et 2,1 ms au maximum sur un lot de 100 cartes simulées.
 - Une seule mesure CI ne permet pas d'inférer une amélioration statistique ; aucune optimisation spéculative n'a été implémentée.
 - `TEST_RESULTS.md` et `NEXT_ITERATION.md` actualisés. CI cycle 73 à confirmer.
+
+## Cycle 74 — Benchmark comparatif MV3
+
+- CI cycle 73 : Node et Chromium réussis.
+- Nouveau test Playwright avec extension MV3 réellement chargée : ajout cumulatif de 100, 500 puis 1 000 cartes simulées, 50 % hors sujet.
+- Enregistrement par palier du nombre de scans, de leur durée cumulée et de la durée maximale ; contrôle du nombre de cartes masquées.
+- Les durées seront disponibles dans les logs du workflow navigateur après exécution. Un seul run ne permet pas de conclure à un gain statistique.
+- CI cycle 74 à confirmer ; aucune optimisation spéculative du moteur.

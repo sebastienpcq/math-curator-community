@@ -283,7 +283,7 @@ test('legacy V1 import on fresh storage remains compatible',async({page})=>{
   attempts:localStorage.getItem('knowledge-curator-attempts-v1')
  }));
  expect(result.progress.arithmetic.status).toBe('in_progress');
- expect(result.attempts).toBeNull();
+ expect(JSON.parse(result.attempts)).toEqual([]);
 });
 
 test('legacy V1 mastery is not accepted without recorded evidence',async({page})=>{

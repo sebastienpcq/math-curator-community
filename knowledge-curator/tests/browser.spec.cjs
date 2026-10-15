@@ -341,3 +341,35 @@ test('legacy archive write failure prevents successful import',async({page})=>{
  expect(await page.evaluate(()=>localStorage.getItem('knowledge-curator-import-journal-v1'))).toBeNull();
  await page.evaluate(()=>{Storage.prototype.setItem=window.__restoreSetItem;});
 });
+
+test('interrupted V1 import restores legacy archive and progress',async({page})=>{
+ await page.goto('http://127.0.0.1:8770/');
+ await expect(page.locator('#study-steps .study-step')).toHaveCount(7);
+ const oldArchive=JSON.stringify({version:1,importedAt:'2026-10-15T00:00:00.000Z',progress:{}});
+ const original=await page.evaluate(archive=>{
+  localStorage.setItem('knowledge-curator-legacy-v1-archive',archive);
+  return {progress:localStorage.getItem('knowledge-curator-progress-v1'),
+   attempts:localStorage.getItem('knowledge-curator-attempts-v1'),
+   archive:localStorage.getItem('knowledge-curator-legacy-v1-archive')};
+ },oldArchive);
+ await page.evaluate(snapshot=>{
+  localStorage.setItem('knowledge-curator-import-journal-v1',JSON.stringify({
+   progress:snapshot.progress,attempts:snapshot.attempts,legacyArchive:snapshot.archive
+  }));
+  localStorage.setItem('knowledge-curator-legacy-v1-archive',JSON.stringify({
+   version:1,importedAt:'2026-10-16T00:00:00.000Z',progress:{}
+  }));
+  localStorage.setItem('knowledge-curator-progress-v1','{}');
+ },original);
+ await page.reload();
+ const after=await page.evaluate(()=>({
+  progress:localStorage.getItem('knowledge-curator-progress-v1'),
+  attempts:localStorage.getItem('knowledge-curator-attempts-v1'),
+  archive:localStorage.getItem('knowledge-curator-legacy-v1-archive'),
+  journal:localStorage.getItem('knowledge-curator-import-journal-v1')
+ }));
+ expect(after.progress).toBe(original.progress);
+ expect(after.attempts).toBe(original.attempts);
+ expect(after.archive).toBe(original.archive);
+ expect(after.journal).toBeNull();
+});

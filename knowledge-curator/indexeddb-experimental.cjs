@@ -89,7 +89,33 @@
    tx.onerror=()=>reject(tx.error||Error('Migration failed'));
   });
  }
- const api={DB_NAME,STORE,KEY,open,transact,read,migrateFromLegacy};
+ async function prepareMigration(db,legacyStorage,stateV3){
+  if(legacyStorage.getItem('knowledge-curator-import-journal-v1')!==null)
+   throw Error('Legacy recovery pending');
+  const snapshot=stateV3.fromLegacy(legacyStorage);
+  if(!stateV3.validate(snapshot))throw Error('Invalid legacy snapshot');
+  const current=await read(db);
+  if(current!==null){
+   if(!stateV3.validate(current))throw Error('Invalid IndexedDB state');
+   return {status:'already-present',snapshot,current};
+  }
+  return {status:'ready',snapshot,current:null};
+ }
+ async function confirmMigration(db,legacyStorage,stateV3,prepared){
+  if(!prepared||prepared.status!=='ready'||!stateV3.validate(prepared.snapshot))
+   throw Error('Migration not prepared');
+  if(legacyStorage.getItem('knowledge-curator-import-journal-v1')!==null)
+   throw Error('Legacy recovery pending');
+  // Refuse if the legacy snapshot changed since preview. This is a best-effort
+  // guard, not an atomic lock against concurrent localStorage writers.
+  const current=stateV3.fromLegacy(legacyStorage);
+  if(JSON.stringify(current)!==JSON.stringify(prepared.snapshot))
+   throw Error('Legacy data changed since preview');
+  const migrated=await migrateFromLegacy(db,legacyStorage,stateV3);
+  if(!stateV3.validate(migrated))throw Error('Invalid migrated state');
+  return migrated;
+ }
+ const api={DB_NAME,STORE,KEY,open,transact,read,migrateFromLegacy,prepareMigration,confirmMigration};
  if(typeof module!=='undefined'&&module.exports)module.exports=api;
  if(root)root.KnowledgeIndexedDB=api;
 })(typeof window!=='undefined'?window:globalThis);

@@ -51,3 +51,10 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Test Chromium ajouté : journal corrompu, historique existant inchangé après rechargement.
 - Risque résiduel : récupération multi-clé non atomique et indisponibilité persistante du stockage.
 - Attendre les résultats CI de ce cycle avant validation.
+
+## Cycle 7 — Analyse des échecs CI
+
+- CI cycle 6 : 5 tests navigateur réussis, 2 échoués. Logs analysés : les assertions attendaient des messages antérieurs au mécanisme de journal ; l'injection permanente empêchait aussi la restauration immédiate.
+- Scénario corrigé : constater le journal conservé, lever la panne simulée, recharger, puis comparer exactement les deux valeurs antérieures.
+- Défaut supplémentaire : journal corrompu au démarrage pouvait être suivi d'une sauvegarde automatique écrasant la progression. Initialisation désormais interrompue sans écriture si la récupération échoue.
+- Tests du cycle 7 à confirmer sur GitHub Actions.

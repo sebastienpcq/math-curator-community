@@ -757,3 +757,45 @@ test('IndexedDB and V3 validator reject the same malformed archive',async({page}
  expect(result.stored).toBeNull();
 });
 
+
+test('opt-in migration preview does not write and confirm preserves legacy',async({page})=>{
+ await page.goto('http://127.0.0.1:8770/');
+ await page.addScriptTag({url:'/state-v3.cjs'});
+ await page.addScriptTag({url:'/indexeddb-experimental.cjs'});
+ const result=await page.evaluate(async()=>{
+  const adapter=window.KnowledgeIndexedDB,db=await adapter.open(indexedDB);
+  const key='knowledge-curator-progress-v1';
+  const original=localStorage.getItem(key);
+  const prepared=await adapter.prepareMigration(db,localStorage,window.KnowledgeStateV3);
+  const before=await adapter.read(db);
+  const committed=await adapter.confirmMigration(db,localStorage,window.KnowledgeStateV3,prepared);
+  const after=await adapter.read(db);
+  db.close();
+  return {status:prepared.status,before,committed,after,original,legacy:localStorage.getItem(key)};
+ });
+ expect(result.status).toBe('ready');
+ expect(result.before).toBeNull();
+ expect(result.after).toEqual(result.committed);
+ expect(result.legacy).toBe(result.original);
+});
+test('opt-in migration refuses changed legacy snapshot',async({page})=>{
+ await page.goto('http://127.0.0.1:8770/');
+ await page.addScriptTag({url:'/state-v3.cjs'});
+ await page.addScriptTag({url:'/indexeddb-experimental.cjs'});
+ const result=await page.evaluate(async()=>{
+  const adapter=window.KnowledgeIndexedDB,db=await adapter.open(indexedDB);
+  const key='knowledge-curator-progress-v1';
+  const original=localStorage.getItem(key);
+  const prepared=await adapter.prepareMigration(db,localStorage,window.KnowledgeStateV3);
+  localStorage.setItem(key,JSON.stringify({arithmetic:{status:'in_progress',updatedAt:'2026-10-15T00:00:00.000Z'}}));
+  let error='';
+  try{await adapter.confirmMigration(db,localStorage,window.KnowledgeStateV3,prepared);}
+  catch(e){error=e.message;}
+  const canonical=await adapter.read(db);
+  if(original===null)localStorage.removeItem(key);else localStorage.setItem(key,original);
+  db.close();
+  return {error,canonical};
+ });
+ expect(result.error).toBe('Legacy data changed since preview');
+ expect(result.canonical).toBeNull();
+});

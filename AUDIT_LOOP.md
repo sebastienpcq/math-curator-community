@@ -649,3 +649,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Benchmark sur 500 cartes simulées : premier scan 17,8 ms, rescan avec cache 4,1 ms, un scan par phase ; différence observée ~77 %.
 - Résultat limité à une session Chromium ; aucune preuve de gain général ni nécessité d'optimisation supplémentaire.
 - `TEST_RESULTS.md` et `NEXT_ITERATION.md` actualisés. CI cycle 79 à confirmer ; aucune modification fonctionnelle.
+
+## Cycle 80 — Benchmark apparié sur profils indépendants
+
+- CI cycle 79 : Node et Chromium réussis.
+- Test MV3 ajouté : trois profils Chromium indépendants, chacun avec 500 cartes simulées ; mesure du premier balayage et d'un rescan avec cache dans la même session.
+- Le test publie les six durées, les nombres de scans et les médianes par phase. Il vérifie la conservation des 250 masquages.
+- Aucun seuil de gain n'est imposé : les mesures sont exploratoires et ne doivent pas rendre la CI instable.
+- CI cycle 80 à confirmer ; aucun changement du moteur de production.

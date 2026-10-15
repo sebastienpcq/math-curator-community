@@ -17,3 +17,11 @@
 ## Release gate
 
 No merge, release or activation without explicit authorization. `main` must remain unchanged.
+
+## Cycle 75 performance checkpoint
+
+- Verified CI on cycle-74 commit: 10 MV3 and 48 prototype browser tests passed.
+- Scan durations at 100/500/1000 cards: 6.2 / 7.8 / 9.4 ms (one run).
+- No performance change is justified by this sample alone.
+- Next: repeat the same benchmark across multiple runs, report median, range and variability, then evaluate mutations that modify existing cards rather than append batches.
+- Continue to protect `main`; no merge or release.

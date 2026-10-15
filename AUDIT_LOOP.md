@@ -333,3 +333,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Les opérations de reset, import et append ne sont pas encore migrées vers cette frontière ; la transition est partielle.
 - Risque : le garde-fou journal doit être validé dans les tests d'import et de récupération existants.
 - CI cycle 41 à confirmer ; IndexedDB reste désactivé.
+
+## Cycle 42 — Écriture des tentatives centralisée
+
+- CI cycle 41 : contrôles généraux réussis ; navigateur encore en cours au relevé.
+- Les deux écritures d'exercices et de révisions passent maintenant par `KnowledgeStorage.appendAttempt`.
+- Deux tests Node ajoutés : délégation de l'écriture et refus si un journal de récupération existe.
+- Les imports et resets continuent d'utiliser des opérations directes pour leur séquence de restauration ; leur refactorisation doit conserver les invariants existants.
+- CI cycle 42 à confirmer. IndexedDB reste désactivé.

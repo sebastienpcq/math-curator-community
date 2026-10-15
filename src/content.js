@@ -27,7 +27,9 @@ function process(card){
  const isShort=!!card.matches('ytd-reel-item-renderer')||!!card.querySelector('a[href^="/shorts/"]');
  const ev=MathScoring.evaluate(video,settings);
  let decision=MathScoring.decide(ev,video,settings);
- if(isShort&&settings.hideShorts&&!settings.allowVideos?.includes(video.id))decision='hide';
+ if(isShort&&settings.hideShorts&&decision!=='show')decision='hide';
+ // Explicit video blocks take precedence over Shorts exceptions and allowlists.
+ if(video.id&&settings.blockVideos?.includes(video.id))decision='hide';
  // Unknown content is preserved except in strict mode; no arbitrary zero score.
  card.classList.toggle('math-curator-hidden',decision==='hide'||(decision==='unknown'&&settings.mode==='strict'));
  const old=card.querySelector('.math-curator-badge');

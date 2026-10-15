@@ -286,3 +286,36 @@ test('MV3 processes a large recommendation feed and dynamic batch',async()=>{
   fs.rmSync(profile,{recursive:true,force:true});
  }
 });
+
+test('MV3 badge mutations do not prevent filtering later inserted videos',async()=>{
+ const profile=fs.mkdtempSync(path.join(os.tmpdir(),'math-curator-badges-'));
+ let context;
+ try{
+  context=await chromium.launchPersistentContext(profile,{
+   channel:'chromium',headless:true,
+   args:['--disable-extensions-except='+root,'--load-extension='+root]
+  });
+  let workers=context.serviceWorkers();
+  if(!workers.length)workers=[await context.waitForEvent('serviceworker',{timeout:15000})];
+  const page=await context.newPage();
+  await page.route('https://www.youtube.com/**',route=>route.fulfill({
+   status:200,contentType:'text/html',
+   body:'<!doctype html><html><body><main id="feed"><ytd-video-renderer><a id="video-title" href="/watch?v=abcdefghijk">Cours de mathématiques débutant fractions et équations</a></ytd-video-renderer></main></body></html>'
+  }));
+  await page.goto('https://www.youtube.com/',{waitUntil:'domcontentloaded'});
+  await workers[0].evaluate(async()=>chrome.storage.local.set({settings:{
+   enabled:true,mode:'balanced',showBadges:true
+  }}));
+  await expect(page.locator('.math-curator-badge')).toHaveCount(1);
+  await page.evaluate(()=>{
+   const card=document.createElement('ytd-video-renderer');
+   card.innerHTML='<a id="video-title" href="/watch?v=bcdefghijkl">Gaming highlights</a>';
+   document.querySelector('#feed').append(card);
+  });
+  await expect(page.locator('ytd-video-renderer.math-curator-hidden')).toHaveCount(1);
+  await expect(page.locator('.math-curator-badge')).toHaveCount(1);
+ }finally{
+  if(context)await context.close();
+  fs.rmSync(profile,{recursive:true,force:true});
+ }
+});

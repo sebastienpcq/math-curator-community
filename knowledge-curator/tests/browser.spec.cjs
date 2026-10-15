@@ -162,3 +162,35 @@ test('corrupt journal remains untouched after repeated reloads',async({page})=>{
   await expect(page.locator('#study-message')).toContainText('Impossible de lire la progression');
  }
 });
+
+test('reset failure preserves history and reports cancellation',async({page})=>{
+ await page.goto('http://127.0.0.1:8770/');
+ await expect(page.locator('#study-steps .study-step')).toHaveCount(7);
+ const first=page.locator('.study-step').first();
+ await first.locator('form.exercise').first().locator('input').fill('999');
+ await first.locator('form.exercise').first().locator('button[type=submit]').click();
+ const before=await page.evaluate(()=>({
+  attempts:localStorage.getItem('knowledge-curator-attempts-v1'),
+  progress:localStorage.getItem('knowledge-curator-progress-v1')
+ }));
+ await page.evaluate(()=>{
+  const original=Storage.prototype.setItem;
+  window.__restoreSetItem=original;
+  let failed=false;
+  Storage.prototype.setItem=function(key,value){
+   if(key==='knowledge-curator-progress-v1'&&!failed){failed=true;throw Error('simulated reset failure');}
+   return original.call(this,key,value);
+  };
+  window.confirm=()=>true;
+ });
+ await page.locator('#progress-reset').click();
+ await expect(page.locator('#study-message')).toContainText('Réinitialisation annulée');
+ const after=await page.evaluate(()=>({
+  attempts:localStorage.getItem('knowledge-curator-attempts-v1'),
+  progress:localStorage.getItem('knowledge-curator-progress-v1')
+ }));
+ expect(after).toEqual(before);
+ await page.evaluate(()=>{Storage.prototype.setItem=window.__restoreSetItem;});
+ await page.reload();
+ await expect(page.locator('#attempt-history')).toContainText('incorrect');
+});

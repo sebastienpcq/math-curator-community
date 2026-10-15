@@ -176,11 +176,8 @@ document.querySelector('#progress-import').addEventListener('change',async e=>{
       history=KnowledgeAttempts.read(localStorage);
       progress=derivedProgress();
       if(!persist())throw Error('Sauvegarde indisponible');
+      if(legacyArchive!==null)localStorage.setItem('knowledge-curator-legacy-v1-archive',legacyArchive);
       localStorage.removeItem(JOURNAL);
-      if(legacyArchive!==null){
-        try {localStorage.setItem('knowledge-curator-legacy-v1-archive',legacyArchive);}
-        catch {msg.textContent='Progression importée, mais archivage V1 impossible.';}
-      }
     } catch(error) {
       progress=previousProgress;
       history=previousHistory;

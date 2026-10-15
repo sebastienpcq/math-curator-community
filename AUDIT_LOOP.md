@@ -112,3 +112,12 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Test Playwright ajouté : importer un V1 `demonstrated`, recharger, vérifier le statut `in_progress` et l'absence de maîtrise démontrée.
 - Risque résiduel : cette migration perd la distinction de l'ancien statut dans l'état actif ; documenter avant diffusion.
 - CI du cycle 14 à confirmer.
+
+## Cycle 15 — Archivage V1
+
+- CI cycle 14 : Node et Playwright réussis.
+- L'ancien statut V1 est conservé dans une archive séparée, non utilisée comme preuve de maîtrise.
+- Le statut actif reste `in_progress` lorsqu'aucune tentative ne démontre la maîtrise.
+- Test Playwright ajouté pour vérifier archive et état actif.
+- Risque : écriture de l'archive après validation active, dont l'échec est signalé mais n'annule pas l'import.
+- CI cycle 15 à confirmer.

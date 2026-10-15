@@ -551,3 +551,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Correctif : ignorer les ajouts/suppressions de badges et dialogues propres à Math Curator dans le déclenchement des rescans.
 - Test MV3 ajouté : un badge apparaît puis une nouvelle vidéo hors sujet insérée dynamiquement reste correctement filtrée.
 - CI cycle 68 à confirmer ; aucune mesure instrumentée de latence/mémoire n'est encore disponible.
+
+## Cycle 69 — Correction de réévaluation des cartes réutilisées
+
+- CI cycle 68 : Node réussi, Chromium échoué (1/8 tests MV3) sur `MV3 reevaluates reused video cards and handles missing metadata`.
+- Cause démontrée : `MutationObserver` ne surveillait que les ajouts/suppressions de nœuds, pas les changements de texte ni de `href` d'une carte réutilisée.
+- Correctif : observer `characterData` et les attributs `href`/`title` ; ignorer les mutations internes aux badges et dialogues.
+- Le test de non-régression existant couvre le passage hors sujet → cours mathématique → hors sujet sur une même carte.
+- CI cycle 69 à confirmer ; aucune activation IndexedDB.

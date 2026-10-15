@@ -37,3 +37,37 @@ Ce test **documente un défaut architectural**, il ne constitue pas une correcti
 - Privilégier une transaction IndexedDB `readwrite` pour des modifications concurrentes.
 - Ajouter des tests à deux onglets et de conflits avant toute migration active.
 - Préserver les clés historiques et l'export V2 pendant la transition.
+
+## Cycle 35 — Plan d'activation progressive IndexedDB
+
+**Statut : proposition, pas activation.** Le test de redémarrage Chromium du cycle 34 doit d'abord réussir.
+
+### Préconditions
+1. CI Node et Chromium verte sur le commit candidat, avec test de profil persistant.
+2. Validation stricte V3 partagée entre l'adaptateur et la migration.
+3. Export V2 disponible et vérifié avant migration.
+4. Aucun journal V0.5 en attente, et aucun état local corrompu.
+5. Test de concurrence avec deux onglets, et simulation d'échec de quota et d'ouverture.
+6. Test de migration sur données réelles anonymisées et représentatives, sans les publier.
+
+### Phases
+- **Phase 0 (actuelle)** : module IndexedDB isolé ; aucune lecture/écriture de l'interface.
+- **Phase 1 (opt-in développeur)** : migration explicite, non destructive ; relecture et comparaison du snapshot ; les anciennes clés restent intactes.
+- **Phase 2 (lecture contrôlée)** : choisir un stockage source de vérité unique par session, avec indicateur de migration ; ne jamais écrire simultanément dans les deux stockages sans protocole défini.
+- **Phase 3 (déploiement limité)** : télémétrie respectueuse de la vie privée et contrôle des erreurs, sans collecte de réponses individuelles.
+- **Phase 4 (généralisation)** : seulement après tests et procédure de retour arrière éprouvée.
+
+### Retour arrière
+- Avant bascule de la source de vérité, l'application continue de lire les clés V0.5.
+- En cas d'échec de migration, ne pas modifier ces clés.
+- Après des écritures dans IndexedDB, un retour à V0.5 n'est **pas** sûr sans export transactionnel et réconciliation ; il faut une procédure explicite de transfert inverse.
+- Ne jamais effacer l'ancienne sauvegarde automatiquement pendant la période de transition.
+
+### Risques ouverts
+- Modifications de localStorage entre le snapshot et le commit IndexedDB.
+- Reprise après échec du navigateur pendant la migration.
+- Contradiction entre un état V0.5 modifié et un état IndexedDB plus récent.
+- Quota réel et effacement de données par le navigateur.
+- Contrôle de versions et compatibilité avec les anciennes sauvegardes.
+
+**Décision : aucun branchement dans l'interface tant que ces risques n'ont pas de tests suffisants.**

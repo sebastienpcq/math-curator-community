@@ -30,3 +30,15 @@ Passing tests establish the behaviors in the tested scenarios, not universal ato
 ## Release decision
 
 **NO-GO for IndexedDB activation.** Keep the V0.5 storage behavior and experimental module separate. Do not merge or publish without an explicit decision and final CI verification.
+
+## Cycle 73 — Measured MV3 DOM scans
+
+Verified on commit `e631a79cf4da198c0d6b7031fdb59d6c6e57f62c`:
+
+- General checks run 38673091939: **SUCCESS**.
+- Browser integration run 38673091936: **SUCCESS**.
+- MV3 smoke tests: **9 passed**.
+- Knowledge Curator browser tests: **48 passed**.
+- Instrumented 100-card fixture: **2 scans**, **2.2 ms cumulative**, **2.1 ms maximum** (Chromium CI, one sample; rounded).
+
+These timings are a single CI sample, not a statistically reliable benchmark or a cross-device performance guarantee. No additional optimization is justified solely by this observation. Repeat measurements under varied load before claiming improvement.

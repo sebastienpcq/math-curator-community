@@ -601,3 +601,26 @@ test('two real Chromium tabs converge on one IndexedDB migration',async({context
  expect(Object.keys(final.progress)).toHaveLength(1);
  await Promise.all([a.close(),b.close()]);
 });
+
+test('IndexedDB upgrade blocked by another connection is reported',async({page})=>{
+ await page.goto('http://127.0.0.1:8770/');
+ await page.addScriptTag({url:'/indexeddb-experimental.cjs'});
+ const result=await page.evaluate(async()=>{
+  const adapter=window.KnowledgeIndexedDB;
+  const db=await adapter.open(indexedDB);
+  const upgrade=indexedDB.open(adapter.DB_NAME,2);
+  const blocked=new Promise(resolve=>{
+   upgrade.onblocked=()=>resolve(true);
+   upgrade.onerror=()=>resolve(false);
+  });
+  const wasBlocked=await blocked;
+  db.close();
+  const upgraded=await new Promise((resolve,reject)=>{
+   upgrade.onsuccess=()=>{upgrade.result.close();resolve(true);};
+   upgrade.onerror=()=>reject(upgrade.error);
+  });
+  return {wasBlocked,upgraded};
+ });
+ expect(result.wasBlocked).toBe(true);
+ expect(result.upgraded).toBe(true);
+});

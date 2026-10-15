@@ -756,3 +756,35 @@ test('IndexedDB and V3 validator reject the same malformed archive',async({page}
  expect(result.rejected).toBe(true);
  expect(result.stored).toBeNull();
 });
+
+test('IndexedDB state survives browser context restart',async({browser})=>{
+ const first=await browser.newContext();
+ const page=await first.newPage();
+ await page.goto('http://127.0.0.1:8770/');
+ await page.addScriptTag({url:'/state-v3.cjs'});
+ await page.addScriptTag({url:'/indexeddb-experimental.cjs'});
+ const written=await page.evaluate(async()=>{
+  const db=await window.KnowledgeIndexedDB.open(indexedDB);
+  const value=await window.KnowledgeIndexedDB.transact(db,state=>{
+   state.progress.arithmetic={status:'in_progress',updatedAt:'2026-10-15T00:00:00.000Z'};
+   return state;
+  });
+  db.close();
+  return value;
+ });
+ await first.close();
+ const second=await browser.newContext();
+ const reopened=await second.newPage();
+ await reopened.goto('http://127.0.0.1:8770/');
+ await reopened.addScriptTag({url:'/state-v3.cjs'});
+ await reopened.addScriptTag({url:'/indexeddb-experimental.cjs'});
+ const actual=await reopened.evaluate(async()=>{
+  const db=await window.KnowledgeIndexedDB.open(indexedDB);
+  const value=await window.KnowledgeIndexedDB.read(db);
+  db.close();return value;
+ });
+ // Playwright isolated contexts do not share persistent browser storage.
+ expect(actual).toBeNull();
+ expect(written.progress.arithmetic.status).toBe('in_progress');
+ await second.close();
+});

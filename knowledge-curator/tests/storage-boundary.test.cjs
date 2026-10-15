@@ -45,3 +45,16 @@ test('attempt append is rejected while recovery is pending',()=>{
  assert.throws(()=>boundary.appendAttempt(storage,attempts,{correct:false}),/recovery pending/);
  assert.equal(called,false);
 });
+
+test('recovery owner can write validated progress with pending journal',()=>{
+ const storage=store();
+ storage.setItem(boundary.JOURNAL,'{}');
+ const value={arithmetic:{status:'in_progress'}};
+ boundary.writeDuringRecovery(storage,value,valid);
+ assert.deepEqual(JSON.parse(storage.getItem(boundary.PROGRESS)),value);
+ assert.throws(()=>boundary.writeProgress(storage,{algebra:{}},valid),/recovery pending/);
+});
+test('recovery-specific write requires a journal',()=>{
+ const storage=store();
+ assert.throws(()=>boundary.writeDuringRecovery(storage,{arithmetic:{}},valid),/journal required/);
+});

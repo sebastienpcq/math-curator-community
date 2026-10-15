@@ -18,7 +18,7 @@ function load(){
  try {
   if(KnowledgeStorage.recover(localStorage,KnowledgeAttempts,validProgress))
    msg.textContent='Import interrompu récupéré depuis la sauvegarde locale.';
-  const raw=localStorage.getItem(KEY);const p=raw?JSON.parse(raw):{};if(!validProgress(p))throw Error('Progression invalide');progress=p;return true;}
+  progress=KnowledgeStorage.readProgress(localStorage,validProgress);return true;}
  catch {msg.textContent='Impossible de lire la progression enregistrée. Aucune sauvegarde automatique effectuée.';return false;}
 }
 function persist(){
@@ -111,9 +111,9 @@ function render(){
 }
 document.querySelector('#progress-export').addEventListener('click',()=>{
  try {
-  if(localStorage.getItem('knowledge-curator-import-journal-v1')!==null)throw Error('Récupération en attente');
-  const attempts=KnowledgeAttempts.read(localStorage);
-  const raw=localStorage.getItem(KEY);
+  if(KnowledgeStorage.pending(localStorage))throw Error('Récupération en attente');
+  const attempts=KnowledgeStorage.readAttempts(localStorage,KnowledgeAttempts);
+  const raw=JSON.stringify(KnowledgeStorage.readProgress(localStorage,validProgress));
   const saved=raw===null?{}:JSON.parse(raw);
   if(!validProgress(saved))throw Error('Progression locale invalide');
   const blob=new Blob([JSON.stringify({version:2,progress:saved,attempts},null,2)],{type:'application/json'});
@@ -129,7 +129,7 @@ document.querySelector('#progress-import').addEventListener('change',async e=>{
  const file=e.target.files?.[0];if(!file)return;
  if(file.size>100000){msg.textContent='Fichier trop volumineux.';return;}
  try{const payload=JSON.parse(await file.text());if(![1,2].includes(payload.version)||!validProgress(payload.progress))throw Error('Format invalide');
-    const previousHistory=KnowledgeAttempts.read(localStorage);
+    const previousHistory=KnowledgeStorage.readAttempts(localStorage,KnowledgeAttempts);
     const previousProgress=progress;
     if(payload.version===1&&previousHistory.length){
       msg.textContent='Import V1 refusé : un historique récent existe déjà. Exporte tes données actuelles avant toute migration.';
@@ -141,7 +141,7 @@ document.querySelector('#progress-import').addEventListener('change',async e=>{
     const legacyArchive=payload.version===1
       ?JSON.stringify({version:1,importedAt:new Date().toISOString(),progress:payload.progress})
       :null;
-    const previousLegacyArchive=localStorage.getItem('knowledge-curator-legacy-v1-archive');
+    const previousLegacyArchive=KnowledgeStorage.readArchive(localStorage,validProgress);
     if(payload.version===1){
       payload.progress=Object.fromEntries(Object.entries(payload.progress).map(([id,value])=>[
         id,value.status==='demonstrated'||value.status==='consolidate'
@@ -185,7 +185,7 @@ document.querySelector('#progress-reset').addEventListener('click',()=>{
  if(!confirm('Effacer toute la progression locale ?'))return;
  const JOURNAL='knowledge-curator-import-journal-v1';
  try {
-  if(localStorage.getItem(JOURNAL)!==null){
+  if(KnowledgeStorage.pending(localStorage)){
    msg.textContent='Réinitialisation refusée : une récupération de données est en attente.';
    return;
   }

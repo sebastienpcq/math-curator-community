@@ -921,3 +921,21 @@ test('pending recovery journal prevents new exercise attempt',async({page})=>{
  expect(after).toBe(before);
  await expect(page.locator('#study-message')).toContainText('tentative non enregistrée');
 });
+
+test('transactional reset preserves legacy archive while clearing progress',async({page})=>{
+ await page.goto('http://127.0.0.1:8770/');
+ await expect(page.locator('#study-steps .study-step')).toHaveCount(7);
+ const archive=JSON.stringify({version:1,importedAt:'2026-10-15T00:00:00.000Z',progress:{}});
+ await page.evaluate(value=>localStorage.setItem('knowledge-curator-legacy-v1-archive',value),archive);
+ await page.evaluate(()=>{window.confirm=()=>true;});
+ await page.locator('#progress-reset').click();
+ await expect(page.locator('#study-message')).toContainText('Progression réinitialisée');
+ const result=await page.evaluate(()=>({
+  archive:localStorage.getItem('knowledge-curator-legacy-v1-archive'),
+  journal:localStorage.getItem('knowledge-curator-import-journal-v1'),
+  attempts:JSON.parse(localStorage.getItem('knowledge-curator-attempts-v1'))
+ }));
+ expect(result.archive).toBe(archive);
+ expect(result.journal).toBeNull();
+ expect(result.attempts).toEqual([]);
+});

@@ -44,11 +44,15 @@ function scan(){if(!document.documentElement)return;document.querySelectorAll(ca
 }
 function schedule(){if(timer)return;timer=setTimeout(()=>{timer=null;scan();},180);}
 chrome.storage.local.get('settings').then(data=>{settings={...MathConfig.DEFAULTS,...data.settings};scan();observer=new MutationObserver(records=>{
-  if(records.some(r=>[...r.addedNodes,...r.removedNodes].some(n=>
-    n.nodeType===1&&!n.matches?.('.math-curator-badge, .math-curator-dialog')&&
-    !n.closest?.('.math-curator-dialog')
-  )))schedule();
-});observer.observe(document.documentElement,{childList:true,subtree:true});});
+  if(records.some(r=>
+    (r.type==='characterData'&&!r.target.parentElement?.closest('.math-curator-dialog, .math-curator-badge'))||
+    (r.type==='attributes'&&!r.target.closest?.('.math-curator-dialog, .math-curator-badge'))||
+    [...r.addedNodes,...r.removedNodes].some(n=>
+      n.nodeType===1&&!n.matches?.('.math-curator-badge, .math-curator-dialog')&&
+      !n.closest?.('.math-curator-dialog')
+    )
+  ))schedule();
+});observer.observe(document.documentElement,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['href','title']});});
 chrome.storage.onChanged.addListener((changes,area)=>{if(area==='local'&&changes.settings){settings={...MathConfig.DEFAULTS,...changes.settings.newValue};resultsCleanup();schedule();}});
 function resultsCleanup(){document.querySelectorAll(cardSelector).forEach(card=>results.delete(card));}
 window.addEventListener('yt-navigate-finish',schedule);document.addEventListener('visibilitychange',()=>{if(!document.hidden)schedule();});

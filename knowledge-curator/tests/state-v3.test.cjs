@@ -99,3 +99,16 @@ test('canonical state survives legacy data removal',()=>{
  const values=storage({[state.KEY]:existing});
  assert.deepEqual(state.read(values),canonical);
 });
+
+test('two stale tab snapshots can overwrite each other with localStorage',()=>{
+ const store=storage({'knowledge-curator-progress-v1':JSON.stringify(sample)});
+ state.migrate(store);
+ const tabA=state.read(store),tabB=state.read(store);
+ tabA.attempts.push(attempt);
+ tabB.progress.algebra={status:'in_progress',updatedAt:'2026-10-15T01:00:00.000Z'};
+ store.setItem(state.KEY,JSON.stringify(tabA));
+ store.setItem(state.KEY,JSON.stringify(tabB));
+ const final=state.read(store);
+ assert.equal(final.attempts.length,0);
+ assert.equal(final.progress.algebra.status,'in_progress');
+});

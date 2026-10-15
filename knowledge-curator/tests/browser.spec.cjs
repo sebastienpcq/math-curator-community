@@ -549,3 +549,28 @@ test('invalid legacy data cannot create IndexedDB canonical state',async({page})
  expect(result.rejected).toBe(true);
  expect(result.current).toBeNull();
 });
+
+test('concurrent migrations preserve first committed canonical state',async({page})=>{
+ await page.goto('http://127.0.0.1:8770/');
+ await page.addScriptTag({url:'/state-v3.cjs'});
+ await page.addScriptTag({url:'/indexeddb-experimental.cjs'});
+ const result=await page.evaluate(async()=>{
+  const adapter=window.KnowledgeIndexedDB;
+  const db=await adapter.open(indexedDB);
+  const stamp='2026-10-15T00:00:00.000Z';
+  const a={getItem:key=>key==='knowledge-curator-progress-v1'
+   ?JSON.stringify({arithmetic:{status:'in_progress',updatedAt:stamp}}):null};
+  const b={getItem:key=>key==='knowledge-curator-progress-v1'
+   ?JSON.stringify({algebra:{status:'in_progress',updatedAt:stamp}}):null};
+  const [first,second]=await Promise.all([
+   adapter.migrateFromLegacy(db,a,window.KnowledgeStateV3),
+   adapter.migrateFromLegacy(db,b,window.KnowledgeStateV3)
+  ]);
+  const stored=await adapter.read(db);
+  db.close();
+  return {first,second,stored};
+ });
+ expect(result.first).toEqual(result.second);
+ expect(result.second).toEqual(result.stored);
+ expect(Object.keys(result.stored.progress)).toHaveLength(1);
+});

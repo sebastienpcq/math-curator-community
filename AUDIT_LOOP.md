@@ -559,3 +559,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Correctif : observer `characterData` et les attributs `href`/`title` ; ignorer les mutations internes aux badges et dialogues.
 - Le test de non-régression existant couvre le passage hors sujet → cours mathématique → hors sujet sur une même carte.
 - CI cycle 69 à confirmer ; aucune activation IndexedDB.
+
+## Cycle 70 — Instrumentation des scans DOM
+
+- CI cycle 69 : contrôles Node et Chromium réussis ; correction des cartes réutilisées validée.
+- Instrumentation locale dans `src/content.js` : nombre de scans, durée totale, dernière durée et durée maximale via `window.__mathCuratorMetrics`.
+- Test MV3 ajouté sur 100 cartes : vérifie la présence des métriques, leur cohérence et une limite conservatrice sur le nombre de scans après un lot de mutations.
+- Aucun titre ni identifiant vidéo n'est collecté par cette instrumentation ; pas de transmission réseau.
+- CI cycle 70 à confirmer. Les chiffres mesurés en CI ne doivent pas être présentés comme représentatifs de tous les appareils.

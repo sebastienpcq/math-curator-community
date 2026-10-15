@@ -514,3 +514,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Test Playwright MV3 ajouté : navigation interne simulée sans rechargement, nouveau contenu filtré, modification de la liste d'autorisation en session puis réapplication du filtrage.
 - Le scénario couvre `yt-navigate-finish` et `chrome.storage.onChanged` dans Chromium avec l'extension chargée.
 - CI cycle 63 à confirmer. Les pages sont simulées et ne remplacent pas une validation sur YouTube réel.
+
+## Cycle 64 — Priorité blocage explicite / autorisation
+
+- CI cycle 63 : Node et Chromium réussis.
+- Défaut fonctionnel confirmé par lecture de `src/content.js` : une vidéo Shorts présente simultanément dans `allowVideos` et `blockVideos` pouvait rester visible, car l'exception Shorts écrasait la décision de blocage.
+- Correctif : une entrée explicite `blockVideos` conserve la priorité, y compris pour les Shorts ; le masquage Shorts par défaut est préservé.
+- Test Playwright MV3 ajouté : conflit allow/block sur vidéo classique et Short, puis levée du blocage.
+- CI cycle 64 à confirmer ; aucune activation IndexedDB.

@@ -491,3 +491,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - `TEST_RESULTS.md` et `NEXT_ITERATION.md` actualisés pour remplacer les points de contrôle obsolètes du cycle 31.
 - Décision NO-GO pour activation IndexedDB : concurrence avec anciens onglets, quota réel, réconciliation et retour arrière non démontrés.
 - Aucune modification fonctionnelle ; CI cycle 60 à confirmer. Critère d'arrêt temporaire : pas de correctif P0/P1 nouveau démontré à cette étape, priorité aux validations de release.
+
+## Cycle 61 — Smoke test de l'extension Chrome Manifest V3
+
+- CI cycle 60 : contrôles Node et Chromium réussis.
+- Inspection du manifeste racine : MV3, permission `storage`, content scripts sur `https://www.youtube.com/*`, service worker `src/background.js`.
+- Ajout de `knowledge-curator/tests/extension-mv3.spec.cjs` : lancement d'un Chromium avec extension chargée, page YouTube simulée localement, contrôle du mode désactivé par défaut, activation du filtre puis désactivation.
+- Workflow navigateur étendu pour exécuter ce test. Le test n'utilise pas le site YouTube réel et ne couvre pas ses changements de DOM.
+- CI cycle 61 à confirmer ; aucun changement de `main`, aucune activation IndexedDB.

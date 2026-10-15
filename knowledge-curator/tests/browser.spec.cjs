@@ -129,3 +129,18 @@ test('interrupted import journal restores original state on reload',async({page}
  expect(restored.journal).toBeNull();
  await expect(page.locator('#attempt-history')).toContainText('incorrect');
 });
+
+test('corrupt recovery journal does not overwrite existing history',async({page})=>{
+ await page.goto('http://127.0.0.1:8770/');
+ await expect(page.locator('#study-steps .study-step')).toHaveCount(7);
+ await page.locator('.study-step').first().locator('form.exercise').first().locator('input').fill('999');
+ await page.locator('.study-step').first().locator('form.exercise').first().locator('button[type=submit]').click();
+ const before=await page.evaluate(()=>localStorage.getItem('knowledge-curator-attempts-v1'));
+ await page.evaluate(()=>localStorage.setItem('knowledge-curator-import-journal-v1',JSON.stringify({
+  attempts:'not json',progress:'{}'
+ })));
+ await page.reload();
+ const after=await page.evaluate(()=>localStorage.getItem('knowledge-curator-attempts-v1'));
+ expect(after).toBe(before);
+ await expect(page.locator('#study-message')).toContainText('Impossible de lire la progression');
+});

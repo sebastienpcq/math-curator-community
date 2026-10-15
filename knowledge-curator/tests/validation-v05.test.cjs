@@ -66,3 +66,10 @@ test('same-time events use insertion order',()=>{
  assert.equal(review.reviewState(step,[ok,bad],Date.parse(stamp)).nextAt,null);
  assert.equal(review.reviewState(step,[bad,ok],Date.parse(stamp)).nextAt,'2026-10-16T00:00:00.000Z');
 });
+
+test('invalid history replacement preserves stored data',()=>{
+ const store=memory(),event=at('ex-arithmetic',true,'2026-10-15T00:00:00.000Z');
+ attempts.append(store,event);
+ assert.throws(()=>attempts.replace(store,[{...event,correct:'invalid'}]));
+ assert.deepEqual(attempts.read(store),[event]);
+});

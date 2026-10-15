@@ -388,3 +388,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Nouveau test Playwright de bout en bout : erreur enregistrée, compétence à consolider, import V2, rechargement, comparaison des données et export JSON.
 - Les tests existants couvrent séparément reset, rollback, révisions espacées, migration V1 et stockage IndexedDB expérimental.
 - CI cycle 48 à confirmer ; aucune déclaration de stabilité avant validation.
+
+## Cycle 48 — Résultat CI du cycle 47 et correction
+
+- CI cycle 47 : Node réussi, navigateur 41/42 réussi, 1 échec.
+- Échec exact : le test V1 vierge attendait `null` pour la clé de tentatives, mais le coordinateur transactionnel écrit désormais explicitement `[]`.
+- La sémantique reste un historique vide ; assertion modifiée pour comparer le tableau décodé à `[]`.
+- Le scénario de non-régression global ajouté dans ce cycle doit encore être exécuté.
+- Aucune preuve de corruption ou perte de données dans cet échec ; CI du dernier commit en attente.

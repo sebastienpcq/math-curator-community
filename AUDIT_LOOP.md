@@ -428,3 +428,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Test Node ajouté : une archive avec identifiant de compétence invalide est refusée avant journal.
 - Limite : un validateur de secours reste présent pour les usages autonomes de la frontière ; le supprimer exige de modifier tous les consommateurs.
 - CI cycle 52 à confirmer.
+
+## Cycle 53 — Validation canonique à la récupération
+
+- CI cycle 52 : Node et Chromium réussis.
+- `learning-ui.js` réutilise désormais `KnowledgeStateV3.validLegacyArchive` avant de restaurer un journal, en conservant le contrôle des compétences du parcours actif.
+- Test Playwright ajouté : archive contenant un identifiant de compétence interdit, refus de restauration, conservation des trois valeurs et du journal.
+- Le validateur de secours de `storage-boundary.cjs` demeure pour compatibilité autonome ; son retrait demande une migration explicite des tests/consommateurs.
+- CI cycle 53 à confirmer. Aucun merge, aucune activation IndexedDB.

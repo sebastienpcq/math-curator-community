@@ -16,34 +16,8 @@ function validProgress(p){
 }
 function load(){
  try {
-  const pending=localStorage.getItem('knowledge-curator-import-journal-v1');
-  if(pending!==null){
-   const snapshot=JSON.parse(pending);
-   if(!snapshot||typeof snapshot!=='object'||!Object.hasOwn(snapshot,'progress')||!Object.hasOwn(snapshot,'attempts')||
-      (snapshot.progress!==null&&typeof snapshot.progress!=='string')||
-      (snapshot.attempts!==null&&typeof snapshot.attempts!=='string'))throw Error('Journal de récupération invalide');
-   const restoredProgress=snapshot.progress===null?{}:JSON.parse(snapshot.progress);
-   const restoredAttempts=snapshot.attempts===null?[]:JSON.parse(snapshot.attempts);
-   if(!validProgress(restoredProgress)||!KnowledgeAttempts.validateHistory(restoredAttempts))throw Error('Journal de récupération invalide');
-   if(Object.hasOwn(snapshot,'legacyArchive')){
-    if(snapshot.legacyArchive!==null&&typeof snapshot.legacyArchive!=='string')throw Error('Archive de récupération invalide');
-    if(snapshot.legacyArchive!==null){
-     if(!KnowledgeStateV3.validLegacyArchive(snapshot.legacyArchive)||
-        !validProgress(JSON.parse(snapshot.legacyArchive).progress))
-      throw Error('Archive de récupération invalide');
-    }
-   }
-   if(Object.hasOwn(snapshot,'legacyArchive')){
-    if(snapshot.legacyArchive===null)localStorage.removeItem('knowledge-curator-legacy-v1-archive');
-    else localStorage.setItem('knowledge-curator-legacy-v1-archive',snapshot.legacyArchive);
-   }
-   if(snapshot.attempts===null)localStorage.removeItem(KnowledgeAttempts.KEY);
-   else localStorage.setItem(KnowledgeAttempts.KEY,snapshot.attempts);
-   if(snapshot.progress===null)localStorage.removeItem(KEY);
-   else localStorage.setItem(KEY,snapshot.progress);
-   localStorage.removeItem('knowledge-curator-import-journal-v1');
+  if(KnowledgeStorage.recover(localStorage,KnowledgeAttempts,validProgress))
    msg.textContent='Import interrompu récupéré depuis la sauvegarde locale.';
-  }
   const raw=localStorage.getItem(KEY);const p=raw?JSON.parse(raw):{};if(!validProgress(p))throw Error('Progression invalide');progress=p;return true;}
  catch {msg.textContent='Impossible de lire la progression enregistrée. Aucune sauvegarde automatique effectuée.';return false;}
 }

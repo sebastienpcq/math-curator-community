@@ -91,3 +91,15 @@ Verified on cycle-76 commit `874deed58cbad143f62d8a6047b895e942bbaed3`:
   - Median: **16.3 ms**, observed range: **13.6–21.3 ms**.
 
 The variation is material. These measurements cannot be directly equated with the incremental 500-card stage in the cumulative benchmark (7.8–7.9 ms), because the experimental conditions differ. Do not infer a speedup or regression without controlled comparison.
+
+## Cycle 79 — Initial versus cached 500-card scan
+
+Verified on commit `f714cdf4f0902bb707fb6ce624a6f8a800777fc0`:
+- General checks run 38674365317: **SUCCESS**.
+- Browser integration run 38674365257: **SUCCESS**; 12 MV3 tests and 48 knowledge-browser tests.
+- Single Chromium profile, 500 simulated cards:
+  - First scan: 17.8 ms, 1 scan.
+  - Cached rescan: 4.1 ms, 1 scan.
+  - Observed ratio: approximately 4.34x; cached pass took approximately 77% less time.
+
+The result supports the usefulness of fingerprint caching in this fixture. It does not measure real YouTube performance or prove the absence of unnecessary DOM queries. No production optimization is proposed on this single sample.

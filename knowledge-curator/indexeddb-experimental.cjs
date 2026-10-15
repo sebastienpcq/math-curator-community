@@ -134,7 +134,22 @@
    tx.onerror=()=>reject(tx.error||Error('Migration failed'));
   });
  }
- const api={DB_NAME,STORE,KEY,open,transact,read,migrateFromLegacy,prepareMigration,confirmMigration};
+ function inspectCutover(db,legacyStorage,stateV3){
+  return Promise.resolve().then(async()=>{
+   if(legacyStorage.getItem('knowledge-curator-import-journal-v1')!==null)
+    return {ready:false,reason:'legacy-recovery-pending'};
+   const canonical=await read(db);
+   if(canonical===null)return {ready:false,reason:'canonical-missing'};
+   if(!stateV3.validate(canonical))return {ready:false,reason:'canonical-invalid'};
+   let legacy;
+   try{legacy=stateV3.fromLegacy(legacyStorage);}
+   catch{return {ready:false,reason:'legacy-invalid'};}
+   if(JSON.stringify(canonical)!==JSON.stringify(legacy))
+    return {ready:false,reason:'state-divergence'};
+   return {ready:true,reason:'states-match'};
+  });
+ }
+ const api={DB_NAME,STORE,KEY,open,transact,read,migrateFromLegacy,prepareMigration,confirmMigration,inspectCutover};
  if(typeof module!=='undefined'&&module.exports)module.exports=api;
  if(root)root.KnowledgeIndexedDB=api;
 })(typeof window!=='undefined'?window:globalThis);

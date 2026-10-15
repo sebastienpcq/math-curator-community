@@ -208,3 +208,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Tests Playwright ajoutés : conservation des clés héritées, idempotence et refus de données invalides.
 - Migration non activée dans l'interface, sans suppression des données existantes.
 - CI cycle 26 à confirmer ; prochain audit : concurrence des migrations et validation du schéma complet.
+
+## Cycle 27 — Migration concurrente IndexedDB
+
+- CI cycle 26 : contrôle général réussi ; navigateur encore en cours au relevé.
+- Défaut identifié : une valeur canonique existante mais vide pouvait être confondue avec une absence de valeur lors de migrations simultanées.
+- Correction : vérification explicite de présence et de validité au sein de la transaction `readwrite` ; aucune migration ne remplace un enregistrement déjà présent.
+- Test Chromium ajouté : deux migrations concurrentes depuis des instantanés différents doivent produire un seul état canonique identique pour les deux appels.
+- CI cycle 27 à confirmer. Aucun changement de l'interface active.

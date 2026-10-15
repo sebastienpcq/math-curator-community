@@ -12,3 +12,10 @@
 ## Cycle 2 — à reprendre
 
 Contrôler les résultats CI et traiter les anomalies de planification des révisions.
+
+## Cycle 2 — Révisions espacées
+
+- Défaut P1 : une erreur après une réussite conservait une date future de révision issue de la réussite précédente.
+- Correctif : annuler la date et le statut de révision échue après une erreur ; repartir sur un intervalle d'un jour à la réussite suivante.
+- Tests ajoutés : succès-erreur-succès, bornes [1,3,7,14,30] jours, ordre chronologique.
+- Exécution CI à confirmer.

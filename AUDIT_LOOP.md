@@ -307,3 +307,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Test Playwright ajouté : les états égaux sont détectés et une modification de localStorage après migration interdit le basculement.
 - La vérification n'est pas un verrou transactionnel ; aucune activation de l'interface ni migration réelle.
 - CI cycle 38 à confirmer.
+
+## Cycle 39 — Deux onglets actifs pendant le basculement
+
+- CI cycle 38 : contrôle général réussi ; navigateur encore en cours au relevé.
+- Test Playwright ajouté : un deuxième onglet écrit dans localStorage après migration, le premier détecte la divergence et refuse le basculement.
+- Protocole de basculement documenté : API de stockage centralisée, source unique de vérité, traitement des anciens onglets non coopératifs et retour arrière explicite.
+- Aucune activation IndexedDB dans l'interface ; ce test démontre une détection, pas un verrouillage.
+- CI cycle 39 à confirmer.

@@ -476,3 +476,10 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Deux tests Node ajoutés : archive absente/corrompue et journal de récupération présent.
 - Le code d'import et de reset reste coordonné par `transaction` ; IndexedDB n'est pas activé.
 - CI cycle 58 à confirmer.
+
+## Cycle 59 — Fidélité import/export V2
+
+- CI cycle 58 : contrôles Node et Chromium réussis.
+- Suppression d'une sérialisation/désérialisation inutile lors de l'export de progression.
+- Deux tests Playwright ajoutés : export V2 puis réimport et rechargement avec comparaison de progression et historique ; import V2 invalide refusé sans modification des trois clés ni journal résiduel.
+- CI cycle 59 à confirmer ; aucun changement de format et IndexedDB toujours désactivé.

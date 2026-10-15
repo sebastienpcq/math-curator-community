@@ -1,19 +1,16 @@
 # NEXT ITERATION — cycle 75 checkpoint
 
-## Verified results
+## Verified
 
-- Cycle 74 commit `f9d8e51`: Node and Chromium CI passed.
-- MV3: 10 passed; prototype browser: 48 passed.
-- Incremental cumulative-DOM benchmark: 100 / 500 / 1000 cards, respectively 6.2 / 7.8 / 9.4 ms (one scan per stage).
+Cycle 74 commit `f9d8e51`: Node and Chromium CI successful.
+MV3 benchmark: 100 cards = 6.2 ms, 500 = 7.8 ms, 1000 = 9.4 ms, one scan per cumulative batch. Single run only.
 
-## Next engineering priorities
+## Next priority
 
-1. Verify CI on the final cycle-75 documentation commit.
-2. Repeat the benchmark across several independent Chromium profiles/runs, separating warmup from measurement and recording median and dispersion.
-3. If justified, add a separate test with continuously changing metadata (rather than only batch insertion) to detect rescans under sustained DOM churn.
-4. Avoid speculative optimization unless measurements demonstrate a meaningful bottleneck.
-5. Validate against live YouTube separately; fixture success cannot establish real-site compatibility.
+1. Check the latest cycle-75 CI.
+2. Repeat the 100/500/1000 benchmark several times, with fresh Chromium profiles, report median and variability. Separate incremental and full-feed scans.
+3. Evaluate observer scheduling under repeated mutations; ensure the metrics themselves do not cause rescans.
+4. Test the real YouTube DOM under an explicitly authorized browser environment before declaring real-world compatibility.
+5. Keep IndexedDB inactive pending coordination and rollback verification.
 
-## Safety gate
-
-Keep IndexedDB experimental; no merge, release, or main changes without explicit authorization.
+No merge or release without authorization. Keep `main` unchanged.

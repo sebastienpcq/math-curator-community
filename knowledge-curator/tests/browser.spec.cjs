@@ -1061,3 +1061,33 @@ test('repeated recovery failure keeps archive journal until writes recover',asyn
  expect(after.journal).toBeNull();
  await fresh.close();
 });
+
+test('startup recovery rejects archive skill IDs outside canonical V3 schema',async({page})=>{
+ await page.goto('http://127.0.0.1:8770/');
+ await expect(page.locator('#study-steps .study-step')).toHaveCount(7);
+ const before=await page.evaluate(()=>{
+  const values={
+   progress:localStorage.getItem('knowledge-curator-progress-v1'),
+   attempts:localStorage.getItem('knowledge-curator-attempts-v1'),
+   archive:localStorage.getItem('knowledge-curator-legacy-v1-archive')
+  };
+  localStorage.setItem('knowledge-curator-import-journal-v1',JSON.stringify({
+   progress:'{}',attempts:'[]',
+   legacyArchive:JSON.stringify({version:1,importedAt:'2026-10-15T00:00:00.000Z',
+    progress:{'INVALID ID':{status:'in_progress',updatedAt:'2026-10-15T00:00:00.000Z'}}})
+  }));
+  return values;
+ });
+ await page.reload();
+ const after=await page.evaluate(()=>({
+  progress:localStorage.getItem('knowledge-curator-progress-v1'),
+  attempts:localStorage.getItem('knowledge-curator-attempts-v1'),
+  archive:localStorage.getItem('knowledge-curator-legacy-v1-archive'),
+  journal:localStorage.getItem('knowledge-curator-import-journal-v1')
+ }));
+ expect(after.progress).toBe(before.progress);
+ expect(after.attempts).toBe(before.attempts);
+ expect(after.archive).toBe(before.archive);
+ expect(after.journal).not.toBeNull();
+ await expect(page.locator('#study-message')).toContainText('Impossible de lire la progression');
+});

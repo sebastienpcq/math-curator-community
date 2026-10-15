@@ -25,6 +25,17 @@ function load(){
    const restoredProgress=snapshot.progress===null?{}:JSON.parse(snapshot.progress);
    const restoredAttempts=snapshot.attempts===null?[]:JSON.parse(snapshot.attempts);
    if(!validProgress(restoredProgress)||!KnowledgeAttempts.validateHistory(restoredAttempts))throw Error('Journal de récupération invalide');
+   if(Object.hasOwn(snapshot,'legacyArchive')){
+    if(snapshot.legacyArchive!==null&&typeof snapshot.legacyArchive!=='string')throw Error('Archive de récupération invalide');
+    if(snapshot.legacyArchive!==null){
+     const archive=JSON.parse(snapshot.legacyArchive);
+     if(!archive||typeof archive!=='object'||archive.version!==1||!validProgress(archive.progress))throw Error('Archive de récupération invalide');
+    }
+   }
+   if(Object.hasOwn(snapshot,'legacyArchive')){
+    if(snapshot.legacyArchive===null)localStorage.removeItem('knowledge-curator-legacy-v1-archive');
+    else localStorage.setItem('knowledge-curator-legacy-v1-archive',snapshot.legacyArchive);
+   }
    if(snapshot.attempts===null)localStorage.removeItem(KnowledgeAttempts.KEY);
    else localStorage.setItem(KnowledgeAttempts.KEY,snapshot.attempts);
    if(snapshot.progress===null)localStorage.removeItem(KEY);
@@ -169,7 +180,7 @@ document.querySelector('#progress-import').addEventListener('change',async e=>{
     const JOURNAL='knowledge-curator-import-journal-v1';
     const originalProgressRaw=localStorage.getItem(KEY);
     const originalAttemptsRaw=localStorage.getItem(KnowledgeAttempts.KEY);
-    const journal={progress:originalProgressRaw,attempts:originalAttemptsRaw};
+    const journal={progress:originalProgressRaw,attempts:originalAttemptsRaw,legacyArchive:previousLegacyArchive};
     localStorage.setItem(JOURNAL,JSON.stringify(journal));
     try {
       if(payload.version===2)KnowledgeAttempts.replace(localStorage,payload.attempts);

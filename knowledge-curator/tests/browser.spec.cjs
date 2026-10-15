@@ -528,3 +528,24 @@ test('IndexedDB migration preserves legacy storage and is idempotent',async({pag
  expect(result.after).toEqual(result.initial);
  expect(result.persisted.version).toBe(3);
 });
+
+test('invalid legacy data cannot create IndexedDB canonical state',async({page})=>{
+ await page.goto('http://127.0.0.1:8770/');
+ await page.addScriptTag({url:'/state-v3.cjs'});
+ await page.addScriptTag({url:'/indexeddb-experimental.cjs'});
+ const result=await page.evaluate(async()=>{
+  const adapter=window.KnowledgeIndexedDB;
+  const db=await adapter.open(indexedDB);
+  const store={
+   getItem:key=>key==='knowledge-curator-progress-v1'?'{invalid':null
+  };
+  let rejected=false;
+  try{await adapter.migrateFromLegacy(db,store,window.KnowledgeStateV3);}
+  catch{rejected=true;}
+  const current=await adapter.read(db);
+  db.close();
+  return {rejected,current};
+ });
+ expect(result.rejected).toBe(true);
+ expect(result.current).toBeNull();
+});

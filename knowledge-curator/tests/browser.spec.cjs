@@ -959,3 +959,37 @@ test('transactional V1 import preserves legacy claim as archive',async({page})=>
  expect(result.archive.progress.arithmetic.status).toBe('demonstrated');
  expect(result.journal).toBeNull();
 });
+
+test('full regression: incorrect attempt, recovery, export and spaced review',async({page})=>{
+ await page.goto('http://127.0.0.1:8770/');
+ await expect(page.locator('#study-steps .study-step')).toHaveCount(7);
+ const first=page.locator('.study-step').first();
+ await first.locator('form.exercise').first().locator('input').fill('999');
+ await first.locator('form.exercise').first().locator('button[type=submit]').click();
+ await expect(page.locator('#review-dashboard')).toContainText('À consolider');
+ const snapshot=await page.evaluate(()=>({
+  progress:JSON.parse(localStorage.getItem('knowledge-curator-progress-v1')),
+  attempts:JSON.parse(localStorage.getItem('knowledge-curator-attempts-v1'))
+ }));
+ const payload={version:2,progress:snapshot.progress,attempts:snapshot.attempts};
+ await page.locator('#progress-import').setInputFiles({
+  name:'regression.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(payload))
+ });
+ await expect(page.locator('#study-message')).toContainText('Progression importée');
+ await page.reload();
+ await expect(page.locator('#review-dashboard')).toContainText('À consolider');
+ const restored=await page.evaluate(()=>({
+  progress:JSON.parse(localStorage.getItem('knowledge-curator-progress-v1')),
+  attempts:JSON.parse(localStorage.getItem('knowledge-curator-attempts-v1')),
+  journal:localStorage.getItem('knowledge-curator-import-journal-v1')
+ }));
+ expect(restored.attempts).toEqual(snapshot.attempts);
+ expect(restored.progress).toEqual(snapshot.progress);
+ expect(restored.journal).toBeNull();
+ const downloadPromise=page.waitForEvent('download');
+ await page.locator('#progress-export').click();
+ const download=await downloadPromise;
+ const fs=require('node:fs');
+ const exported=JSON.parse(fs.readFileSync(await download.path(),'utf8'));
+ expect(exported.attempts).toEqual(snapshot.attempts);
+});

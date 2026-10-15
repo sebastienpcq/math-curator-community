@@ -145,6 +145,11 @@ document.querySelector('#progress-import').addEventListener('change',async e=>{
  try{const payload=JSON.parse(await file.text());if(![1,2].includes(payload.version)||!validProgress(payload.progress))throw Error('Format invalide');
     const previousHistory=KnowledgeAttempts.read(localStorage);
     const previousProgress=progress;
+    if(payload.version===1&&previousHistory.length){
+      msg.textContent='Import V1 refusé : un historique récent existe déjà. Exporte tes données actuelles avant toute migration.';
+      e.target.value='';
+      return;
+    }
     if(payload.version===2&&!KnowledgeAttempts.validateHistory(payload.attempts))throw Error('Historique invalide');
     // A pending journal is written before either legacy key changes.
     // On next launch, recover the original state if an interruption occurred.

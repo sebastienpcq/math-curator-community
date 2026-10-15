@@ -35,3 +35,26 @@ test('failed canonical write preserves legacy keys',()=>{
  assert.throws(()=>state.migrate(store));
  assert.equal(store.getItem('knowledge-curator-progress-v1'),legacy);
 });
+
+test('invalid legacy archive does not create canonical state',()=>{
+ const store=storage({
+  'knowledge-curator-progress-v1':JSON.stringify(sample),
+  'knowledge-curator-legacy-v1-archive':'{invalid'
+ });
+ assert.throws(()=>state.migrate(store));
+ assert.equal(store.getItem(state.KEY),null);
+});
+test('existing canonical state remains unchanged on repeated migration',()=>{
+ const store=storage({'knowledge-curator-progress-v1':JSON.stringify(sample)});
+ const original=state.migrate(store);
+ store.setItem('knowledge-curator-progress-v1','{invalid');
+ assert.deepEqual(state.migrate(store),original);
+});
+test('invalid canonical state is not silently replaced',()=>{
+ const store=storage({
+  'knowledge-curator-progress-v1':JSON.stringify(sample),
+  [state.KEY]:'{invalid'
+ });
+ assert.throws(()=>state.migrate(store));
+ assert.equal(store.getItem(state.KEY),'{invalid');
+});

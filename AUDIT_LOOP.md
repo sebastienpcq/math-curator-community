@@ -121,3 +121,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Test Playwright ajouté pour vérifier archive et état actif.
 - Risque : écriture de l'archive après validation active, dont l'échec est signalé mais n'annule pas l'import.
 - CI cycle 15 à confirmer.
+
+## Cycle 16 — Échec d'archivage V1
+
+- Le statut d'import réussi ne doit pas être annoncé si l'archive V1 obligatoire ne peut pas être enregistrée.
+- L'écriture d'archive est maintenant effectuée avant suppression du journal de récupération ; un échec déclenche la restauration des deux clés principales.
+- Test Playwright ajouté : panne ciblée sur l'archive V1, refus d'import et absence de journal résiduel.
+- Limite : une archive V1 antérieure peut encore être remplacée lors d'une nouvelle importation ; stratégie de conservation multi-versions à auditer.
+- CI du cycle 16 à confirmer.

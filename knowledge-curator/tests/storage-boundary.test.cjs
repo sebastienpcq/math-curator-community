@@ -58,3 +58,44 @@ test('recovery-specific write requires a journal',()=>{
  const storage=store();
  assert.throws(()=>boundary.writeDuringRecovery(storage,{arithmetic:{}},valid),/journal required/);
 });
+
+test('transaction commits progress and attempts together',()=>{
+ const storage=store();
+ const attempts={
+  KEY:'attempts',
+  read:s=>JSON.parse(s.getItem('attempts')||'[]'),
+  replace:(s,items)=>s.setItem('attempts',JSON.stringify(items)),
+  validateHistory:items=>Array.isArray(items)
+ };
+ const result=boundary.transaction(storage,attempts,valid,()=>({
+  progress:{arithmetic:{status:'in_progress'}},
+  attempts:[{correct:false}],legacyArchive:null
+ }));
+ assert.equal(result.attempts.length,1);
+ assert.equal(storage.getItem(boundary.JOURNAL),null);
+ assert.deepEqual(JSON.parse(storage.getItem('attempts')),[{correct:false}]);
+});
+test('transaction rolls back failed progress write',()=>{
+ const values=new Map([['attempts','[{"correct":true}]'],
+  [boundary.PROGRESS,'{"arithmetic":{}}']]);
+ let fail=true;
+ const storage={
+  getItem:k=>values.has(k)?values.get(k):null,
+  setItem:(k,v)=>{
+   if(k===boundary.PROGRESS&&fail){fail=false;throw Error('write failure');}
+   values.set(k,v);
+  },
+  removeItem:k=>values.delete(k)
+ };
+ const attempts={
+  KEY:'attempts',
+  read:s=>JSON.parse(s.getItem('attempts')||'[]'),
+  replace:(s,items)=>s.setItem('attempts',JSON.stringify(items)),
+  validateHistory:Array.isArray
+ };
+ const before=Object.fromEntries(values);
+ assert.throws(()=>boundary.transaction(storage,attempts,valid,()=>({
+  progress:{algebra:{}},attempts:[],legacyArchive:null
+ })),/write failure/);
+ assert.deepEqual(Object.fromEntries(values),before);
+});

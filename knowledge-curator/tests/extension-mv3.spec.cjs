@@ -336,8 +336,8 @@ test('MV3 exposes scan counts and timing without content telemetry',async()=>{
    body:'<!doctype html><html><body><main id="feed"></main></body></html>'
   }));
   await page.goto('https://www.youtube.com/',{waitUntil:'domcontentloaded'});
-  await expect.poll(()=>page.evaluate(()=>window.__mathCuratorMetrics?.scans||0)).toBeGreaterThan(0);
-  const before=await page.evaluate(()=>window.__mathCuratorMetrics.scans);
+  await expect.poll(()=>page.evaluate(()=>Number(document.documentElement.dataset.mathCuratorScans||0))).toBeGreaterThan(0);
+  const before=await page.evaluate(()=>Number(document.documentElement.dataset.mathCuratorScans||0));
   await page.evaluate(()=>{
    const fragment=document.createDocumentFragment();
    for(let i=0;i<100;i++){
@@ -348,7 +348,11 @@ test('MV3 exposes scan counts and timing without content telemetry',async()=>{
    document.querySelector('#feed').append(fragment);
   });
   await expect.poll(()=>page.evaluate(()=>window.__mathCuratorMetrics.scans)).toBeGreaterThan(before);
-  const metrics=await page.evaluate(()=>({...window.__mathCuratorMetrics}));
+  const metrics=await page.evaluate(()=>{
+   const d=document.documentElement.dataset;
+   return {scans:Number(d.mathCuratorScans),lastMs:Number(d.mathCuratorLastMs),
+    totalMs:Number(d.mathCuratorTotalMs),maxMs:Number(d.mathCuratorMaxMs)};
+  });
   expect(metrics.totalMs).toBeGreaterThanOrEqual(0);
   expect(metrics.maxMs).toBeGreaterThanOrEqual(metrics.lastMs);
   expect(metrics.scans).toBeLessThan(12);

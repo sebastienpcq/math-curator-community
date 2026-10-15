@@ -301,3 +301,21 @@ test('legacy V1 mastery is not accepted without recorded evidence',async({page})
  expect(saved.arithmetic.status).toBe('in_progress');
  await expect(page.locator('.study-step').first().locator('.study-status')).not.toContainText('Maîtrise provisoirement démontrée');
 });
+
+test('legacy V1 mastery is archived without granting mastery',async({page})=>{
+ await page.goto('http://127.0.0.1:8770/');
+ await expect(page.locator('#study-steps .study-step')).toHaveCount(7);
+ const payload={version:1,progress:{arithmetic:{
+  status:'demonstrated',updatedAt:'2026-10-15T00:00:00.000Z'
+ }}};
+ await page.locator('#progress-import').setInputFiles({
+  name:'legacy-archive.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(payload))
+ });
+ await expect(page.locator('#study-message')).toContainText('Progression importée');
+ const result=await page.evaluate(()=>({
+  archive:JSON.parse(localStorage.getItem('knowledge-curator-legacy-v1-archive')),
+  active:JSON.parse(localStorage.getItem('knowledge-curator-progress-v1'))
+ }));
+ expect(result.archive.progress.arithmetic.status).toBe('demonstrated');
+ expect(result.active.arithmetic.status).toBe('in_progress');
+});

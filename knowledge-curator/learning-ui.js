@@ -125,8 +125,15 @@ document.querySelector('#progress-import').addEventListener('change',async e=>{
       if(!persist())throw Error('Sauvegarde indisponible');
     } catch(error) {
       progress=previousProgress;
-      if(payload.version===2)KnowledgeAttempts.replace(localStorage,previousHistory);
       history=previousHistory;
+      if(payload.version===2){
+        try {KnowledgeAttempts.replace(localStorage,previousHistory);}
+        catch(rollbackError){
+          msg.textContent='Import interrompu : restauration de l’historique impossible. Ne recharge pas la page ; exporte ou sauvegarde les données avant toute autre action.';
+          e.target.value='';
+          return;
+        }
+      }
       throw error;
     }
     render();msg.textContent='Progression importée.';}

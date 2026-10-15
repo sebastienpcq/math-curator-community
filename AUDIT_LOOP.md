@@ -483,3 +483,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Suppression d'une sérialisation/désérialisation inutile lors de l'export de progression.
 - Deux tests Playwright ajoutés : export V2 puis réimport et rechargement avec comparaison de progression et historique ; import V2 invalide refusé sans modification des trois clés ni journal résiduel.
 - CI cycle 59 à confirmer ; aucun changement de format et IndexedDB toujours désactivé.
+
+## Cycle 60 — Consolidation des preuves et décision de déploiement
+
+- CI cycle 59 : workflows Node (38670136663) et Chromium (38670136562) réussis sur le commit `a856e75`.
+- Relecture des modules `storage-boundary.cjs`, `state-v3.cjs` et `indexeddb-experimental.cjs` : le stockage historique demeure actif ; IndexedDB est expérimental et non chargé dans l'interface.
+- `TEST_RESULTS.md` et `NEXT_ITERATION.md` actualisés pour remplacer les points de contrôle obsolètes du cycle 31.
+- Décision NO-GO pour activation IndexedDB : concurrence avec anciens onglets, quota réel, réconciliation et retour arrière non démontrés.
+- Aucune modification fonctionnelle ; CI cycle 60 à confirmer. Critère d'arrêt temporaire : pas de correctif P0/P1 nouveau démontré à cette étape, priorité aux validations de release.

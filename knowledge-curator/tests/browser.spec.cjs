@@ -1091,3 +1091,57 @@ test('startup recovery rejects archive skill IDs outside canonical V3 schema',as
  expect(after.journal).not.toBeNull();
  await expect(page.locator('#study-message')).toContainText('Impossible de lire la progression');
 });
+
+test('V2 export round trip preserves progress and attempts',async({page})=>{
+ await page.goto('http://127.0.0.1:8770/');
+ await expect(page.locator('#study-steps .study-step')).toHaveCount(7);
+ const first=page.locator('.study-step').first();
+ await first.locator('form.exercise').first().locator('input').fill('999');
+ await first.locator('form.exercise').first().locator('button[type=submit]').click();
+ const before=await page.evaluate(()=>({
+  progress:JSON.parse(localStorage.getItem('knowledge-curator-progress-v1')),
+  attempts:JSON.parse(localStorage.getItem('knowledge-curator-attempts-v1'))
+ }));
+ const downloadPromise=page.waitForEvent('download');
+ await page.locator('#progress-export').click();
+ const download=await downloadPromise;
+ const fs=require('node:fs');
+ const exported=JSON.parse(fs.readFileSync(await download.path(),'utf8'));
+ expect(exported.version).toBe(2);
+ expect(exported.progress).toEqual(before.progress);
+ expect(exported.attempts).toEqual(before.attempts);
+ await page.locator('#progress-import').setInputFiles({
+  name:'roundtrip.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exported))
+ });
+ await expect(page.locator('#study-message')).toContainText('Progression importée');
+ await page.reload();
+ const after=await page.evaluate(()=>({
+  progress:JSON.parse(localStorage.getItem('knowledge-curator-progress-v1')),
+  attempts:JSON.parse(localStorage.getItem('knowledge-curator-attempts-v1'))
+ }));
+ expect(after).toEqual(before);
+});
+test('invalid V2 import preserves progress, attempts and archive',async({page})=>{
+ await page.goto('http://127.0.0.1:8770/');
+ await expect(page.locator('#study-steps .study-step')).toHaveCount(7);
+ const before=await page.evaluate(()=>({
+  progress:localStorage.getItem('knowledge-curator-progress-v1'),
+  attempts:localStorage.getItem('knowledge-curator-attempts-v1'),
+  archive:localStorage.getItem('knowledge-curator-legacy-v1-archive')
+ }));
+ await page.locator('#progress-import').setInputFiles({
+  name:'invalid-v2.json',mimeType:'application/json',
+  buffer:Buffer.from(JSON.stringify({version:2,progress:{},attempts:[{correct:'wrong'}]}))
+ });
+ await expect(page.locator('#study-message')).toContainText('Import refusé');
+ const after=await page.evaluate(()=>({
+  progress:localStorage.getItem('knowledge-curator-progress-v1'),
+  attempts:localStorage.getItem('knowledge-curator-attempts-v1'),
+  archive:localStorage.getItem('knowledge-curator-legacy-v1-archive'),
+  journal:localStorage.getItem('knowledge-curator-import-journal-v1')
+ }));
+ expect(after.progress).toBe(before.progress);
+ expect(after.attempts).toBe(before.attempts);
+ expect(after.archive).toBe(before.archive);
+ expect(after.journal).toBeNull();
+});

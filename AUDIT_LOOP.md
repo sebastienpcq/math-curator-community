@@ -507,3 +507,10 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Le scénario exerce MutationObserver et la synchronisation des réglages Chrome Storage.
 - Limite : le DOM est simulé ; aucun test sur le site YouTube en direct.
 - CI cycle 62 à confirmer ; IndexedDB demeure expérimental.
+
+## Cycle 63 — Navigation SPA et préférences en direct
+
+- CI cycle 62 : contrôles Node réussis ; navigateur encore en cours au relevé.
+- Test Playwright MV3 ajouté : navigation interne simulée sans rechargement, nouveau contenu filtré, modification de la liste d'autorisation en session puis réapplication du filtrage.
+- Le scénario couvre `yt-navigate-finish` et `chrome.storage.onChanged` dans Chromium avec l'extension chargée.
+- CI cycle 63 à confirmer. Les pages sont simulées et ne remplacent pas une validation sur YouTube réel.

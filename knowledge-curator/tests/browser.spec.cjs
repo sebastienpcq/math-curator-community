@@ -799,3 +799,31 @@ test('opt-in migration refuses changed legacy snapshot',async({page})=>{
  expect(result.error).toBe('Legacy data changed since preview');
  expect(result.canonical).toBeNull();
 });
+
+test('confirmed migration commits the exact previewed snapshot',async({page})=>{
+ await page.goto('http://127.0.0.1:8770/');
+ await page.addScriptTag({url:'/state-v3.cjs'});
+ await page.addScriptTag({url:'/indexeddb-experimental.cjs'});
+ const result=await page.evaluate(async()=>{
+  const adapter=window.KnowledgeIndexedDB;
+  const db=await adapter.open(indexedDB);
+  const stamp='2026-10-15T00:00:00.000Z';
+  let reads=0;
+  const legacy={getItem:key=>{
+   if(key==='knowledge-curator-progress-v1'){
+    reads++;
+    return JSON.stringify({arithmetic:{status:'in_progress',updatedAt:stamp}});
+   }
+   return null;
+  }};
+  const prepared=await adapter.prepareMigration(db,legacy,window.KnowledgeStateV3);
+  const approved=JSON.stringify(prepared.snapshot);
+  const result=await adapter.confirmMigration(db,legacy,window.KnowledgeStateV3,prepared);
+  const stored=await adapter.read(db);
+  db.close();
+  return {approved,result,stored,reads};
+ });
+ expect(JSON.stringify(result.result)).toBe(result.approved);
+ expect(result.stored).toEqual(result.result);
+ expect(result.reads).toBe(3);
+});

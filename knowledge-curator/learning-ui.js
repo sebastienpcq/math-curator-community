@@ -32,8 +32,8 @@ function load(){
    localStorage.removeItem('knowledge-curator-import-journal-v1');
    msg.textContent='Import interrompu récupéré depuis la sauvegarde locale.';
   }
-  const raw=localStorage.getItem(KEY);const p=raw?JSON.parse(raw):{};progress=validProgress(p)?p:{};}
- catch {progress={};msg.textContent='Impossible de lire la progression enregistrée.';}
+  const raw=localStorage.getItem(KEY);const p=raw?JSON.parse(raw):{};if(!validProgress(p))throw Error('Progression invalide');progress=p;return true;}
+ catch {msg.textContent='Impossible de lire la progression enregistrée. Aucune sauvegarde automatique effectuée.';return false;}
 }
 function persist(){
  try{localStorage.setItem(KEY,JSON.stringify(progress));return true;}
@@ -174,6 +174,6 @@ document.querySelector('#progress-reset').addEventListener('click',()=>{
 });
 fetch('learning.json').then(r=>{if(!r.ok)throw Error('Impossible de charger le parcours');return r.json();}).then(d=>{
  const errors=KnowledgeLearning.validate(d);if(errors.length)throw Error(errors.join(', '));
- data=d;load();history=readHistory();progress=derivedProgress();persist();render();
+ data=d;if(!load())return;history=readHistory();progress=derivedProgress();persist();render();
 }).catch(error=>{msg.textContent='Parcours indisponible : '+error.message;});
 })();

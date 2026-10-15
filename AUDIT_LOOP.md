@@ -19,3 +19,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Correctif : annuler la date et le statut de révision échue après une erreur ; repartir sur un intervalle d'un jour à la réussite suivante.
 - Tests ajoutés : succès-erreur-succès, bornes [1,3,7,14,30] jours, ordre chronologique.
 - Exécution CI à confirmer.
+
+## Cycle 3 — Résilience du stockage et horodatages identiques
+
+- Les deux workflows du cycle 2 ont conclu avec succès (Node V0.5 et Playwright).
+- Cas P1 : si la restauration de l'historique échoue pendant l'import, le gestionnaire signale désormais explicitement le risque de perte et évite de présenter l'échec comme un simple fichier invalide.
+- Convention de tri explicitée : à horodatage identique, l'ordre d'enregistrement est conservé par le tri stable de JavaScript.
+- Deux tests ajoutés : événements simultanés et refus d'un historique invalide.
+- La simulation d'échec de stockage dans l'interface et la vérification des tests de ce cycle restent à effectuer.

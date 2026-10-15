@@ -373,3 +373,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Test Playwright ajouté : reset réussi, journal absent, tentatives vides, archive préservée.
 - Tests historiques d'échec de reset restent indispensables pour la validation.
 - CI cycle 46 à confirmer ; import encore sur le mécanisme existant.
+
+## Cycle 47 — Import V1/V2 via coordinateur commun
+
+- CI cycle 46 : contrôles généraux réussis ; navigateur encore en cours au relevé.
+- Handler d'import refactorisé pour utiliser `KnowledgeStorage.transaction` (validation, journal, rollback).
+- Les imports V1 conservent la déclaration historique en archive et rétrogradent les maîtrises non prouvées ; V2 restaure l'historique importé.
+- Test Playwright V1 ajouté ; tests V2, import invalide et injection de pannes existants servent de non-régression.
+- CI cycle 47 à confirmer ; IndexedDB demeure expérimental.

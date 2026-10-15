@@ -620,3 +620,10 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Résultats mesurés : 100 cartes = 6,2 ms ; 500 = 7,8 ms ; 1 000 = 9,4 ms, un scan par lot cumulé.
 - Aucune explosion du temps de traitement observée, mais échantillon unique insuffisant pour estimer la complexité ou affirmer une optimisation.
 - `TEST_RESULTS.md` et `NEXT_ITERATION.md` actualisés ; aucune modification fonctionnelle. CI cycle 75 à confirmer.
+
+## Cycle 76 — Benchmark répliqué sur profils Chromium indépendants
+
+- CI cycle 75 : contrôle général réussi ; navigateur en cours au relevé.
+- Test MV3 ajouté : trois exécutions indépendantes sur 500 cartes, chaque fois avec un nouveau profil Chromium.
+- Le test publie les trois durées, la médiane, l'étendue et le nombre de scans ; chaque essai vérifie que 250 recommandations hors sujet sont masquées.
+- Pas de changement de production ni d'optimisation spéculative. CI cycle 76 à confirmer.

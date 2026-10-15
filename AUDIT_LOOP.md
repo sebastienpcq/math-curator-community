@@ -257,3 +257,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Test Playwright : tentative incorrectement typée rejetée sans écriture.
 - Limite : le validateur local doit être unifié avec `state-v3.cjs` pour éviter une divergence de schéma.
 - CI cycle 32 à confirmer.
+
+## Cycle 33 — Validation de schéma unifiée
+
+- Contrôle général cycle 32 réussi ; navigateur en cours au relevé.
+- Le validateur local IndexedDB était divergent du schéma canonique V3 (notamment archives historiques).
+- `transact` utilise désormais `KnowledgeStateV3.validate` comme source unique de validation.
+- Tests Chromium adaptés pour charger explicitement `state-v3.cjs` avant l'adaptateur ; scénario ajouté sur archive V1 malformée.
+- CI cycle 33 à confirmer ; aucune activation du module expérimental.

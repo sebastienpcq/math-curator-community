@@ -65,3 +65,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Nouveau test Playwright : trois rechargements successifs avec journal de récupération invalide, comparaison exacte de la progression et du journal avant/après.
 - Critère : aucune écriture automatique ne doit effacer le journal ni altérer la progression tant que la récupération est impossible.
 - CI du cycle 8 à vérifier ; aucune validation anticipée.
+
+## Cycle 9 — Réinitialisation sécurisée
+
+- CI cycle 8 : Node et Chromium réussis.
+- Défaut P1 : la réinitialisation supprimait l'historique avant de confirmer la sauvegarde de la progression, sans retour arrière sûr.
+- Correction : journal de récupération partagé, refus si récupération en attente, rollback et alerte en cas d'échec.
+- Test Playwright : panne simulée pendant reset, comparaison des valeurs avant/après, puis rechargement.
+- Validation cycle 9 en attente de CI.

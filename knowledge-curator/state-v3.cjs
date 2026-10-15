@@ -9,6 +9,14 @@
    ['in_progress','consolidate','demonstrated'].includes(v.status)&&
    typeof v.updatedAt==='string'&&Number.isFinite(Date.parse(v.updatedAt)));
  }
+ function validLegacyArchive(raw){
+  try {
+   const archive=JSON.parse(raw);
+   return plain(archive)&&archive.version===1&&
+    typeof archive.importedAt==='string'&&Number.isFinite(Date.parse(archive.importedAt))&&
+    validProgress(archive.progress);
+  } catch {return false;}
+ }
  function validate(record){
   return plain(record)&&record.version===VERSION&&
    validProgress(record.progress)&&
@@ -17,7 +25,8 @@
     typeof e.skillId==='string'&&/^[a-z0-9-]{1,80}$/.test(e.skillId)&&
     typeof e.exerciseId==='string'&&/^[a-z0-9-]{1,80}$/.test(e.exerciseId)&&
     typeof e.correct==='boolean'&&typeof e.timestamp==='string'&&Number.isFinite(Date.parse(e.timestamp)))&&
-   (record.legacyArchive===null||typeof record.legacyArchive==='string');
+   (record.legacyArchive===null||(
+    typeof record.legacyArchive==='string'&&validLegacyArchive(record.legacyArchive)));
  }
  function fromLegacy(storage){
   const progressRaw=storage.getItem('knowledge-curator-progress-v1');

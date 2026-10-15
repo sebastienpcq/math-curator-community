@@ -71,3 +71,19 @@ Ce test **documente un défaut architectural**, il ne constitue pas une correcti
 - Contrôle de versions et compatibilité avec les anciennes sauvegardes.
 
 **Décision : aucun branchement dans l'interface tant que ces risques n'ont pas de tests suffisants.**
+
+## Cycle 39 — Protocole de basculement et onglets concurrents
+
+Un test Playwright avec deux onglets actifs vérifie que l'inspection de basculement refuse un état devenu divergent après une écriture de l'autre onglet.
+
+**Ce test ne prouve pas l'exclusion mutuelle.** Le code V0.5 actuel écrit toujours dans localStorage et ne consulte pas de verrou ou de marqueur IndexedDB.
+
+### Conditions nécessaires à un vrai basculement
+1. Centraliser toutes les écritures pédagogiques derrière une seule API de stockage.
+2. Choisir une source de vérité unique et durable (IndexedDB) et éviter la double écriture implicite.
+3. Empêcher les anciennes pages encore ouvertes d'écrire dans localStorage : une simple marque en localStorage ne suffit pas pour des pages qui ignorent ce protocole.
+4. Prévoir une fermeture/recharge contrôlée des anciens onglets avant activation, avec vérification de divergence juste avant la transition.
+5. Maintenir les anciennes données en sauvegarde en lecture seule ; un retour arrière après nouvelles tentatives exige une exportation inverse et une réconciliation.
+6. Tester les collisions, redémarrages et échecs de migration sur une version de l'interface réellement intégrée.
+
+**Décision :** ne pas activer IndexedDB dans l'interface tant que les écritures de l'ancien code ne sont pas coordonnées. Les anciens onglets non coopératifs restent un risque bloquant.

@@ -211,3 +211,36 @@ test('export refuses pending recovery journal',async({page})=>{
  await expect(page.locator('#study-message')).toContainText('Export impossible');
  expect(await page.evaluate(()=>localStorage.getItem('knowledge-curator-import-journal-v1'))).toBe('{broken');
 });
+
+test('export and reimport preserve attempts after reload',async({page})=>{
+ await page.goto('http://127.0.0.1:8770/');
+ await expect(page.locator('#study-steps .study-step')).toHaveCount(7);
+ const first=page.locator('.study-step').first();
+ await first.locator('form.exercise').first().locator('input').fill('999');
+ await first.locator('form.exercise').first().locator('button[type=submit]').click();
+ const original=await page.evaluate(()=>({
+  progress:JSON.parse(localStorage.getItem('knowledge-curator-progress-v1')),
+  attempts:JSON.parse(localStorage.getItem('knowledge-curator-attempts-v1'))
+ }));
+ const downloadPromise=page.waitForEvent('download');
+ await page.locator('#progress-export').click();
+ const download=await downloadPromise;
+ expect(download.suggestedFilename()).toBe('knowledge-curator-progression.json');
+ const fs=require('node:fs');
+ const exported=JSON.parse(fs.readFileSync(await download.path(),'utf8'));
+ expect(exported.version).toBe(2);
+ expect(exported.attempts).toEqual(original.attempts);
+ expect(exported.progress).toEqual(original.progress);
+ await page.locator('#progress-reset').evaluate(button=>{window.confirm=()=>true;button.click();});
+ await expect(page.locator('#attempt-history')).toContainText('Aucune tentative');
+ await page.locator('#progress-import').setInputFiles({
+  name:'restored.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exported))
+ });
+ await expect(page.locator('#study-message')).toContainText('Progression importée');
+ await page.reload();
+ const restored=await page.evaluate(()=>({
+  progress:JSON.parse(localStorage.getItem('knowledge-curator-progress-v1')),
+  attempts:JSON.parse(localStorage.getItem('knowledge-curator-attempts-v1'))
+ }));
+ expect(restored).toEqual(original);
+});

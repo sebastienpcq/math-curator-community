@@ -177,3 +177,17 @@ test('canonical V3 archive validator is applied by legacy boundary',()=>{
  assert.throws(()=>boundary.transaction(storage,attempts,valid,old=>old),/Invalid existing archive/);
  assert.equal(storage.getItem(boundary.JOURNAL),null);
 });
+
+test('missing canonical validator fails closed before transaction writes',()=>{
+ const storage=store();
+ const previous=globalThis.KnowledgeStateV3;
+ delete globalThis.KnowledgeStateV3;
+ try{
+  const attempts={KEY:'attempts',read:()=>[],replace:()=>{},validateHistory:Array.isArray};
+  assert.throws(()=>boundary.transaction(storage,attempts,valid,old=>old),
+   /Canonical archive validator unavailable/);
+  assert.equal(storage.getItem(boundary.JOURNAL),null);
+ }finally{
+  globalThis.KnowledgeStateV3=previous;
+ }
+});

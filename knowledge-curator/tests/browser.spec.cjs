@@ -624,3 +624,42 @@ test('IndexedDB upgrade blocked by another connection is reported',async({page})
  expect(result.wasBlocked).toBe(true);
  expect(result.upgraded).toBe(true);
 });
+
+test('IndexedDB adapter aborts thrown callback without committing',async({page})=>{
+ await page.goto('http://127.0.0.1:8770/');
+ await page.addScriptTag({url:'/indexeddb-experimental.cjs'});
+ const result=await page.evaluate(async()=>{
+  const adapter=window.KnowledgeIndexedDB;
+  const db=await adapter.open(indexedDB);
+  const before=await adapter.read(db);
+  let message='';
+  try{
+   await adapter.transact(db,()=>{throw Error('intentional failure');});
+  }catch(error){message=error.message;}
+  const after=await adapter.read(db);
+  db.close();
+  return {message,before,after};
+ });
+ expect(result.message).toBe('intentional failure');
+ expect(result.after).toEqual(result.before);
+});
+test('IndexedDB adapter aborts invalid data without replacing committed state',async({page})=>{
+ await page.goto('http://127.0.0.1:8770/');
+ await page.addScriptTag({url:'/indexeddb-experimental.cjs'});
+ const result=await page.evaluate(async()=>{
+  const adapter=window.KnowledgeIndexedDB;
+  const db=await adapter.open(indexedDB);
+  const initial=await adapter.transact(db,state=>{
+   state.progress.arithmetic={status:'in_progress',updatedAt:'2026-10-15T00:00:00.000Z'};
+   return state;
+  });
+  let rejected=false;
+  try{await adapter.transact(db,()=>({version:2,progress:{},attempts:[]}));}
+  catch{rejected=true;}
+  const after=await adapter.read(db);
+  db.close();
+  return {initial,after,rejected};
+ });
+ expect(result.rejected).toBe(true);
+ expect(result.after).toEqual(result.initial);
+});

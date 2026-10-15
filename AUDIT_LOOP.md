@@ -419,3 +419,12 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Correctif : valider JSON, version, horodatage et progression de l'archive existante et de l'archive cible avant création du journal.
 - Deux tests Node ajoutés : archive antérieure malformée et archive cible malformée ; dans les deux cas aucune écriture de journal.
 - CI cycle 51 à confirmer. Aucun changement direct de `main` et IndexedDB non activé.
+
+## Cycle 52 — Schéma d'archive partagé
+
+- CI cycle 51 : contrôle général réussi ; navigateur en cours au relevé.
+- `state-v3.cjs` expose désormais `validLegacyArchive`; `storage-boundary.cjs` réutilise ce validateur quand il est chargé, en conservant la restriction des compétences de l'interface.
+- `index.html` charge le schéma avant la frontière de stockage.
+- Test Node ajouté : une archive avec identifiant de compétence invalide est refusée avant journal.
+- Limite : un validateur de secours reste présent pour les usages autonomes de la frontière ; le supprimer exige de modifier tous les consommateurs.
+- CI cycle 52 à confirmer.

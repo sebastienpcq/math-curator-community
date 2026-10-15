@@ -169,22 +169,11 @@ test('invalid new archive is rejected before any transaction write',()=>{
 
 test('canonical V3 archive validator is applied by legacy boundary',()=>{
  const storage=store();
- const schema=require('../state-v3.cjs');
- const previous=globalThis.KnowledgeStateV3;
- globalThis.KnowledgeStateV3=schema;
- try{
-  storage.setItem('knowledge-curator-legacy-v1-archive',JSON.stringify({
-   version:1,importedAt:'2026-10-15T00:00:00.000Z',
-   progress:{'INVALID ID':{status:'in_progress',updatedAt:'2026-10-15T00:00:00.000Z'}}
-  }));
-  const attempts={
-   KEY:'attempts',read:()=>[],replace:()=>{},
-   validateHistory:Array.isArray
-  };
-  assert.throws(()=>boundary.transaction(storage,attempts,valid,old=>old),/Invalid existing archive/);
-  assert.equal(storage.getItem(boundary.JOURNAL),null);
- }finally{
-  if(previous===undefined)delete globalThis.KnowledgeStateV3;
-  else globalThis.KnowledgeStateV3=previous;
- }
+ storage.setItem('knowledge-curator-legacy-v1-archive',JSON.stringify({
+  version:1,importedAt:'2026-10-15T00:00:00.000Z',
+  progress:{'INVALID ID':{status:'in_progress',updatedAt:'2026-10-15T00:00:00.000Z'}}
+ }));
+ const attempts={KEY:'attempts',read:()=>[],replace:()=>{},validateHistory:Array.isArray};
+ assert.throws(()=>boundary.transaction(storage,attempts,valid,old=>old),/Invalid existing archive/);
+ assert.equal(storage.getItem(boundary.JOURNAL),null);
 });

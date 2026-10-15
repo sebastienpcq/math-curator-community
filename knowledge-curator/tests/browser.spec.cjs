@@ -85,7 +85,7 @@ test('failed rollback reports an explicit warning',async({page})=>{
     attemptsWrites++;
     if(attemptsWrites>=2)throw Error('simulated rollback failure');
    }
-   if(key==='knowledge-curator-progress-v1')throw Error('simulated progress failure');
+   if(key==='knowledge-curator-progress-v1' && attemptsWrites>0)throw Error('simulated progress failure');
    return original.call(this,key,value);
   };
  });

@@ -239,3 +239,12 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Invariants : rejet explicite et aucune modification de l'état précédemment validé.
 - Le test de quota simule l'exception dans le callback ; il ne reproduit pas un véritable quota disque épuisé dans Chromium.
 - CI cycle 30 à confirmer ; module non activé en production.
+
+## Cycle 31 — Synthèse et garde-fou migration
+
+- CI cycle 30 : Node et Playwright réussis (runs 38665780038 et 38665780092).
+- Inspection du module expérimental : migration possible malgré un journal de récupération V0.5 en attente, source potentiellement partiellement écrite.
+- Correction : refuser la migration tant que le journal est présent.
+- Test Playwright ajouté ; validation CI en attente.
+- `TEST_RESULTS.md` et `NEXT_ITERATION.md` réactualisés : les risques non vérifiés sont explicités.
+- Aucun branchement du stockage expérimental à l'interface, aucune modification de main.

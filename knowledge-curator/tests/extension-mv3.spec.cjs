@@ -319,3 +319,43 @@ test('MV3 badge mutations do not prevent filtering later inserted videos',async(
   fs.rmSync(profile,{recursive:true,force:true});
  }
 });
+
+test('MV3 exposes scan counts and timing without content telemetry',async()=>{
+ const profile=fs.mkdtempSync(path.join(os.tmpdir(),'math-curator-metrics-'));
+ let context;
+ try{
+  context=await chromium.launchPersistentContext(profile,{
+   channel:'chromium',headless:true,
+   args:['--disable-extensions-except='+root,'--load-extension='+root]
+  });
+  let workers=context.serviceWorkers();
+  if(!workers.length)workers=[await context.waitForEvent('serviceworker',{timeout:15000})];
+  const page=await context.newPage();
+  await page.route('https://www.youtube.com/**',route=>route.fulfill({
+   status:200,contentType:'text/html',
+   body:'<!doctype html><html><body><main id="feed"></main></body></html>'
+  }));
+  await page.goto('https://www.youtube.com/',{waitUntil:'domcontentloaded'});
+  await expect.poll(()=>page.evaluate(()=>window.__mathCuratorMetrics?.scans||0)).toBeGreaterThan(0);
+  const before=await page.evaluate(()=>window.__mathCuratorMetrics.scans);
+  await page.evaluate(()=>{
+   const fragment=document.createDocumentFragment();
+   for(let i=0;i<100;i++){
+    const card=document.createElement('ytd-video-renderer');
+    card.innerHTML='<a id="video-title" href="/watch?v=abcdefghijk">Gaming highlights</a>';
+    fragment.append(card);
+   }
+   document.querySelector('#feed').append(fragment);
+  });
+  await expect.poll(()=>page.evaluate(()=>window.__mathCuratorMetrics.scans)).toBeGreaterThan(before);
+  const metrics=await page.evaluate(()=>({...window.__mathCuratorMetrics}));
+  expect(metrics.totalMs).toBeGreaterThanOrEqual(0);
+  expect(metrics.maxMs).toBeGreaterThanOrEqual(metrics.lastMs);
+  expect(metrics.scans).toBeLessThan(12);
+  expect(Object.keys(metrics).sort()).toEqual(['lastMs','maxMs','scans','totalMs']);
+  console.log('Math Curator scan metrics',JSON.stringify(metrics));
+ }finally{
+  if(context)await context.close();
+  fs.rmSync(profile,{recursive:true,force:true});
+ }
+});

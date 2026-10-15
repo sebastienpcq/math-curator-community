@@ -150,8 +150,11 @@ document.querySelector('#progress-import').addEventListener('change',async e=>{
       e.target.value='';
       return;
     }
-    // Legacy V1 mastery assertions lack supporting attempts: preserve learning
-    // activity without treating them as independently demonstrated mastery.
+    // Keep original V1 assertions in a separate, non-authoritative archive.
+    // The active progression still requires fresh evidence of mastery.
+    const legacyArchive=payload.version===1
+      ?JSON.stringify({version:1,importedAt:new Date().toISOString(),progress:payload.progress})
+      :null;
     if(payload.version===1){
       payload.progress=Object.fromEntries(Object.entries(payload.progress).map(([id,value])=>[
         id,value.status==='demonstrated'||value.status==='consolidate'
@@ -174,6 +177,10 @@ document.querySelector('#progress-import').addEventListener('change',async e=>{
       progress=derivedProgress();
       if(!persist())throw Error('Sauvegarde indisponible');
       localStorage.removeItem(JOURNAL);
+      if(legacyArchive!==null){
+        try {localStorage.setItem('knowledge-curator-legacy-v1-archive',legacyArchive);}
+        catch {msg.textContent='Progression importée, mais archivage V1 impossible.';}
+      }
     } catch(error) {
       progress=previousProgress;
       history=previousHistory;

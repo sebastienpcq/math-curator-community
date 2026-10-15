@@ -58,3 +58,44 @@ test('invalid canonical state is not silently replaced',()=>{
  assert.throws(()=>state.migrate(store));
  assert.equal(store.getItem(state.KEY),'{invalid');
 });
+
+test('quota error during migration preserves legacy and leaves no canonical record',()=>{
+ const values=new Map([
+  ['knowledge-curator-progress-v1',JSON.stringify(sample)],
+  ['knowledge-curator-attempts-v1',JSON.stringify([attempt])]
+ ]);
+ const store={
+  getItem:key=>values.has(key)?values.get(key):null,
+  setItem:(key,value)=>{
+   if(key===state.KEY)throw Error('QuotaExceededError');
+   values.set(key,value);
+  }
+ };
+ const before=Object.fromEntries(values);
+ assert.throws(()=>state.migrate(store),/QuotaExceededError/);
+ assert.deepEqual(Object.fromEntries(values),before);
+});
+test('repeated migration after transient write failure is safe',()=>{
+ const values=new Map([['knowledge-curator-progress-v1',JSON.stringify(sample)]]);
+ let fail=true;
+ const store={
+  getItem:key=>values.has(key)?values.get(key):null,
+  setItem:(key,value)=>{
+   if(key===state.KEY&&fail)throw Error('transient failure');
+   values.set(key,value);
+  }
+ };
+ assert.throws(()=>state.migrate(store));
+ assert.equal(store.getItem(state.KEY),null);
+ fail=false;
+ const first=state.migrate(store);
+ assert.deepEqual(state.migrate(store),first);
+ assert.deepEqual(first.progress,sample);
+});
+test('canonical state survives legacy data removal',()=>{
+ const store=storage({'knowledge-curator-progress-v1':JSON.stringify(sample)});
+ const canonical=state.migrate(store);
+ const existing=store.getItem(state.KEY);
+ const values=storage({[state.KEY]:existing});
+ assert.deepEqual(state.read(values),canonical);
+});

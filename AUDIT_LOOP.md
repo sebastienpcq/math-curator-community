@@ -529,3 +529,10 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Inspection de `MathScoring.decide` : blocage vidéo > autorisation vidéo > blocage chaîne > autorisation chaîne > règles pédagogiques. Le correctif Shorts du cycle 64 préserve le blocage explicite.
 - Test Chromium MV3 ajouté pour vérifier ces priorités sur une page YouTube simulée, y compris le retour au filtrage strict lorsque les exceptions sont retirées.
 - Aucun changement de logique métier faute d'anomalie supplémentaire démontrée ; CI cycle 65 à confirmer.
+
+## Cycle 66 — Cartes réutilisées et métadonnées manquantes
+
+- CI cycle 65 : Node et Chromium réussis.
+- Test MV3 ajouté : une carte initialement masquée devient un cours mathématique et doit réapparaître, puis redevient hors sujet et doit être masquée ; une carte sans métadonnées reste visible en mode équilibré mais est masquée en mode strict.
+- Le test couvre le cache de fingerprint, les mutations DOM et les comportements `unknown`.
+- CI cycle 66 à confirmer. Aucun changement de production avant résultat du test.

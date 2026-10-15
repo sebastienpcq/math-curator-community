@@ -194,3 +194,20 @@ test('reset failure preserves history and reports cancellation',async({page})=>{
  await page.reload();
  await expect(page.locator('#attempt-history')).toContainText('incorrect');
 });
+
+test('export rejects corrupt history without replacing it',async({page})=>{
+ await page.goto('http://127.0.0.1:8770/');
+ await expect(page.locator('#study-steps .study-step')).toHaveCount(7);
+ await page.evaluate(()=>localStorage.setItem('knowledge-curator-attempts-v1','{broken'));
+ await page.locator('#progress-export').click();
+ await expect(page.locator('#study-message')).toContainText('Export impossible');
+ expect(await page.evaluate(()=>localStorage.getItem('knowledge-curator-attempts-v1'))).toBe('{broken');
+});
+test('export refuses pending recovery journal',async({page})=>{
+ await page.goto('http://127.0.0.1:8770/');
+ await expect(page.locator('#study-steps .study-step')).toHaveCount(7);
+ await page.evaluate(()=>localStorage.setItem('knowledge-curator-import-journal-v1','{broken'));
+ await page.locator('#progress-export').click();
+ await expect(page.locator('#study-message')).toContainText('Export impossible');
+ expect(await page.evaluate(()=>localStorage.getItem('knowledge-curator-import-journal-v1'))).toBe('{broken');
+});

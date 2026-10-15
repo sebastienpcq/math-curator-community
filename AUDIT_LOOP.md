@@ -436,3 +436,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Test Playwright ajouté : archive contenant un identifiant de compétence interdit, refus de restauration, conservation des trois valeurs et du journal.
 - Le validateur de secours de `storage-boundary.cjs` demeure pour compatibilité autonome ; son retrait demande une migration explicite des tests/consommateurs.
 - CI cycle 53 à confirmer. Aucun merge, aucune activation IndexedDB.
+
+## Cycle 54 — Suppression du validateur de secours
+
+- CI cycle 53 : contrôles Node et Chromium réussis.
+- `storage-boundary.cjs` exige maintenant `KnowledgeStateV3.validLegacyArchive` ; le validateur de secours dupliqué a été retiré.
+- Les tests Node chargent explicitement le schéma canonique. Test ajouté : en l'absence du validateur, la transaction échoue avant toute écriture.
+- `index.html` charge déjà le schéma V3 avant la frontière de stockage.
+- CI cycle 54 à confirmer ; aucune migration IndexedDB active.

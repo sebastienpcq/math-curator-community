@@ -411,3 +411,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Correction : validation de l'horodatage avant toute restauration des trois clés.
 - Deux tests Playwright ajoutés : archive invalide sans mutation partielle ; deux reprises échouées puis restauration après levée de la panne.
 - CI cycle 50 à confirmer ; IndexedDB non activé.
+
+## Cycle 51 — Validation des archives avant transaction
+
+- CI cycle 50 : contrôles Node réussis ; Chromium encore en cours lors du relevé.
+- Défaut confirmé par inspection : `KnowledgeStorage.transaction` acceptait une archive V1 arbitraire dès lors qu'elle était une chaîne, contrairement au validateur de récupération au démarrage.
+- Correctif : valider JSON, version, horodatage et progression de l'archive existante et de l'archive cible avant création du journal.
+- Deux tests Node ajoutés : archive antérieure malformée et archive cible malformée ; dans les deux cas aucune écriture de journal.
+- CI cycle 51 à confirmer. Aucun changement direct de `main` et IndexedDB non activé.

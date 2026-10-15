@@ -381,3 +381,10 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Les imports V1 conservent la déclaration historique en archive et rétrogradent les maîtrises non prouvées ; V2 restaure l'historique importé.
 - Test Playwright V1 ajouté ; tests V2, import invalide et injection de pannes existants servent de non-régression.
 - CI cycle 47 à confirmer ; IndexedDB demeure expérimental.
+
+## Cycle 48 — Non-régression globale
+
+- CI cycle 47 : contrôles généraux réussis ; navigateur en cours au relevé.
+- Nouveau test Playwright de bout en bout : erreur enregistrée, compétence à consolider, import V2, rechargement, comparaison des données et export JSON.
+- Les tests existants couvrent séparément reset, rollback, révisions espacées, migration V1 et stockage IndexedDB expérimental.
+- CI cycle 48 à confirmer ; aucune déclaration de stabilité avant validation.

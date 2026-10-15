@@ -184,3 +184,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Ce test est une reproduction volontaire du défaut, pas une correction ; la CI doit le confirmer.
 - Décision : ne pas activer V3 ; préparer un module IndexedDB transactionnel et des tests de concurrence avant migration.
 - Aucun changement des données utilisateurs ni de l'interface.
+
+## Cycle 24 — Prototype transactionnel IndexedDB
+
+- CI cycle 23 : Node et Chromium réussis.
+- Nouveau module expérimental IndexedDB avec transaction `readwrite` de lecture-modification-écriture ; non chargé par l'interface.
+- Test Chromium ajouté : deux modifications concurrentes dans le même magasin, conservation de la tentative et de la progression.
+- Le test utilise IndexedDB natif pour établir la propriété de transaction ; l'intégration du module expérimental et la migration V3 restent non vérifiées.
+- CI cycle 24 à confirmer.

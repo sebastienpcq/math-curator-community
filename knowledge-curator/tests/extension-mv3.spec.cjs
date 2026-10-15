@@ -189,3 +189,48 @@ test('MV3 video-specific rules override channel rules and strict filtering',asyn
   fs.rmSync(profile,{recursive:true,force:true});
  }
 });
+
+test('MV3 reevaluates reused video cards and handles missing metadata',async()=>{
+ const profile=fs.mkdtempSync(path.join(os.tmpdir(),'math-curator-reused-'));
+ let context;
+ try{
+  context=await chromium.launchPersistentContext(profile,{
+   channel:'chromium',headless:true,
+   args:['--disable-extensions-except='+root,'--load-extension='+root]
+  });
+  let workers=context.serviceWorkers();
+  if(!workers.length)workers=[await context.waitForEvent('serviceworker',{timeout:15000})];
+  const page=await context.newPage();
+  await page.route('https://www.youtube.com/**',route=>route.fulfill({
+   status:200,contentType:'text/html',
+   body:'<!doctype html><html><body><main><ytd-video-renderer id="reused"><a id="video-title" href="/watch?v=abcdefghijk">Gaming highlights</a></ytd-video-renderer><ytd-video-renderer id="missing"></ytd-video-renderer></main></body></html>'
+  }));
+  await page.goto('https://www.youtube.com/',{waitUntil:'domcontentloaded'});
+  await workers[0].evaluate(async()=>chrome.storage.local.set({settings:{
+   enabled:true,mode:'balanced'
+  }}));
+  await expect(page.locator('#reused')).toHaveClass(/math-curator-hidden/);
+  await expect(page.locator('#missing')).not.toHaveClass(/math-curator-hidden/);
+  await page.evaluate(()=>{
+   const card=document.querySelector('#reused');
+   const link=card.querySelector('#video-title');
+   link.textContent='Cours de mathématiques débutant : fractions et équations';
+   link.setAttribute('href','/watch?v=bcdefghijkl');
+  });
+  await expect(page.locator('#reused')).not.toHaveClass(/math-curator-hidden/);
+  await page.evaluate(()=>{
+   const card=document.querySelector('#reused');
+   const link=card.querySelector('#video-title');
+   link.textContent='Gaming highlights';
+   link.setAttribute('href','/watch?v=cdefghijklm');
+  });
+  await expect(page.locator('#reused')).toHaveClass(/math-curator-hidden/);
+  await workers[0].evaluate(async()=>chrome.storage.local.set({settings:{
+   enabled:true,mode:'strict'
+  }}));
+  await expect(page.locator('#missing')).toHaveClass(/math-curator-hidden/);
+ }finally{
+  if(context)await context.close();
+  fs.rmSync(profile,{recursive:true,force:true});
+ }
+});

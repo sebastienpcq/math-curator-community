@@ -47,7 +47,7 @@ function load(){
  catch {msg.textContent='Impossible de lire la progression enregistrée. Aucune sauvegarde automatique effectuée.';return false;}
 }
 function persist(){
- try{localStorage.setItem(KEY,JSON.stringify(progress));return true;}
+ try{KnowledgeStorage.writeProgress(localStorage,progress,validProgress);return true;}
  catch{msg.textContent='Sauvegarde locale indisponible. Exporte ta progression pour la conserver.';return false;}
 }
 function setStatus(id,status){progress[id]={status,updatedAt:new Date().toISOString()};persist();render();}

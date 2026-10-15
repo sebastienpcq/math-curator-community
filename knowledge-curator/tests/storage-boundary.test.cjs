@@ -26,3 +26,22 @@ test('invalid progress is rejected before writing',()=>{
  assert.throws(()=>boundary.writeProgress(storage,[],valid),/Invalid progress/);
  assert.equal(storage.getItem(boundary.PROGRESS),null);
 });
+
+test('attempt append is delegated through boundary',()=>{
+ const storage=store();
+ const attempts={append:(target,event)=>{
+  target.setItem('attempts',JSON.stringify([event]));
+  return true;
+ }};
+ const event={skillId:'arithmetic',correct:false};
+ boundary.appendAttempt(storage,attempts,event);
+ assert.deepEqual(JSON.parse(storage.getItem('attempts')),[event]);
+});
+test('attempt append is rejected while recovery is pending',()=>{
+ const storage=store();
+ storage.setItem(boundary.JOURNAL,'{}');
+ let called=false;
+ const attempts={append:()=>{called=true;}};
+ assert.throws(()=>boundary.appendAttempt(storage,attempts,{correct:false}),/recovery pending/);
+ assert.equal(called,false);
+});

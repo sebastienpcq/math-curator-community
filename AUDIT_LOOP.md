@@ -103,3 +103,12 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Nouveau test Playwright : importer un fichier V1 valide sans historique existant, recharger, vérifier la compétence en cours et l'absence de tentatives artificielles.
 - Compatibilité historique vérifiée uniquement si le nouveau test passe en CI.
 - Suite : tester V1 avec progression de maîtrise ancienne sans preuves d'exercices.
+
+## Cycle 14 — Maîtrise historique sans preuves
+
+- Contrôle général du cycle 13 réussi ; navigateur encore en cours au relevé.
+- Décision conservatrice : une maîtrise V1 sans historique de tentatives est importée comme `in_progress`, non comme `demonstrated`.
+- Même traitement pour l'ancien statut `consolidate` non vérifiable.
+- Test Playwright ajouté : importer un V1 `demonstrated`, recharger, vérifier le statut `in_progress` et l'absence de maîtrise démontrée.
+- Risque résiduel : cette migration perd la distinction de l'ancien statut dans l'état actif ; documenter avant diffusion.
+- CI du cycle 14 à confirmer.

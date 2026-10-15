@@ -704,3 +704,26 @@ test('IndexedDB migration refuses legacy state with pending recovery journal',as
  expect(result.error).toBe('Legacy recovery pending');
  expect(result.saved).toBeNull();
 });
+
+test('IndexedDB rejects invalid attempt payload without commit',async({page})=>{
+ await page.goto('http://127.0.0.1:8770/');
+ await page.addScriptTag({url:'/indexeddb-experimental.cjs'});
+ const result=await page.evaluate(async()=>{
+  const adapter=window.KnowledgeIndexedDB;
+  const db=await adapter.open(indexedDB);
+  const before=await adapter.read(db);
+  let rejected=false;
+  try{
+   await adapter.transact(db,state=>{
+    state.attempts.push({skillId:'arithmetic',exerciseId:'ex-arithmetic',
+     correct:'yes',timestamp:'2026-10-15T00:00:00.000Z'});
+    return state;
+   });
+  }catch{rejected=true;}
+  const after=await adapter.read(db);
+  db.close();
+  return {before,after,rejected};
+ });
+ expect(result.rejected).toBe(true);
+ expect(result.after).toEqual(result.before);
+});

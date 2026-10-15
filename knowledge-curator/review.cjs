@@ -5,6 +5,7 @@
  function validDate(s){const n=Date.parse(s);return Number.isFinite(n)?n:null;}
  function reviewState(step,events,now=Date.now()){
   const ordered=events.filter(e=>e.skillId===step.id).slice().sort((a,b)=>validDate(a.timestamp)-validDate(b.timestamp));
+  // Same timestamps retain insertion order (stable sort): later recorded attempt wins.
   const errors=ordered.filter(e=>!e.correct).length;
   const latest=ordered.at(-1);
   const lastCorrect=ordered.filter(e=>e.correct).at(-1);

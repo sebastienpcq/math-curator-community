@@ -30,6 +30,13 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Run V0.5 Node regression tests
         run: node --test knowledge-curator/tests/validation-v05.test.cjs knowledge-curator/tests/state-v3.test.cjs
+      - name: Test IndexedDB persistence across Chromium restart
+        run: |
+          python3 -m http.server 8770 --bind 127.0.0.1 --directory knowledge-curator &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID || true' EXIT
+          sleep 2
+          node knowledge-curator/tests/indexeddb-persistence.cjs
       - name: Serve local site and run browser checks
         run: |
           python3 -m http.server 8770 --bind 127.0.0.1 --directory knowledge-curator &

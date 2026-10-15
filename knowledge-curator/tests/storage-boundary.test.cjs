@@ -217,3 +217,42 @@ test('common recovery refuses malformed archive without changing values',()=>{
  assert.equal(storage.getItem(boundary.PROGRESS),'{"existing":{}}');
  assert.notEqual(storage.getItem(boundary.JOURNAL),null);
 });
+
+test('old two-key journal recovers without modifying newer archive',()=>{
+ const storage=store();
+ const attempts={KEY:'attempts',validateHistory:Array.isArray};
+ const archive=JSON.stringify({version:1,importedAt:'2026-10-15T00:00:00.000Z',progress:{}});
+ storage.setItem('knowledge-curator-legacy-v1-archive',archive);
+ storage.setItem(boundary.JOURNAL,JSON.stringify({progress:'{}',attempts:'[]'}));
+ storage.setItem(boundary.PROGRESS,'{"arithmetic":{}}');
+ assert.equal(boundary.recover(storage,attempts,valid),true);
+ assert.equal(storage.getItem(boundary.PROGRESS),'{}');
+ assert.equal(storage.getItem('attempts'),'[]');
+ assert.equal(storage.getItem('knowledge-curator-legacy-v1-archive'),archive);
+ assert.equal(storage.getItem(boundary.JOURNAL),null);
+});
+test('repeated recovery failures retain journal until storage becomes writable',()=>{
+ const values=new Map([
+  [boundary.JOURNAL,JSON.stringify({progress:'{}',attempts:'[]',legacyArchive:null})],
+  [boundary.PROGRESS,'{"arithmetic":{}}']
+ ]);
+ let failing=true;
+ const storage={
+  getItem:k=>values.has(k)?values.get(k):null,
+  setItem:(k,v)=>{
+   if(k===boundary.PROGRESS&&failing)throw Error('temporary failure');
+   values.set(k,v);
+  },
+  removeItem:k=>values.delete(k)
+ };
+ const attempts={KEY:'attempts',validateHistory:Array.isArray};
+ for(let i=0;i<2;i++){
+  assert.throws(()=>boundary.recover(storage,attempts,valid),/temporary failure/);
+  assert.notEqual(storage.getItem(boundary.JOURNAL),null);
+ }
+ failing=false;
+ assert.equal(boundary.recover(storage,attempts,valid),true);
+ assert.equal(storage.getItem(boundary.PROGRESS),'{}');
+ assert.equal(storage.getItem('attempts'),'[]');
+ assert.equal(storage.getItem(boundary.JOURNAL),null);
+});

@@ -113,9 +113,7 @@ document.querySelector('#progress-export').addEventListener('click',()=>{
  try {
   if(KnowledgeStorage.pending(localStorage))throw Error('Récupération en attente');
   const attempts=KnowledgeStorage.readAttempts(localStorage,KnowledgeAttempts);
-  const raw=JSON.stringify(KnowledgeStorage.readProgress(localStorage,validProgress));
-  const saved=raw===null?{}:JSON.parse(raw);
-  if(!validProgress(saved))throw Error('Progression locale invalide');
+  const saved=KnowledgeStorage.readProgress(localStorage,validProgress);
   const blob=new Blob([JSON.stringify({version:2,progress:saved,attempts},null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');a.href=url;a.download='knowledge-curator-progression.json';a.click();

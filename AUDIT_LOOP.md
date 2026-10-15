@@ -160,3 +160,12 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Workflow CI étendu pour exécuter ces tests.
 - Le prototype n'est pas activé en production ; aucune migration utilisateur n'est effectuée.
 - Validation CI du cycle 20 en attente.
+
+## Cycle 21 — Validation du prototype V3
+
+- Contrôle général cycle 20 réussi ; navigateur en cours au moment de la vérification.
+- Anomalie : l'archive V1 était acceptée comme simple chaîne sans validation JSON ni structure.
+- Correctif : validation de la version, de la date d'archivage et de la progression de l'archive.
+- Trois tests Node ajoutés : archive invalide, migration idempotente après corruption du format hérité, état canonique invalide conservé sans remplacement silencieux.
+- Module toujours expérimental et non connecté à l'interface.
+- CI cycle 21 à confirmer.

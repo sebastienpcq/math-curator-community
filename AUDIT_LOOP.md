@@ -581,3 +581,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - CI cycle 71 : Node réussi ; Chromium 8/9, échec dans le test de métriques à la ligne 350 (`window.__mathCuratorMetrics` inaccessible depuis `page.evaluate`).
 - Correctif ciblé : remplacer le dernier accès direct à la variable du monde isolé par `document.documentElement.dataset.mathCuratorScans`.
 - Aucun changement du moteur de filtrage ; CI cycle 72 à confirmer.
+
+## Cycle 73 — Analyse instrumentée des scans
+
+- CI cycle 72 : Node et Chromium réussis (runs 38673091939 et 38673091936).
+- 9 tests MV3 et 48 tests navigateur pédagogique réussis.
+- Mesure observée dans les logs : 2 scans, 2,2 ms cumulés et 2,1 ms au maximum sur un lot de 100 cartes simulées.
+- Une seule mesure CI ne permet pas d'inférer une amélioration statistique ; aucune optimisation spéculative n'a été implémentée.
+- `TEST_RESULTS.md` et `NEXT_ITERATION.md` actualisés. CI cycle 73 à confirmer.

@@ -231,3 +231,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Test Playwright : une connexion ouverte bloque une mise à niveau de version, puis sa fermeture permet la reprise.
 - Limite : le test d'upgrade valide le comportement natif IndexedDB ; les erreurs quota et abort de l'adaptateur restent à tester directement.
 - CI cycle 29 à confirmer ; aucune activation du stockage expérimental.
+
+## Cycle 30 — Abort et quota IndexedDB
+
+- CI cycle 29 : Node et Chromium réussis.
+- Trois tests Playwright supplémentaires sur l'adaptateur réel : exception du callback, état invalide après commit antérieur, exception simulée `QuotaExceededError`.
+- Invariants : rejet explicite et aucune modification de l'état précédemment validé.
+- Le test de quota simule l'exception dans le callback ; il ne reproduit pas un véritable quota disque épuisé dans Chromium.
+- CI cycle 30 à confirmer ; module non activé en production.

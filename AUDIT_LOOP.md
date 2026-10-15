@@ -403,3 +403,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Deux tests Node ajoutés au coordinateur : refus d'un historique préexistant corrompu avant création du journal ; panne de restauration conservant le journal et signalant `Rollback failed`.
 - Aucun changement de code métier ni d'activation IndexedDB.
 - Validation des nouveaux tests et de la CI navigateur à confirmer avant toute qualification de stabilité.
+
+## Cycle 50 — Restauration répétée et archive V1 invalide
+
+- CI cycle 49 : contrôles Node réussis ; navigateur encore en cours au relevé.
+- Défaut identifié par inspection : la restauration du journal vérifiait la version et la progression de l'archive V1, mais pas son horodatage `importedAt`.
+- Correction : validation de l'horodatage avant toute restauration des trois clés.
+- Deux tests Playwright ajoutés : archive invalide sans mutation partielle ; deux reprises échouées puis restauration après levée de la panne.
+- CI cycle 50 à confirmer ; IndexedDB non activé.

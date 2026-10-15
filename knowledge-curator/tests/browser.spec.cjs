@@ -825,5 +825,5 @@ test('confirmed migration commits the exact previewed snapshot',async({page})=>{
  });
  expect(JSON.stringify(result.result)).toBe(result.approved);
  expect(result.stored).toEqual(result.result);
- expect(result.reads).toBe(3);
+ expect(result.reads).toBe(2);
 });

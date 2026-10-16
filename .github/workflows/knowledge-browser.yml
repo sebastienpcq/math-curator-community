@@ -30,6 +30,10 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Run V0.5 Node regression tests
         run: node --test knowledge-curator/tests/validation-v05.test.cjs knowledge-curator/tests/state-v3.test.cjs knowledge-curator/tests/storage-boundary.test.cjs
+      - name: Check Unicode classification and paired metadata baseline
+        run: |
+          node --test knowledge-curator/evaluation/scoring-unicode.test.cjs
+          node knowledge-curator/evaluation/run-paired-baseline.cjs
       - name: Evaluate verified pedagogical corpus with actual scoring engine
         run: node knowledge-curator/evaluation/run-scoring-baseline.cjs
       - name: Run real MV3 extension smoke test

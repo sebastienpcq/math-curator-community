@@ -1,7 +1,7 @@
 {
-  "version": "0.2",
+  "version": "0.3-pilot",
   "date": "2026-10-16",
-  "limitations": "Échantillon intentionnel, non représentatif; aucune validation de la justesse mathématique. Transcriptions récupérées via vidIQ mais non reproduites.",
+  "limitations": "Échantillon intentionnel, non représentatif; aucune validation de la justesse mathématique. Transcriptions récupérées via vidIQ mais non reproduites. Description excerpts are partial and not comparable to full YouTube descriptions.",
   "videos": [
     {
       "id": "0-y8RUNPnQE",
@@ -21,7 +21,9 @@
         "source": "titre et description consultés",
         "quality": "non évaluée",
         "correctness": "non vérifiée"
-      }
+      },
+      "descriptionExcerpt": "#fraction #fractions #nationapprenante #éducation #écoleàlamaison #cm1 #cm2 #mathématiques #nombre #calculs #primaire #enfants #élémentaire",
+      "descriptionExcerptSource": "vidIQ search snippet; excerpt, not full description"
     },
     {
       "id": "m0HUFgWbgsA",
@@ -41,7 +43,9 @@
         "source": "titre et description consultés",
         "quality": "non évaluée",
         "correctness": "non vérifiée"
-      }
+      },
+      "descriptionExcerpt": "Dans cette vidéo, je te propose de revoir tout le cours sur le chapitre des fractions.",
+      "descriptionExcerptSource": "vidIQ search snippet; excerpt, not full description"
     },
     {
       "id": "49OnlwASFbg",
@@ -61,7 +65,9 @@
         "source": "titre et description consultés",
         "quality": "non évaluée",
         "correctness": "non vérifiée"
-      }
+      },
+      "descriptionExcerpt": null,
+      "descriptionExcerptSource": "unavailable in retained evidence"
     },
     {
       "id": "7VFpZ63Tgis",
@@ -81,7 +87,9 @@
         "source": "titre et description consultés",
         "quality": "non évaluée",
         "correctness": "non vérifiée"
-      }
+      },
+      "descriptionExcerpt": "Dans cette vidéo, tu pourras apprendre à effectuer une démonstration de la propriété donnant les solutions d'une équation du second degré.",
+      "descriptionExcerptSource": "vidIQ search snippet; excerpt, not full description"
     },
     {
       "id": "5oBnmZVrOXE",
@@ -101,7 +109,9 @@
         "source": "titre et description consultés",
         "quality": "non évaluée",
         "correctness": "non vérifiée"
-      }
+      },
+      "descriptionExcerpt": "Dans cette vidéo, je te propose de revoir tout le cours sur le chapitre des probabilités conditionnelles.",
+      "descriptionExcerptSource": "vidIQ search snippet; excerpt, not full description"
     },
     {
       "id": "fNk_zzaMoSs",
@@ -121,7 +131,9 @@
         "source": "titre et description consultés",
         "quality": "non évaluée",
         "correctness": "non vérifiée"
-      }
+      },
+      "descriptionExcerpt": "Beginning the linear algebra series with the basics.",
+      "descriptionExcerptSource": "vidIQ search snippet; excerpt, not full description"
     },
     {
       "id": "PFDu9oVAE-g",
@@ -141,7 +153,9 @@
         "source": "titre et description consultés",
         "quality": "non évaluée",
         "correctness": "non vérifiée"
-      }
+      },
+      "descriptionExcerpt": "A visual understanding of eigenvectors, eigenvalues, and the usefulness of an eigenbasis.",
+      "descriptionExcerptSource": "vidIQ search snippet; excerpt, not full description"
     },
     {
       "id": "pWtt0AvU0KA",
@@ -161,7 +175,9 @@
         "source": "titre et description consultés",
         "quality": "non évaluée",
         "correctness": "non vérifiée"
-      }
+      },
+      "descriptionExcerpt": "Courses on Khan Academy are always 100% free. Start practicing—and saving your progress now.",
+      "descriptionExcerptSource": "vidIQ search snippet; excerpt, not full description"
     },
     {
       "id": "6dZLq77gSGU",
@@ -181,7 +197,9 @@
         "source": "titre et description consultés",
         "quality": "non évaluée",
         "correctness": "non vérifiée"
-      }
+      },
+      "descriptionExcerpt": null,
+      "descriptionExcerptSource": "unavailable in retained evidence"
     },
     {
       "id": "vv3JNSPKeEU",
@@ -201,7 +219,9 @@
         "source": "titre et description consultés",
         "quality": "non évaluée",
         "correctness": "non vérifiée"
-      }
+      },
+      "descriptionExcerpt": "We define topological spaces and give examples including the discrete, trivial, and metric topologies.",
+      "descriptionExcerptSource": "vidIQ search snippet; excerpt, not full description"
     }
   ]
 }

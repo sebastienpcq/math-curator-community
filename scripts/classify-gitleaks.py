@@ -48,13 +48,22 @@ def main(path):
         status,reason="unverified","unavailable_history"
         if commit and file_path and secret:
             try:
-                source=subprocess.check_output(["git","show",f"{commit}:{file_path}"],stderr=subprocess.DEVNULL).decode("utf-8")
-                status,reason=classify(source,secret,finding.get("StartLine"))
-                if reason=="value_not_in_snapshot":
-                    parent=subprocess.check_output(["git","rev-parse",commit+"^"],stderr=subprocess.DEVNULL).decode().strip()
-                    previous=subprocess.check_output(["git","show",f"{parent}:{file_path}"],stderr=subprocess.DEVNULL).decode("utf-8")
-                    status,reason=classify(previous,secret,None)
-                    reason="parent_"+reason
+                patch=subprocess.check_output(
+                    ["git","show","--format=","--no-ext-diff","--unified=0",commit,"--",file_path],
+                    stderr=subprocess.DEVNULL
+                ).decode("utf-8")
+                changed=[line[1:] for line in patch.splitlines() if line.startswith(("+","-")) and not line.startswith(("+++","---"))]
+                in_diff=any(secret in line for line in changed)
+                if not in_diff:
+                    status,reason="unverified","not_found_in_commit_diff"
+                else:
+                    source=subprocess.check_output(["git","show",f"{commit}:{file_path}"],stderr=subprocess.DEVNULL).decode("utf-8")
+                    status,reason=classify(source,secret,finding.get("StartLine"))
+                    if reason=="value_not_in_snapshot":
+                        parent=subprocess.check_output(["git","rev-parse",commit+"^"],stderr=subprocess.DEVNULL).decode().strip()
+                        previous=subprocess.check_output(["git","show",f"{parent}:{file_path}"],stderr=subprocess.DEVNULL).decode("utf-8")
+                        status,reason=classify(previous,secret,None)
+                        reason="parent_"+reason
             except (subprocess.CalledProcessError,UnicodeDecodeError,ValueError):
                 pass
         print(json.dumps({"finding":index,"rule":finding.get("RuleID","unknown"),"commit":commit[:12],"status":status,"reason":reason}))

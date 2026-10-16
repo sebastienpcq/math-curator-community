@@ -3,8 +3,6 @@ on:
   push:
     branches:
       - agent/youtube-client-hardening
-    paths:
-      - '.github/workflows/youtube-hardening-live.yml'
 permissions:
   contents: read
 jobs:

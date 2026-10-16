@@ -30,3 +30,6 @@ test('network errors do not expose transport exception secrets',async()=>{
  }});
  await assert.rejects(c.getVideos([id]),e=>!e.message.includes('fixture-secret')&&!e.cause);
 });
+
+test('rejects null API payload and does not return partial data',async()=>{const c=createYouTubeClient({apiKey:'fixture-key',fetchImpl:async()=>response(200,null)});await assert.rejects(c.getVideos([id]),/Invalid API payload/);});
+test('missing item ID is reported without guessing privacy status',async()=>{const c=createYouTubeClient({apiKey:'fixture-key',fetchImpl:async()=>response(200,{items:[{id:'xxxxxxxxxxx',snippet:{title:'Other'}}]})});const out=await c.getVideos([id]);assert.deepEqual(out.videos,[]);assert.deepEqual(out.missingIds,[id]);});

@@ -29,3 +29,17 @@ The adapter is not wired into the Chrome UI, and no external network calls occur
 `youtube-api.cjs` exports `createYouTubeClient({apiKey,fetchImpl})`. Use only on a trusted server or CLI; do not import this module into the public Chrome extension or commit credentials. The transport is injectable for offline tests. It calls the official `videos.list` endpoint with `snippet,contentDetails` and up to 50 video IDs. Results include normalized public metadata and `missingIds`, without guessing whether an absent video was deleted, private or otherwise inaccessible. Quota errors (`QUOTA_EXCEEDED`), access denials (`ACCESS_DENIED`), and other HTTP errors (`HTTP_ERROR`) are distinguished where the API supplies an error reason.
 
 Run `node --test knowledge-curator/evaluation/youtube-api.test.cjs`. These tests use simulated responses, not live YouTube credentials. API quotas and real-network compatibility require a separate authorized integration test. The connector is not yet wired into the Chrome extension.
+
+## Cycle 89 — Live verification CLI
+
+The server-only `verify-live.cjs` accepts `YOUTUBE_API_KEY` from the process environment and optionally `YOUTUBE_VIDEO_ID` (default: `PFDu9oVAE-g`). It calls `videos.list` for one video and prints a **sanitized** JSON result (ID, title, channel, missing IDs; never the key or full description).
+
+On a trusted local machine or private CI environment:
+
+```sh
+YOUTUBE_API_KEY=<set-in-your-shell-or-secret-store> node src/video-intelligence/verify-live.cjs
+```
+
+Do not put the real key in shell history, commit it, or paste it into chat. Prefer an environment variable supplied by a trusted secret store. If the key is absent, the CLI exits with status 2 without any network request. A real call is not executed by the standard CI; CI tests mock the transport to avoid consuming quota or requiring secrets. A successful offline test does not validate the real API connection.
+
+Tests: `node --test knowledge-curator/evaluation/youtube-live-cli.test.cjs`.

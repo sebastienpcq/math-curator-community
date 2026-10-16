@@ -1,0 +1,265 @@
+{
+  "source": "actual src/scoring.js executed",
+  "sourceInput": "title only; context empty",
+  "settings": "level all, threshold 42, no allow/block lists",
+  "summary": {
+    "count": 10,
+    "balancedShown": 10,
+    "balancedHidden": 0,
+    "balancedUnknown": 0,
+    "strictShown": 0,
+    "strictHidden": 0,
+    "strictUnknown": 10
+  },
+  "results": [
+    {
+      "id": "0-y8RUNPnQE",
+      "title": "Découvrir les fractions CM1 - CM2 - Cycle 3 - Maths - Mathématiques",
+      "expectedDomain": "arithmétique",
+      "score": 48,
+      "relevant": true,
+      "domains": [
+        "elementary"
+      ],
+      "confidence": "faible (titre principalement)",
+      "signals": {
+        "pedagogy": false,
+        "proof": false,
+        "intuition": false,
+        "exercise": false,
+        "structure": false,
+        "clickbait": false,
+        "advanced": false,
+        "beginner": false
+      },
+      "decisions": {
+        "balanced": "show",
+        "strict": "unknown"
+      }
+    },
+    {
+      "id": "m0HUFgWbgsA",
+      "title": "LE COURS : Les fractions - Sixième - Cinquième",
+      "expectedDomain": "arithmétique",
+      "score": 56,
+      "relevant": true,
+      "domains": [
+        "elementary"
+      ],
+      "confidence": "faible (titre principalement)",
+      "signals": {
+        "pedagogy": true,
+        "proof": false,
+        "intuition": false,
+        "exercise": false,
+        "structure": false,
+        "clickbait": false,
+        "advanced": false,
+        "beginner": false
+      },
+      "decisions": {
+        "balanced": "show",
+        "strict": "unknown"
+      }
+    },
+    {
+      "id": "49OnlwASFbg",
+      "title": "DÉMONSTRATION du théorème de Pythagore - Quatrième",
+      "expectedDomain": "géométrie",
+      "score": 50,
+      "relevant": true,
+      "domains": [],
+      "confidence": "faible (titre principalement)",
+      "signals": {
+        "pedagogy": false,
+        "proof": true,
+        "intuition": false,
+        "exercise": false,
+        "structure": false,
+        "clickbait": false,
+        "advanced": false,
+        "beginner": false
+      },
+      "decisions": {
+        "balanced": "show",
+        "strict": "unknown"
+      }
+    },
+    {
+      "id": "7VFpZ63Tgis",
+      "title": "DEMONSTRATION : Solutions d'une équation du second degré - Première",
+      "expectedDomain": "algèbre",
+      "score": 58,
+      "relevant": true,
+      "domains": [],
+      "confidence": "faible (titre principalement)",
+      "signals": {
+        "pedagogy": false,
+        "proof": true,
+        "intuition": false,
+        "exercise": true,
+        "structure": false,
+        "clickbait": false,
+        "advanced": false,
+        "beginner": false
+      },
+      "decisions": {
+        "balanced": "show",
+        "strict": "unknown"
+      }
+    },
+    {
+      "id": "5oBnmZVrOXE",
+      "title": "LE COURS : Probabilités conditionnelles - Première/Terminale",
+      "expectedDomain": "probabilités",
+      "score": 61,
+      "relevant": true,
+      "domains": [
+        "probability"
+      ],
+      "confidence": "faible (titre principalement)",
+      "signals": {
+        "pedagogy": true,
+        "proof": false,
+        "intuition": false,
+        "exercise": false,
+        "structure": false,
+        "clickbait": false,
+        "advanced": false,
+        "beginner": false
+      },
+      "decisions": {
+        "balanced": "show",
+        "strict": "unknown"
+      }
+    },
+    {
+      "id": "fNk_zzaMoSs",
+      "title": "Vectors | Chapter 1, Essence of linear algebra",
+      "expectedDomain": "algèbre linéaire",
+      "score": 68,
+      "relevant": true,
+      "domains": [
+        "elementary",
+        "linear"
+      ],
+      "confidence": "faible (titre principalement)",
+      "signals": {
+        "pedagogy": true,
+        "proof": false,
+        "intuition": false,
+        "exercise": false,
+        "structure": true,
+        "clickbait": false,
+        "advanced": false,
+        "beginner": false
+      },
+      "decisions": {
+        "balanced": "show",
+        "strict": "unknown"
+      }
+    },
+    {
+      "id": "PFDu9oVAE-g",
+      "title": "Eigenvectors and eigenvalues | Chapter 14, Essence of linear algebra",
+      "expectedDomain": "algèbre linéaire",
+      "score": 68,
+      "relevant": true,
+      "domains": [
+        "elementary",
+        "linear"
+      ],
+      "confidence": "faible (titre principalement)",
+      "signals": {
+        "pedagogy": true,
+        "proof": false,
+        "intuition": false,
+        "exercise": false,
+        "structure": true,
+        "clickbait": false,
+        "advanced": false,
+        "beginner": false
+      },
+      "decisions": {
+        "balanced": "show",
+        "strict": "unknown"
+      }
+    },
+    {
+      "id": "pWtt0AvU0KA",
+      "title": "Proof of fundamental theorem of calculus | AP Calculus AB | Khan Academy",
+      "expectedDomain": "analyse",
+      "score": 58,
+      "relevant": true,
+      "domains": [
+        "calculus"
+      ],
+      "confidence": "faible (titre principalement)",
+      "signals": {
+        "pedagogy": false,
+        "proof": true,
+        "intuition": false,
+        "exercise": false,
+        "structure": false,
+        "clickbait": false,
+        "advanced": false,
+        "beginner": false
+      },
+      "decisions": {
+        "balanced": "show",
+        "strict": "unknown"
+      }
+    },
+    {
+      "id": "6dZLq77gSGU",
+      "title": "What does a ≡ b (mod n) mean? Basic Modular Arithmetic, Congruence",
+      "expectedDomain": "théorie des nombres",
+      "score": 43,
+      "relevant": true,
+      "domains": [
+        "elementary",
+        "number"
+      ],
+      "confidence": "faible (titre principalement)",
+      "signals": {
+        "pedagogy": false,
+        "proof": false,
+        "intuition": false,
+        "exercise": false,
+        "structure": false,
+        "clickbait": false,
+        "advanced": false,
+        "beginner": false
+      },
+      "decisions": {
+        "balanced": "show",
+        "strict": "unknown"
+      }
+    },
+    {
+      "id": "vv3JNSPKeEU",
+      "title": "Topology Lecture 01: Topological Spaces",
+      "expectedDomain": "topologie",
+      "score": 56,
+      "relevant": true,
+      "domains": [
+        "advanced"
+      ],
+      "confidence": "faible (titre principalement)",
+      "signals": {
+        "pedagogy": true,
+        "proof": false,
+        "intuition": false,
+        "exercise": false,
+        "structure": false,
+        "clickbait": false,
+        "advanced": false,
+        "beginner": false
+      },
+      "decisions": {
+        "balanced": "show",
+        "strict": "unknown"
+      }
+    }
+  ]
+}

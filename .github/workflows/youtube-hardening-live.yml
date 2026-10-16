@@ -30,7 +30,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Live YouTube regression (one video, no retry)
+      - name: Live YouTube regression (one request, no retries)
         env:
           YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
           YOUTUBE_VIDEO_ID: PFDu9oVAE-g

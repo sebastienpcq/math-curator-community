@@ -1,0 +1,21 @@
+name: YouTube client simulated tests
+on:
+  push:
+    branches:
+      - agent/youtube-client-hardening
+  pull_request:
+    branches:
+      - agent/youtube-live-validation
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run deterministic tests (no API key)
+        run: node --test src/video-intelligence/youtube-api.test.cjs

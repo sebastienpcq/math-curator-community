@@ -1,0 +1,60 @@
+name: Isolated YouTube mutation audit
+on:
+  pull_request:
+    branches:
+      - agent/youtube-live-validation
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  mutation-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run seven isolated mutants without network requests
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, shutil, subprocess, tempfile
+          from pathlib import Path
+          root=Path("src/video-intelligence")
+          original=(root/"youtube-api.cjs").read_text()
+          mutations={
+           "quota_retry":("if(!quota&&(rate||RETRYABLE.has(response.status))","if((rate||RETRYABLE.has(response.status))"),
+           "retry_bound":("attempt<=maxRetries","attempt<=maxRetries+1"),
+           "ignore_retry_after":("Number.isFinite(seconds)?Math.min(seconds*1000,30000):200*2**attempt","200*2**attempt"),
+           "disable_dedup":("const unique=[...new Set(ids)];","const unique=ids;"),
+           "leak_key_in_url":("url.searchParams.set('part','snippet,contentDetails');","url.searchParams.set('key',apiKey);url.searchParams.set('part','snippet,contentDetails');"),
+           "disable_timeout":("const timer=setTimeout(abort,timeoutMs);","const timer=setTimeout(abort,timeoutMs*100000);"),
+           "malformed_403_as_503":("body=null;","body=null;response={...response,status:503};"),
+          }
+          def run(path):
+              return subprocess.run(["node","--test","youtube-api.test.cjs"],cwd=path,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,timeout=30,check=False).returncode
+          with tempfile.TemporaryDirectory(prefix="mutation-") as tmp:
+              dest=Path(tmp)
+              for name in ("youtube-api.cjs","youtube-api.test.cjs","metadata.cjs"):
+                  shutil.copy2(root/name,dest/name)
+              if run(dest):
+                  raise SystemExit("Baseline tests failed; no mutation score")
+              print(json.dumps({"baseline":"passed"}))
+              results=[]
+              for name,(before,after) in mutations.items():
+                  if original.count(before)!=1:
+                      status="invalid"
+                  else:
+                      (dest/"youtube-api.cjs").write_text(original.replace(before,after,1))
+                      try: status="killed" if run(dest) else "survived"
+                      except subprocess.TimeoutExpired: status="timeout"
+                      finally: (dest/"youtube-api.cjs").write_text(original)
+                  results.append((name,status))
+                  print(json.dumps({"mutation":name,"status":status}))
+              valid=[s for _,s in results if s in ("killed","survived")]
+              killed=valid.count("killed")
+              print(json.dumps({"summary":"mutation_audit","evaluated":len(valid),"killed":killed,"score_pct":round(killed*100/len(valid),1) if valid else None,"incomplete":sum(s in ("invalid","timeout") for _,s in results)}))
+          PY

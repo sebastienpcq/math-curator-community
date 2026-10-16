@@ -1,5 +1,6 @@
 name: YouTube API hardening live regression
 on:
+  workflow_dispatch:
   push:
     branches:
       - agent/youtube-client-hardening

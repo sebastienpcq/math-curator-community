@@ -1,0 +1,12 @@
+'use strict';
+const test=require('node:test');const assert=require('node:assert/strict');
+const {createYouTubeClient}=require('../../src/video-intelligence/youtube-api.cjs');
+const id='PFDu9oVAE-g';
+const response=(status,data)=>({ok:status>=200&&status<300,status,async json(){if(data instanceof Error)throw data;return data;}});
+test('valid metadata and canonical URL',async()=>{let u;const c=createYouTubeClient({apiKey:'fixture-key',fetchImpl:async url=>{u=new URL(url);return response(200,{items:[{id,snippet:{title:' Vectors ',channelTitle:'3Blue1Brown',description:'Linear algebra'}}]});}});const out=await c.getVideos([id]);assert.equal(out.videos[0].title,'Vectors');assert.equal(out.videos[0].url,'https://www.youtube.com/watch?v='+id);assert.equal(u.hostname,'www.googleapis.com');});
+test('missing or inaccessible video remains unclassified',async()=>{const c=createYouTubeClient({apiKey:'fixture-key',fetchImpl:async()=>response(200,{items:[]})});assert.deepEqual((await c.getVideos([id])).missingIds,[id]);});
+test('duplicate IDs removed',async()=>{let u;const c=createYouTubeClient({apiKey:'fixture-key',fetchImpl:async url=>{u=new URL(url);return response(200,{items:[]});}});await c.getVideos([id,id]);assert.equal(u.searchParams.get('id'),id);});
+test('reject invalid IDs and absent key',async()=>{assert.throws(()=>createYouTubeClient({}),TypeError);const c=createYouTubeClient({apiKey:'fixture-key',fetchImpl:async()=>response(200,{items:[]})});await assert.rejects(c.getVideos(['invalid']),TypeError);await assert.rejects(c.getVideos([]),TypeError);await assert.rejects(c.getVideos(Array(51).fill(id)),TypeError);});
+test('quota and auth failures surfaced as 403 without exposing secret',async()=>{const c=createYouTubeClient({apiKey:'fixture-key',fetchImpl:async()=>response(403,{})});await assert.rejects(c.getVideos([id]),e=>e.status===403&&!e.message.includes('fixture-key'));});
+test('server error, invalid JSON and malformed response',async()=>{for(const [status,data] of [[500,{}],[200,new Error('bad')],[200,{}]]){const c=createYouTubeClient({apiKey:'fixture-key',fetchImpl:async()=>response(status,data)});await assert.rejects(c.getVideos([id]));}});
+test('network errors and aborted requests',async()=>{const c=createYouTubeClient({apiKey:'fixture-key',fetchImpl:async()=>{throw Error('offline');}});await assert.rejects(c.getVideos([id]),/Network failure/);const ctrl=new AbortController();ctrl.abort();await assert.rejects(c.getVideos([id],{signal:ctrl.signal}),/Network failure/);});

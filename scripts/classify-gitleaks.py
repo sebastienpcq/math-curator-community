@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """Classify Gitleaks findings without printing matched values or source lines."""
 import json
+import hashlib
+import hmac
+import os
 import re
 import subprocess
 import sys
@@ -46,6 +49,14 @@ def classify(source, secret, line):
 
 def main(path):
     with open(path,encoding="utf-8") as f: findings=json.load(f)
+    grouping_key=os.urandom(32)
+    groups={}
+    for finding in findings:
+        value=finding.get("Secret")
+        if isinstance(value,str) and value:
+            digest=hmac.new(grouping_key,value.encode("utf-8"),hashlib.sha256).digest()
+            if digest not in groups:
+                groups[digest]=len(groups)+1
     for index,finding in enumerate(findings,1):
         commit=finding.get("Commit","")
         file_path=finding.get("File","")
@@ -71,7 +82,9 @@ def main(path):
                         reason="parent_"+reason
             except (subprocess.CalledProcessError,UnicodeDecodeError,ValueError):
                 pass
-        print(json.dumps({"finding":index,"rule":finding.get("RuleID","unknown"),"commit":commit[:12],"status":status,"reason":reason}))
+        digest=hmac.new(grouping_key,secret.encode("utf-8"),hashlib.sha256).digest() if isinstance(secret,str) and secret else None
+        print(json.dumps({"finding":index,"group":groups.get(digest),"rule":finding.get("RuleID","unknown"),"commit":commit[:12],"file":file_path,"status":status,"reason":reason,"exception_allowed":False}))
+    print(json.dumps({"summary":"forensic_groups","findings":len(findings),"unique_values":len(groups),"automatic_exceptions":0}))
 
 if __name__=="__main__":
     main(sys.argv[1])

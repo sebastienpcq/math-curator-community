@@ -1,0 +1,31 @@
+{
+  "version": "0.1",
+  "date": "2026-10-16",
+  "scope": "Real YouTube negative pilot; provisional labels from verified title/description, not independently double-annotated or transcript-verified",
+  "videos": [
+    {
+      "id": "k90y6PIzIaE",
+      "title": "Official Geometry Dash Trailer",
+      "channel": "RobTopGames",
+      "label": "negative",
+      "reason": "Bande-annonce d'un jeu de plateforme, pas un cours de mathématiques",
+      "source": "https://www.youtube.com/watch?v=k90y6PIzIaE"
+    },
+    {
+      "id": "eG-mAFt8hYg",
+      "title": "Math Rock Beginner Guitar Lesson - Essential Techniques, Chords, Strumming, Timing",
+      "channel": "Let's Talk About Math Rock",
+      "label": "negative",
+      "reason": "Cours de guitare consacré au genre musical math rock, non à l'enseignement des mathématiques",
+      "source": "https://www.youtube.com/watch?v=eG-mAFt8hYg"
+    },
+    {
+      "id": "DX_NtGg9ESY",
+      "title": "Beginner Math Rock/Midwest Emo Guitar Lesson (Master the Basics in 10 Minutes)",
+      "channel": "Let's Talk About Math Rock",
+      "label": "negative",
+      "reason": "Cours de guitare et style musical, malgré le terme math",
+      "source": "https://www.youtube.com/watch?v=DX_NtGg9ESY"
+    }
+  ]
+}

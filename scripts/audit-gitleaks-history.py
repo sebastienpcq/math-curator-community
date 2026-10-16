@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import subprocess
 import sys
+from collections import Counter
 
 def git(*args, input_data=None):
     return subprocess.run(["git",*args],input=input_data,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL,check=False).stdout
@@ -18,7 +19,7 @@ def main(report_path):
     if not commits:
         print(json.dumps({"audit":"incomplete","reason":"no_history"}));return 2
     for value in values:
-        paths=set(); hits=0; classifications=set(); examined=0
+        paths=set(); hits=0; classifications=set(); examined=0; by_path={}; unverified_reasons=Counter()
         for commit in commits:
             # Git grep prints only filenames into a captured buffer, never stdout.
             proc=subprocess.run(["git","grep","-l","-F","-e",value,commit,"--"],stdout=subprocess.PIPE,stderr=subprocess.DEVNULL,check=False)
@@ -32,6 +33,14 @@ def main(report_path):
                 source=git("show",f"{commit}:{path}").decode("utf-8","replace")
                 status,reason=module.classify(source,value,None)
                 classifications.add(status)
+                entry=by_path.setdefault(path,Counter())
+                entry[status]+=1
+                if status=='unverified':
+                    unverified_reasons[reason]+=1
+        # Only report aggregate metadata. A heuristic never authorizes an exception.
+        for path,counts in sorted(by_path.items()):
+            print(json.dumps({"audit":"path_inventory","file":path,"snapshots":sum(counts.values()),"probable_storage":counts.get("probable_storage_identifier",0),"unverified":counts.get("unverified",0),"exception_authorized":False}))
+        print(json.dumps({"audit":"unverified_reasons","reasons":dict(sorted(unverified_reasons.items())),"exception_authorized":False}))
         # A heuristic can NEVER authorize an exception.
         print(json.dumps({"audit":"history_inventory","commits_examined":examined,"matching_snapshots":hits,"matching_paths":len(paths),"statuses":sorted(classifications),"exception_authorized":False}))
     fingerprints=[f.get("Fingerprint") for f in findings]

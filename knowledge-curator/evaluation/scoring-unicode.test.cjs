@@ -12,7 +12,7 @@ const examples=[
 for(const [title,domain] of examples)test('recognizes '+title,()=>{
  assert.ok(scoring.evaluate({title}).domains.includes(domain));
 });
-for(const title of ['gaming highlights','geometrician fantasy game','topological hairstyle','unrelated music'])test('does not falsely recognize '+title,()=>{
+for(const title of ['gaming highlights','geometrician fantasy game','topical hairstyle','unrelated music'])test('does not falsely recognize '+title,()=>{
  assert.equal(scoring.evaluate({title}).relevant,false);
 });
 test('pilot positive titles retain mathematical relevance',()=>{

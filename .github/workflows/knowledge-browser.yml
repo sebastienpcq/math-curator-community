@@ -33,6 +33,7 @@ jobs:
       - name: Check Unicode classification and paired metadata baseline
         run: |
           node --test knowledge-curator/evaluation/scoring-unicode.test.cjs
+          node --test knowledge-curator/evaluation/youtube-api.test.cjs
           node knowledge-curator/evaluation/run-paired-baseline.cjs
           node knowledge-curator/evaluation/run-adversarial-fixtures.cjs
           node knowledge-curator/evaluation/run-real-negative-pilot.cjs

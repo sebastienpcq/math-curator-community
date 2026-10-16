@@ -8,8 +8,8 @@ function createYouTubeClient({apiKey,fetchImpl=globalThis.fetch}={}){
   if(!Array.isArray(ids)||ids.length<1||ids.length>50||ids.some(id=>!ID.test(id)))throw new TypeError('Invalid video IDs');
   const unique=[...new Set(ids)];
   const url=new URL('https://www.googleapis.com/youtube/v3/videos');
-  url.searchParams.set('part','snippet,contentDetails');url.searchParams.set('id',unique.join(','));url.searchParams.set('key',apiKey);
-  let response;try{response=await fetchImpl(url.toString(),{signal,redirect:'error'});}catch(e){throw new Error('Network failure',{cause:e});}
+  url.searchParams.set('part','snippet,contentDetails');url.searchParams.set('id',unique.join(','));
+  let response;try{response=await fetchImpl(url.toString(),{signal,redirect:'error',headers:{'X-Goog-Api-Key':apiKey}});}catch(e){throw new Error('Network failure');}
   if(!response.ok){let reason='';try{const body=await response.json();reason=String(body?.error?.errors?.[0]?.reason||'');}catch{}const code=['quotaExceeded','dailyLimitExceeded'].includes(reason)?'QUOTA_EXCEEDED':response.status===401||response.status===403?'ACCESS_DENIED':'HTTP_ERROR';const err=new Error('YouTube API request failed: '+code);err.status=response.status;err.code=code;throw err;}
   let data;try{data=await response.json();}catch{throw new Error('Invalid JSON');}
   if(!Array.isArray(data?.items))throw new Error('Invalid API payload');

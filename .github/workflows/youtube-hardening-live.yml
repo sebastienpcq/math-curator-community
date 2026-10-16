@@ -1,0 +1,42 @@
+name: YouTube API hardening live regression
+on:
+  push:
+    branches:
+      - agent/youtube-client-hardening
+    paths:
+      - '.github/workflows/youtube-hardening-live.yml'
+permissions:
+  contents: read
+jobs:
+  simulated:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test src/video-intelligence/youtube-api.test.cjs
+  live:
+    needs: simulated
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Live YouTube regression (one video, no retry)
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+          YOUTUBE_VIDEO_ID: PFDu9oVAE-g
+        run: |
+          if [ -z "$YOUTUBE_API_KEY" ]; then
+            echo "::error::YOUTUBE_API_KEY is not configured"
+            exit 1
+          fi
+          node src/video-intelligence/verify-live.cjs

@@ -43,3 +43,7 @@ YOUTUBE_API_KEY=<set-in-your-shell-or-secret-store> node src/video-intelligence/
 Do not put the real key in shell history, commit it, or paste it into chat. Prefer an environment variable supplied by a trusted secret store. If the key is absent, the CLI exits with status 2 without any network request. A real call is not executed by the standard CI; CI tests mock the transport to avoid consuming quota or requiring secrets. A successful offline test does not validate the real API connection.
 
 Tests: `node --test knowledge-curator/evaluation/youtube-live-cli.test.cjs`.
+
+## Cycle 90 — Secret handling hardening
+
+The connector now sends `YOUTUBE_API_KEY` through the `X-Goog-Api-Key` request header rather than the URL query string, reducing exposure in URL logs. This header must be verified in an authorized real API integration test; no live call has yet been made. Network exceptions are sanitized to avoid returning potentially sensitive transport messages. Additional offline tests assert that the key never appears in the URL or exposed error. The connector remains server-only and must not be bundled into the browser extension.

@@ -1,0 +1,42 @@
+name: Secret scanning (Gitleaks)
+on:
+  push:
+    branches:
+      - agent/youtube-client-hardening
+  pull_request:
+    branches:
+      - agent/youtube-live-validation
+permissions:
+  contents: read
+jobs:
+  gitleaks:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Scan full available Git history without disclosing findings
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION=8.24.3
+          curl --fail --silent --show-error --location --retry 2 \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${VERSION}/gitleaks_${VERSION}_linux_x64.tar.gz" \
+            --output /tmp/gitleaks.tar.gz
+          mkdir -p /tmp/gitleaks-bin
+          tar -xzf /tmp/gitleaks.tar.gz -C /tmp/gitleaks-bin gitleaks
+          set +e
+          /tmp/gitleaks-bin/gitleaks git --redact --no-banner --report-format json \
+            --report-path /tmp/gitleaks-report.json . >/tmp/gitleaks-output.log 2>&1
+          result=$?
+          set -e
+          if [ "$result" -eq 1 ]; then
+            echo "::error::Gitleaks detected potential secrets; report suppressed to protect sensitive data"
+            exit 1
+          elif [ "$result" -ne 0 ]; then
+            echo "::error::Gitleaks scan failed (code $result); details suppressed"
+            exit "$result"
+          fi
+          echo "Gitleaks history scan completed without findings"

@@ -1,0 +1,27 @@
+name: Math Curator - Verify YouTube API (manual)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-youtube-api:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - name: Check out audited development commit
+        uses: actions/checkout@v4
+        with:
+          ref: cbaae4f1ed3577dd770971b7bf5be8662fdc1d01
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify one public video (no artifacts)
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+          YOUTUBE_VIDEO_ID: PFDu9oVAE-g
+        run: node src/video-intelligence/verify-live.cjs

@@ -30,5 +30,9 @@ class ClassifierTests(unittest.TestCase):
         source="localStorage.setItem('fictional-storage-id-123456','data');"
         self.assertEqual(module.classify(source,"fictional-storage-id-123456",1)[0],"probable_storage_identifier")
 
+    def test_literal_in_comparison_does_not_crash_or_exempt(self):
+        source="if (key === 'fictional-storage-id-123456') return false;"
+        self.assertEqual(module.classify(source,"fictional-storage-id-123456",1)[0],"unverified")
+
 if __name__=="__main__":
     unittest.main()

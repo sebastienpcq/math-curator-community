@@ -17,6 +17,8 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+      - name: Test classifier with synthetic fixtures
+        run: python3 -m unittest discover -s scripts -p 'test_classify_gitleaks.py'
       - name: Scan full available Git history without disclosing findings
         shell: bash
         run: |

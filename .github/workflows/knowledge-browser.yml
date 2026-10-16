@@ -35,6 +35,7 @@ jobs:
           node --test knowledge-curator/evaluation/scoring-unicode.test.cjs
           node knowledge-curator/evaluation/run-paired-baseline.cjs
           node knowledge-curator/evaluation/run-adversarial-fixtures.cjs
+          node knowledge-curator/evaluation/run-real-negative-pilot.cjs
       - name: Evaluate verified pedagogical corpus with actual scoring engine
         run: node knowledge-curator/evaluation/run-scoring-baseline.cjs
       - name: Run real MV3 extension smoke test

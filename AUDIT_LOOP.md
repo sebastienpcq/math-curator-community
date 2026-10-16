@@ -707,3 +707,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Erreurs de quota, d'accès et HTTP distinguées ; exceptions réseau et JSON malformé prises en compte.
 - Tests Node simulés publiés et ajoutés au workflow navigateur. Une implémentation équivalente a passé 11 tests locaux ; la version exacte publiée nécessite confirmation CI.
 - Aucun appel réel à l'API, aucune clé secrète utilisée, aucune modification de `main`, aucune fusion.
+
+## Cycle 89 — Point de contrôle YouTube Data API réel
+
+- CI cycle 88 : workflows Node et Chromium réussis (runs 38898296555 et 38898296478).
+- Nouveau CLI serveur `src/video-intelligence/verify-live.cjs` : clé exclusivement via `YOUTUBE_API_KEY`, vérification d'une vidéo, sortie JSON expurgée et refus sans clé.
+- Tests hors réseau ajoutés (`youtube-live-cli.test.cjs`) pour absence de clé, succès simulé, quota et vidéo absente ; CI configurée pour les exécuter.
+- Aucun outil disponible ne permet de consulter ou d'utiliser un secret GitHub configuré ; aucun appel réel à l'API n'a été effectué. La validation réelle reste bloquée jusqu'à mise à disposition sécurisée d'une clé autorisée.
+- Aucune modification de `main`, fusion ou release. CI du dernier commit à confirmer.

@@ -54,7 +54,7 @@ jobs:
                     git init -q
                     git config user.name "CI Test"
                     git config user.email "ci@example.invalid"
-                    python3 -c 'from pathlib import Path; Path("fixture.txt").write_text("github_token = "+chr(34)+"ghp_"+"A"*36+chr(34)+"\\n")'
+                    python3 -c 'from pathlib import Path; Path("fixture.txt").write_text("github_token = "+chr(34)+"ghp_"+"aB3dE5fG7hJ9kL2mN4pQ6rS8tU0vW1xY2zZ3"+chr(34)+"\\n")'
                     git add fixture.txt
                     git commit -qm "synthetic scanner control"
                     set +e
@@ -62,7 +62,7 @@ jobs:
                     synthetic_status=$?
                     set -e
                     if [ "$synthetic_status" -ne 1 ]; then
-                      echo "::error::Synthetic secret detection control failed"
+                      echo "::error::Synthetic secret detection control failed (exit $synthetic_status)"
                       exit 2
                     fi
                     python3 -c 'import json; r=json.load(open("/tmp/gitleaks-synthetic.json")); assert any(x.get("RuleID")=="github-pat" for x in r), "Expected GitHub token rule not triggered"'

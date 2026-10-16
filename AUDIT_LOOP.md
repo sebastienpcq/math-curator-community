@@ -673,3 +673,12 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Le test de récupération précédemment défaillant passe après synchronisation explicite avec l'historique enregistré. Cela suggère une course de test, sans prouver l'absence d'anomalie métier.
 - Test Playwright ajouté : tentative incorrecte enregistrée, puis trois cycles successifs de journal d'import interrompu, corruption simulée des deux clés, rechargement et comparaison exacte de progression/historique.
 - Aucun changement du code de production ; CI cycle 82 à confirmer.
+
+## Cycle 83 — Premier corpus pédagogique et baseline réelle
+
+- Corpus de dix vidéos vérifiées via vidIQ, niveaux primaire à universitaire ; dix transcriptions accessibles, non archivées dans le dépôt.
+- `knowledge-curator/evaluation/pedagogical-corpus-v0.2.json` : métadonnées vérifiées, domaine et niveau présumés, état des transcriptions.
+- `run-scoring-baseline.cjs` et `SCORING_BASELINE.json` : exécution de `src/scoring.js` avec titre seul et contexte vide. Équilibré : 10 show ; strict : 10 unknown.
+- Lacunes observées : détection de domaine absente pour Pythagore et second degré ; aucun contrôle de vérité mathématique. Ces résultats ne mesurent pas la précision faute d'échantillon négatif et de labels indépendants.
+- `PEDAGOGICAL_EVALUATION.md` documente les limites et prochaines expériences. L'accès vidIQ aux nouvelles requêtes est temporairement limité par les crédits.
+- CI sur dernier commit à confirmer ; aucune modification du moteur ni de `main`.

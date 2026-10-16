@@ -1,0 +1,37 @@
+name: YouTube API live validation
+on:
+  push:
+    branches:
+      - agent/youtube-live-validation
+    paths:
+      - '.github/workflows/youtube-live-validation.yml'
+  workflow_dispatch:
+    inputs:
+      video_id:
+        description: 'Public YouTube video ID (11 characters)'
+        required: false
+        default: 'PFDu9oVAE-g'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify secret configuration
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+        run: |
+          if [ -z "$YOUTUBE_API_KEY" ]; then
+            echo "::error::YOUTUBE_API_KEY repository secret is missing"
+            exit 1
+          fi
+      - name: Query YouTube Data API v3
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+          YOUTUBE_VIDEO_ID: ${{ inputs.video_id || 'PFDu9oVAE-g' }}
+        run: node src/video-intelligence/verify-live.cjs

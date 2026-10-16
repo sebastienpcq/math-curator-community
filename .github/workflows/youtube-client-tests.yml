@@ -14,8 +14,33 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
       - name: Run deterministic tests (no API key)
         run: node --test src/video-intelligence/youtube-api.test.cjs
+
+  live:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/agent/youtube-client-hardening'
+    needs: test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate YouTube API once
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+          YOUTUBE_VIDEO_ID: PFDu9oVAE-g
+        run: |
+          if [ -z "$YOUTUBE_API_KEY" ]; then
+            echo "::error::YOUTUBE_API_KEY is missing"
+            exit 1
+          fi
+          node src/video-intelligence/verify-live.cjs

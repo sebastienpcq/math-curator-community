@@ -35,11 +35,22 @@ jobs:
             --report-path /tmp/gitleaks-report.json . >/tmp/gitleaks-output.log 2>&1
           result=$?
           set -e
-          trap 'rm -f /tmp/gitleaks-report.json /tmp/gitleaks-output.log' EXIT
+          trap 'rm -f /tmp/gitleaks-report.json /tmp/gitleaks-output.log /tmp/gitleaks-candidate-ignore /tmp/gitleaks-dry-run.json /tmp/gitleaks-dry-run.log' EXIT
           if [ "$result" -eq 1 ]; then
             if [ -f /tmp/gitleaks-report.json ]; then
               python3 scripts/classify-gitleaks.py /tmp/gitleaks-report.json || true
               python3 scripts/audit-gitleaks-history.py /tmp/gitleaks-report.json || true
+              if python3 scripts/prepare-gitleaks-dry-run.py /tmp/gitleaks-report.json /tmp/gitleaks-candidate-ignore; then
+                set +e
+                /tmp/gitleaks-bin/gitleaks git --no-banner --gitleaks-ignore-path /tmp/gitleaks-candidate-ignore --report-format json --report-path /tmp/gitleaks-dry-run.json . >/tmp/gitleaks-dry-run.log 2>&1
+                dry_status=$?
+                set -e
+                if [ "$dry_status" -eq 0 ]; then
+                  echo "Gitleaks candidate dry-run: no remaining findings"
+                else
+                  echo "::warning::Gitleaks candidate dry-run did not pass (exit $dry_status)"
+                fi
+              fi
               python3 -c 'import json,subprocess,sys; findings=json.load(open(sys.argv[1])); p=subprocess.run(["git","show","4a0fff15d734:knowledge-curator/attempts.cjs"],capture_output=True,check=False); lines=p.stdout.decode("utf-8","replace").splitlines() if p.returncode==0 else []; vals=[s.split("=",1)[1].strip().rstrip(";").strip(chr(39)+chr(34)) for s in lines if s.strip().startswith("const KEY=")]; ok=len(vals)==1 and len(findings)==5 and all(f.get("Secret")==vals[0] for f in findings); print(json.dumps({"audit":"historical_constant_exact_match","verified":ok,"history_available":p.returncode==0,"key_declarations":len(vals),"exceptions_activated":False})); sys.exit(0 if ok else 2)' /tmp/gitleaks-report.json
               python3 -c 'import json,sys; r=json.load(open(sys.argv[1])); e={("4a0fff15d734","knowledge-curator/attempts.cjs"),("149bdd12227d","knowledge-curator/tests/browser.spec.cjs"),("4d5e863a93c6","knowledge-curator/tests/browser.spec.cjs"),("602e38bb00b9","knowledge-curator/tests/browser.spec.cjs"),("be3cacc01a79","knowledge-curator/tests/browser.spec.cjs")}; f=[x.get("Fingerprint") for x in r]; print(json.dumps({"audit":"fingerprint_identity","expected_locations":len(r)==5 and {(str(x.get("Commit",""))[:12],x.get("File")) for x in r}==e,"five_distinct_fingerprints":len(f)==5 and all(isinstance(x,str) and bool(x) for x in f) and len(set(f))==5,"expected_rule":all(x.get("RuleID")=="generic-api-key" for x in r),"exceptions_activated":False}))' /tmp/gitleaks-report.json
             fi

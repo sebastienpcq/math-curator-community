@@ -6,8 +6,8 @@ const TOKEN_LEFT='(?<![\\p{L}\\p{N}])';
 const TOKEN_RIGHT='(?![\\p{L}\\p{N}])';
 function token(source){return new RegExp(TOKEN_LEFT+'(?:'+source+')'+TOKEN_RIGHT,'iu');}
 const rules={
- elementary:token("(?:second degré|quadratic equation|(arithmetic|arithmétique|algèbre|algebra|equation|équation|fractions?|polynom|mathematics|mathématiques|maths?|mathe|matem[aá]tic)"),
- geometry:token("(?:pythagore|pythagoras|(géométrie|geometry|trigonométrie|trigonometry|triangles?|euclid|geometric)"),
+ elementary:token("(?:second degré|quadratic equation|arithmetic|arithmétique|algèbre|algebra|equation|équation|fractions?|polynom|mathematics|mathématiques|maths?|mathe|matem[aá]tic)"),
+ geometry:token("(?:pythagore|pythagoras|géométrie|geometry|trigonométrie|trigonometry|triangles?|euclid|geometric)"),
  calculus:token("(analyse|calculus|limite|limits?|derivat|dériv|intégral|integral|continuit|continuity|séries?|series)"),
  linear:token("(algèbre linéaire|linear algebra|matrices?|matrix|vecteurs?|vectors?|eigenvalues?|valeurs propres|espaces? vectoriels?)"),
  probability:token("(probabilit|probability|statistics?|statistiques?|variance|bayesian|bayésien)"),

@@ -39,7 +39,7 @@ def classify(source, secret, line):
             refs=[s for s in lines if re.search(r"\b"+re.escape(var)+r"\b",s)]
             if any(SENSITIVE.search(s) for s in refs):
                 return "unverified", "sensitive_variable_use"
-            if any(STORAGE_CALL.search(s) for s in refs):
+            if any(STORAGE_CALL.search(s) or re.search(r"\bstorage\s*\.\s*(?:getItem|setItem|removeItem)\s*\(",s) for s in refs):
                 return "probable_storage_identifier", "constant_used_in_storage_"+location_note
         return "unverified", "constant_without_proven_storage_use"
     return "unverified", "insufficient_context"

@@ -29,6 +29,11 @@ def classify(source, secret, line):
         for m in KEY_ASSIGN.finditer(lines[i]):
             if m.group(3)==secret:
                 assignments.append(m.group(1))
+    if not assignments:
+        # A literal may be passed directly to storage.setItem, or appear in a
+        # comparison inside a test; never promote it without positive evidence.
+        if any(re.search(r"\\b(?:localStorage|sessionStorage)\\s*\\.\\s*(?:getItem|setItem|removeItem)\\s*\\([^)]*"+re.escape(secret),lines[i]) for i in occurrences):
+            return "probable_storage_identifier", "storage_literal_argument_"+location_note
     if assignments:
         for var in assignments:
             refs=[s for s in lines if re.search(r"\b"+re.escape(var)+r"\b",s)]

@@ -73,3 +73,8 @@ test('retry wait can be interrupted by caller',async()=>{
 test('HTTP fetch that ignores AbortSignal still times out',async()=>{
  await errorCode(()=>new Promise(()=>{}),'TIMEOUT',{timeoutMs:8,maxRetries:0});
 });
+
+test('untrusted transport error codes never expose a secret',async()=>{
+ const poisoned=Object.assign(new Error('transport failed'),{code:secret});
+ await errorCode(async()=>{throw poisoned;},'NETWORK_ERROR',{maxRetries:0});
+});

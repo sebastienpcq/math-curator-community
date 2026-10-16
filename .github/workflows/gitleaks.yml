@@ -34,7 +34,7 @@ jobs:
           set -e
           if [ "$result" -eq 1 ]; then
             if [ -f /tmp/gitleaks-report.json ]; then
-              jq -r '[.[] | .RuleID] | group_by(.) | map({rule: .[0], count: length}) | .[] | "Rule: \\(.rule) | findings: \\(.count)"' /tmp/gitleaks-report.json || true
+              jq -r '[.[] | .RuleID] | group_by(.) | map({rule: .[0], count: length}) | .[] | "Rule: \(.rule) | findings: \(.count)"' /tmp/gitleaks-report.json || true
             fi
             echo "::error::Gitleaks detected potential secrets; values and locations suppressed"
             exit 1

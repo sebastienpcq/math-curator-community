@@ -47,3 +47,16 @@ No production scoring changes. No merge, release or main modification. vidIQ cre
 ### Next experiment
 
 Collect 10–20 real negative and ambiguous videos with independently documented relevance labels; obtain full descriptions where permitted, and evaluate precision, recall and abstention policy on a held-out corpus. Preserve the original V0.2 baseline for comparison.
+
+## Cycle 85 — First real negative YouTube controls
+
+Three real YouTube videos were verified using publicly indexed titles and descriptions:
+- `k90y6PIzIaE` — Official Geometry Dash Trailer (game trailer).
+- `eG-mAFt8hYg` — Math Rock Beginner Guitar Lesson (guitar).
+- `DX_NtGg9ESY` — Beginner Math Rock/Midwest Emo Guitar Lesson (guitar).
+
+All three are provisional **non-mathematics-teaching** labels based on their descriptions. The actual `src/scoring.js`, using only titles, marked all three as mathematically relevant (3/3 pilot false positives). These are not independent double annotations, and three deliberately difficult negatives do not support a population-level false-positive rate.
+
+Root causes indicated by metadata: `Geometry Dash` matches geometry; `math rock` matches math. The next correction should introduce a narrowly scoped ambiguity-handling policy backed by real positive/negative controls, rather than hard-coding arbitrary channel or video IDs.
+
+vidIQ has zero credits remaining, with renewal reported for 2026-11-06. This pilot used publicly indexed YouTube descriptions instead. Do not claim full transcript validation.

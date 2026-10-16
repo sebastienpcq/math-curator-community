@@ -30,6 +30,8 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Run V0.5 Node regression tests
         run: node --test knowledge-curator/tests/validation-v05.test.cjs knowledge-curator/tests/state-v3.test.cjs knowledge-curator/tests/storage-boundary.test.cjs
+      - name: Evaluate verified pedagogical corpus with actual scoring engine
+        run: node knowledge-curator/evaluation/run-scoring-baseline.cjs
       - name: Run real MV3 extension smoke test
         run: npx playwright test knowledge-curator/tests/extension-mv3.spec.cjs --reporter=line --workers=1
       - name: Test IndexedDB persistence across Chromium restart

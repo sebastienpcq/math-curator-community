@@ -699,3 +699,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Exécution réelle du moteur sur les titres : 3/3 classées pertinentes mathématiques, malgré leur sujet non mathématique. Étiquettes provisoires fondées sur les descriptions, sans double annotation indépendante.
 - Corpus, script reproductible, CI et rapport actualisés. Pas de correction opportuniste fondée sur seulement trois exemples ; prochaine priorité : politique d'ambiguïté et corpus équilibré.
 - CI du cycle 85 à confirmer ; aucune modification directe de `main`.
+
+## Cycle 88 — Connecteur officiel YouTube Data API v3
+
+- Connecteur serveur `src/video-intelligence/youtube-api.cjs` publié sur `agent/recursive-audit`, sans clé embarquée dans l'extension.
+- `fetchImpl` injectable, requêtes `videos.list`, validation des identifiants, dédoublonnage, normalisation des métadonnées et liste des vidéos indisponibles.
+- Erreurs de quota, d'accès et HTTP distinguées ; exceptions réseau et JSON malformé prises en compte.
+- Tests Node simulés publiés et ajoutés au workflow navigateur. Une implémentation équivalente a passé 11 tests locaux ; la version exacte publiée nécessite confirmation CI.
+- Aucun appel réel à l'API, aucune clé secrète utilisée, aucune modification de `main`, aucune fusion.

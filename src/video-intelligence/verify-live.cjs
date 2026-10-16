@@ -6,7 +6,7 @@ async function run({env=process.env,fetchImpl=globalThis.fetch,write=console.log
  if(!key){write(JSON.stringify({status:'blocked',reason:'YOUTUBE_API_KEY is not configured; no network request made'}));return 2;}
  const id=env.YOUTUBE_VIDEO_ID||DEFAULT_ID;
  try{
-  const client=createYouTubeClient({apiKey:key,fetchImpl});
+  const client=createYouTubeClient({apiKey:key,fetchImpl,maxRetries:0});
   const result=await client.getVideos([id]);
   const v=result.videos[0];
   write(JSON.stringify({status:v?'success':'not_found',source:'YouTube Data API v3',

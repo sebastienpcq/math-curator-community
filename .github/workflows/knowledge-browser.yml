@@ -34,6 +34,7 @@ jobs:
         run: |
           node --test knowledge-curator/evaluation/scoring-unicode.test.cjs
           node --test knowledge-curator/evaluation/youtube-api.test.cjs
+          node --test knowledge-curator/evaluation/youtube-live-cli.test.cjs
           node knowledge-curator/evaluation/run-paired-baseline.cjs
           node knowledge-curator/evaluation/run-adversarial-fixtures.cjs
           node knowledge-curator/evaluation/run-real-negative-pilot.cjs

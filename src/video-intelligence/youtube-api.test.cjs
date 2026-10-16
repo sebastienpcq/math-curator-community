@@ -106,3 +106,17 @@ test('Retry-After values are bounded and invalid values use backoff',async()=>{
   assert.deepEqual(delays,[expected]);
  }
 });
+
+test('quota and retry bounds remain observable under mutation',async()=>{
+ let calls=0;
+ await assert.rejects(client(async()=>{calls++;return fail(429,'quotaExceeded');}).getVideos([id]),{code:'QUOTA_EXCEEDED'});
+ assert.equal(calls,1);
+ calls=0;
+ await assert.rejects(client(async()=>{calls++;return fail(503);},{maxRetries:1}).getVideos([id]),{code:'HTTP_ERROR'});
+ assert.equal(calls,2);
+});
+test('timeout has a bounded wall-clock deadline',async()=>{
+ const c=client(()=>new Promise(()=>{}),{timeoutMs:8,maxRetries:0});
+ const watchdog=new Promise((_,reject)=>setTimeout(()=>reject(new Error('timeout watchdog exceeded')),150));
+ await assert.rejects(Promise.race([c.getVideos([id]),watchdog]),{code:'TIMEOUT'});
+});

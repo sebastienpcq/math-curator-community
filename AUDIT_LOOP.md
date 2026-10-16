@@ -682,3 +682,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Lacunes observées : détection de domaine absente pour Pythagore et second degré ; aucun contrôle de vérité mathématique. Ces résultats ne mesurent pas la précision faute d'échantillon négatif et de labels indépendants.
 - `PEDAGOGICAL_EVALUATION.md` documente les limites et prochaines expériences. L'accès vidIQ aux nouvelles requêtes est temporairement limité par les crédits.
 - CI sur dernier commit à confirmer ; aucune modification du moteur ni de `main`.
+
+## Cycle 84 — Classification Unicode et évaluation contradictoire
+
+- Moteur `src/scoring.js` modifié sur la branche dédiée : frontières Unicode, variantes accentuées, mentions de Pythagore et second degré, prévention du faux domaine « analyse » sur le mot « series » désignant une série vidéo.
+- Tests `scoring-unicode.test.cjs` ajoutés, exécution CI configurée ; contrôles ciblés effectués par exécution directe du module JavaScript.
+- Huit descriptions partielles précédemment vérifiées ajoutées au corpus ; comparaison titre seul vs titre + extrait enregistrée dans `SCORING_PAIRED_V03.json`. Le corpus ne contient pas les descriptions intégrales.
+- Quatorze titres synthétiques annotés indépendamment : TP 7, FP 2, TN 5, FN 0. Métriques limitées aux fixtures synthétiques ; pas de mesure fiable de précision réelle sur YouTube.
+- Aucune fusion dans `main`. Vérification CI du dernier commit nécessaire avant de déclarer le cycle validé.

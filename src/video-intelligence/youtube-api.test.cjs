@@ -88,3 +88,12 @@ test('malformed HTTP error body preserves status-based retry policy',async()=>{
  await assert.rejects(client(async()=>{calls++;return malformed(403);}).getVideos([id]),{code:'ACCESS_DENIED',status:403});
  assert.equal(calls,1);
 });
+
+test('HTTP 403 rate limiting retries, ordinary forbidden does not',async()=>{
+ let calls=0;
+ await assert.rejects(client(async()=>{calls++;return fail(403,'rateLimitExceeded');}).getVideos([id]),{code:'RATE_LIMITED',status:403});
+ assert.equal(calls,3);
+ calls=0;
+ await assert.rejects(client(async()=>{calls++;return fail(403,'forbidden');}).getVideos([id]),{code:'ACCESS_DENIED',status:403});
+ assert.equal(calls,1);
+});

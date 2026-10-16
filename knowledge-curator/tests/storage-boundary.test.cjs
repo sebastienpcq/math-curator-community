@@ -1,0 +1,270 @@
+'use strict';
+const test=require('node:test');
+const assert=require('node:assert/strict');
+const boundary=require('../storage-boundary.cjs');
+const schema=require('../state-v3.cjs');
+globalThis.KnowledgeStateV3=schema;
+function store(){
+ const values=new Map();
+ return {getItem:k=>values.has(k)?values.get(k):null,
+  setItem:(k,v)=>values.set(k,v),removeItem:k=>values.delete(k)};
+}
+const valid=value=>value!==null&&typeof value==='object'&&!Array.isArray(value);
+test('legacy boundary round trips progression',()=>{
+ const storage=store();
+ boundary.writeProgress(storage,{arithmetic:{status:'in_progress'}},valid);
+ assert.deepEqual(boundary.readProgress(storage,valid),{arithmetic:{status:'in_progress'}});
+});
+test('pending recovery blocks writes without mutating progress',()=>{
+ const storage=store();
+ boundary.writeProgress(storage,{arithmetic:{}},valid);
+ const before=storage.getItem(boundary.PROGRESS);
+ storage.setItem(boundary.JOURNAL,'{}');
+ assert.throws(()=>boundary.writeProgress(storage,{algebra:{}},valid),/recovery pending/);
+ assert.equal(storage.getItem(boundary.PROGRESS),before);
+});
+test('invalid progress is rejected before writing',()=>{
+ const storage=store();
+ assert.throws(()=>boundary.writeProgress(storage,[],valid),/Invalid progress/);
+ assert.equal(storage.getItem(boundary.PROGRESS),null);
+});
+
+test('attempt append is delegated through boundary',()=>{
+ const storage=store();
+ const attempts={append:(target,event)=>{
+  target.setItem('attempts',JSON.stringify([event]));
+  return true;
+ }};
+ const event={skillId:'arithmetic',correct:false};
+ boundary.appendAttempt(storage,attempts,event);
+ assert.deepEqual(JSON.parse(storage.getItem('attempts')),[event]);
+});
+test('attempt append is rejected while recovery is pending',()=>{
+ const storage=store();
+ storage.setItem(boundary.JOURNAL,'{}');
+ let called=false;
+ const attempts={append:()=>{called=true;}};
+ assert.throws(()=>boundary.appendAttempt(storage,attempts,{correct:false}),/recovery pending/);
+ assert.equal(called,false);
+});
+
+test('recovery owner can write validated progress with pending journal',()=>{
+ const storage=store();
+ storage.setItem(boundary.JOURNAL,'{}');
+ const value={arithmetic:{status:'in_progress'}};
+ boundary.writeDuringRecovery(storage,value,valid);
+ assert.deepEqual(JSON.parse(storage.getItem(boundary.PROGRESS)),value);
+ assert.throws(()=>boundary.writeProgress(storage,{algebra:{}},valid),/recovery pending/);
+});
+test('recovery-specific write requires a journal',()=>{
+ const storage=store();
+ assert.throws(()=>boundary.writeDuringRecovery(storage,{arithmetic:{}},valid),/journal required/);
+});
+
+test('transaction commits progress and attempts together',()=>{
+ const storage=store();
+ const attempts={
+  KEY:'attempts',
+  read:s=>JSON.parse(s.getItem('attempts')||'[]'),
+  replace:(s,items)=>s.setItem('attempts',JSON.stringify(items)),
+  validateHistory:items=>Array.isArray(items)
+ };
+ const result=boundary.transaction(storage,attempts,valid,()=>({
+  progress:{arithmetic:{status:'in_progress'}},
+  attempts:[{correct:false}],legacyArchive:null
+ }));
+ assert.equal(result.attempts.length,1);
+ assert.equal(storage.getItem(boundary.JOURNAL),null);
+ assert.deepEqual(JSON.parse(storage.getItem('attempts')),[{correct:false}]);
+});
+test('transaction rolls back failed progress write',()=>{
+ const values=new Map([['attempts','[{"correct":true}]'],
+  [boundary.PROGRESS,'{"arithmetic":{}}']]);
+ let fail=true;
+ const storage={
+  getItem:k=>values.has(k)?values.get(k):null,
+  setItem:(k,v)=>{
+   if(k===boundary.PROGRESS&&fail){fail=false;throw Error('write failure');}
+   values.set(k,v);
+  },
+  removeItem:k=>values.delete(k)
+ };
+ const attempts={
+  KEY:'attempts',
+  read:s=>JSON.parse(s.getItem('attempts')||'[]'),
+  replace:(s,items)=>s.setItem('attempts',JSON.stringify(items)),
+  validateHistory:Array.isArray
+ };
+ const before=Object.fromEntries(values);
+ assert.throws(()=>boundary.transaction(storage,attempts,valid,()=>({
+  progress:{algebra:{}},attempts:[],legacyArchive:null
+ })),/write failure/);
+ assert.deepEqual(Object.fromEntries(values),before);
+});
+
+test('transaction refuses malformed previous attempts before journal creation',()=>{
+ const storage=store();
+ storage.setItem('attempts','{bad');
+ const attempts={
+  KEY:'attempts',
+  read:s=>JSON.parse(s.getItem('attempts')),
+  replace:(s,items)=>s.setItem('attempts',JSON.stringify(items)),
+  validateHistory:Array.isArray
+ };
+ assert.throws(()=>boundary.transaction(storage,attempts,valid,old=>old),SyntaxError);
+ assert.equal(storage.getItem(boundary.JOURNAL),null);
+ assert.equal(storage.getItem('attempts'),'{bad');
+});
+test('rollback failure retains journal and reports recoverability failure',()=>{
+ const values=new Map([[boundary.PROGRESS,'{}'],['attempts','[]']]);
+ let failProgress=true;
+ const storage={
+  getItem:k=>values.has(k)?values.get(k):null,
+  setItem:(k,v)=>{
+   if(k===boundary.PROGRESS&&failProgress){failProgress=false;throw Error('progress failure');}
+   if(k==='attempts'&&v==='[]'&&values.has(boundary.JOURNAL))
+    throw Error('rollback failure');
+   values.set(k,v);
+  },
+  removeItem:k=>values.delete(k)
+ };
+ const attempts={
+  KEY:'attempts',
+  read:s=>JSON.parse(s.getItem('attempts')||'[]'),
+  replace:(s,items)=>s.setItem('attempts',JSON.stringify(items)),
+  validateHistory:Array.isArray
+ };
+ assert.throws(()=>boundary.transaction(storage,attempts,valid,()=>({
+  progress:{arithmetic:{}},attempts:[{correct:false}],legacyArchive:null
+ })),/Rollback failed/);
+ assert.notEqual(storage.getItem(boundary.JOURNAL),null);
+});
+
+test('invalid existing legacy archive blocks transaction before journal',()=>{
+ const storage=store();
+ storage.setItem('knowledge-curator-legacy-v1-archive','{"version":1,"progress":{}}');
+ const attempts={
+  KEY:'attempts',
+  read:s=>JSON.parse(s.getItem('attempts')||'[]'),
+  replace:(s,items)=>s.setItem('attempts',JSON.stringify(items)),
+  validateHistory:Array.isArray
+ };
+ assert.throws(()=>boundary.transaction(storage,attempts,valid,old=>old),/Invalid existing archive/);
+ assert.equal(storage.getItem(boundary.JOURNAL),null);
+ assert.equal(storage.getItem('knowledge-curator-legacy-v1-archive'),'{"version":1,"progress":{}}');
+});
+test('invalid new archive is rejected before any transaction write',()=>{
+ const storage=store();
+ const attempts={
+  KEY:'attempts',
+  read:s=>JSON.parse(s.getItem('attempts')||'[]'),
+  replace:(s,items)=>s.setItem('attempts',JSON.stringify(items)),
+  validateHistory:Array.isArray
+ };
+ assert.throws(()=>boundary.transaction(storage,attempts,valid,old=>({
+  ...old,legacyArchive:'not json'
+ })),/Invalid transaction state/);
+ assert.equal(storage.getItem(boundary.JOURNAL),null);
+});
+
+test('canonical V3 archive validator is applied by legacy boundary',()=>{
+ const storage=store();
+ storage.setItem('knowledge-curator-legacy-v1-archive',JSON.stringify({
+  version:1,importedAt:'2026-10-15T00:00:00.000Z',
+  progress:{'INVALID ID':{status:'in_progress',updatedAt:'2026-10-15T00:00:00.000Z'}}
+ }));
+ const attempts={KEY:'attempts',read:()=>[],replace:()=>{},validateHistory:Array.isArray};
+ assert.throws(()=>boundary.transaction(storage,attempts,valid,old=>old),/Invalid existing archive/);
+ assert.equal(storage.getItem(boundary.JOURNAL),null);
+});
+
+test('missing canonical validator fails closed before transaction writes',()=>{
+ const storage=store();
+ const previous=globalThis.KnowledgeStateV3;
+ delete globalThis.KnowledgeStateV3;
+ try{
+  const attempts={KEY:'attempts',read:()=>[],replace:()=>{},validateHistory:Array.isArray};
+  assert.throws(()=>boundary.transaction(storage,attempts,valid,old=>old),
+   /Canonical archive validator unavailable/);
+  assert.equal(storage.getItem(boundary.JOURNAL),null);
+ }finally{
+  globalThis.KnowledgeStateV3=previous;
+ }
+});
+
+test('common recovery restores three keys and clears journal',()=>{
+ const storage=store();
+ const attempts={KEY:'attempts',validateHistory:Array.isArray};
+ const archive=JSON.stringify({version:1,importedAt:'2026-10-15T00:00:00.000Z',progress:{}});
+ storage.setItem(boundary.JOURNAL,JSON.stringify({
+  progress:'{}',attempts:'[]',legacyArchive:archive
+ }));
+ assert.equal(boundary.recover(storage,attempts,valid),true);
+ assert.equal(storage.getItem(boundary.PROGRESS),'{}');
+ assert.equal(storage.getItem('attempts'),'[]');
+ assert.equal(storage.getItem('knowledge-curator-legacy-v1-archive'),archive);
+ assert.equal(storage.getItem(boundary.JOURNAL),null);
+ assert.equal(boundary.recover(storage,attempts,valid),false);
+});
+test('common recovery refuses malformed archive without changing values',()=>{
+ const storage=store();
+ const attempts={KEY:'attempts',validateHistory:Array.isArray};
+ storage.setItem(boundary.PROGRESS,'{"existing":{}}');
+ storage.setItem(boundary.JOURNAL,JSON.stringify({
+  progress:'{}',attempts:'[]',legacyArchive:'{bad'
+ }));
+ assert.throws(()=>boundary.recover(storage,attempts,valid),/Invalid recovery archive/);
+ assert.equal(storage.getItem(boundary.PROGRESS),'{"existing":{}}');
+ assert.notEqual(storage.getItem(boundary.JOURNAL),null);
+});
+
+test('old two-key journal recovers without modifying newer archive',()=>{
+ const storage=store();
+ const attempts={KEY:'attempts',validateHistory:Array.isArray};
+ const archive=JSON.stringify({version:1,importedAt:'2026-10-15T00:00:00.000Z',progress:{}});
+ storage.setItem('knowledge-curator-legacy-v1-archive',archive);
+ storage.setItem(boundary.JOURNAL,JSON.stringify({progress:'{}',attempts:'[]'}));
+ storage.setItem(boundary.PROGRESS,'{"arithmetic":{}}');
+ assert.equal(boundary.recover(storage,attempts,valid),true);
+ assert.equal(storage.getItem(boundary.PROGRESS),'{}');
+ assert.equal(storage.getItem('attempts'),'[]');
+ assert.equal(storage.getItem('knowledge-curator-legacy-v1-archive'),archive);
+ assert.equal(storage.getItem(boundary.JOURNAL),null);
+});
+test('repeated recovery failures retain journal until storage becomes writable',()=>{
+ const values=new Map([
+  [boundary.JOURNAL,JSON.stringify({progress:'{}',attempts:'[]',legacyArchive:null})],
+  [boundary.PROGRESS,'{"arithmetic":{}}']
+ ]);
+ let failing=true;
+ const storage={
+  getItem:k=>values.has(k)?values.get(k):null,
+  setItem:(k,v)=>{
+   if(k===boundary.PROGRESS&&failing)throw Error('temporary failure');
+   values.set(k,v);
+  },
+  removeItem:k=>values.delete(k)
+ };
+ const attempts={KEY:'attempts',validateHistory:Array.isArray};
+ for(let i=0;i<2;i++){
+  assert.throws(()=>boundary.recover(storage,attempts,valid),/temporary failure/);
+  assert.notEqual(storage.getItem(boundary.JOURNAL),null);
+ }
+ failing=false;
+ assert.equal(boundary.recover(storage,attempts,valid),true);
+ assert.equal(storage.getItem(boundary.PROGRESS),'{}');
+ assert.equal(storage.getItem('attempts'),'[]');
+ assert.equal(storage.getItem(boundary.JOURNAL),null);
+});
+
+test('validated archive read accepts absent and rejects corrupt archive',()=>{
+ const storage=store();
+ assert.equal(boundary.readArchive(storage,valid),null);
+ storage.setItem('knowledge-curator-legacy-v1-archive','{broken');
+ assert.throws(()=>boundary.readArchive(storage,valid),/Invalid existing archive/);
+});
+test('archive read is blocked during pending recovery',()=>{
+ const storage=store();
+ storage.setItem(boundary.JOURNAL,'{}');
+ assert.throws(()=>boundary.readArchive(storage,valid),/recovery pending/);
+});

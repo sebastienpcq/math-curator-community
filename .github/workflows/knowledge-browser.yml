@@ -6,6 +6,12 @@ on:
     paths:
       - 'knowledge-curator/**'
       - '.github/workflows/knowledge-browser.yml'
+  pull_request:
+    branches:
+      - fix/knowledge-curator-v0.5-integration
+    paths:
+      - 'knowledge-curator/**'
+      - '.github/workflows/knowledge-browser.yml'
   workflow_dispatch:
 permissions:
   contents: read
@@ -22,6 +28,27 @@ jobs:
         run: |
           npm install --no-save @playwright/test@1.56.1
           npx playwright install --with-deps chromium
+      - name: Run V0.5 Node regression tests
+        run: node --test knowledge-curator/tests/validation-v05.test.cjs knowledge-curator/tests/state-v3.test.cjs knowledge-curator/tests/storage-boundary.test.cjs
+      - name: Check Unicode classification and paired metadata baseline
+        run: |
+          node --test knowledge-curator/evaluation/scoring-unicode.test.cjs
+          node --test knowledge-curator/evaluation/youtube-api.test.cjs
+          node --test knowledge-curator/evaluation/youtube-live-cli.test.cjs
+          node knowledge-curator/evaluation/run-paired-baseline.cjs
+          node knowledge-curator/evaluation/run-adversarial-fixtures.cjs
+          node knowledge-curator/evaluation/run-real-negative-pilot.cjs
+      - name: Evaluate verified pedagogical corpus with actual scoring engine
+        run: node knowledge-curator/evaluation/run-scoring-baseline.cjs
+      - name: Run real MV3 extension smoke test
+        run: npx playwright test knowledge-curator/tests/extension-mv3.spec.cjs --reporter=line --workers=1
+      - name: Test IndexedDB persistence across Chromium restart
+        run: |
+          python3 -m http.server 8770 --bind 127.0.0.1 --directory knowledge-curator &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID || true' EXIT
+          sleep 2
+          node knowledge-curator/tests/indexeddb-persistence.cjs
       - name: Serve local site and run browser checks
         run: |
           python3 -m http.server 8770 --bind 127.0.0.1 --directory knowledge-curator &

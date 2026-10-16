@@ -1,0 +1,251 @@
+{
+  "source": "actual src/scoring.js",
+  "descriptionType": "partial verified snippets, not full descriptions",
+  "rows": [
+    {
+      "id": "0-y8RUNPnQE",
+      "expectedDomain": "arithmétique",
+      "titleOnly": {
+        "score": 48,
+        "domains": [
+          "elementary"
+        ],
+        "confidence": "faible (titre principalement)",
+        "decisions": {
+          "balanced": "show",
+          "strict": "unknown"
+        }
+      },
+      "titleAndExcerpt": {
+        "score": 48,
+        "domains": [
+          "elementary"
+        ],
+        "confidence": "moyenne (métadonnées)",
+        "decisions": {
+          "balanced": "show",
+          "strict": "hide"
+        }
+      }
+    },
+    {
+      "id": "m0HUFgWbgsA",
+      "expectedDomain": "arithmétique",
+      "titleOnly": {
+        "score": 56,
+        "domains": [
+          "elementary"
+        ],
+        "confidence": "faible (titre principalement)",
+        "decisions": {
+          "balanced": "show",
+          "strict": "unknown"
+        }
+      },
+      "titleAndExcerpt": {
+        "score": 63,
+        "domains": [
+          "elementary"
+        ],
+        "confidence": "moyenne (métadonnées)",
+        "decisions": {
+          "balanced": "show",
+          "strict": "hide"
+        }
+      }
+    },
+    {
+      "id": "49OnlwASFbg",
+      "expectedDomain": "géométrie",
+      "titleOnly": {
+        "score": 58,
+        "domains": [
+          "geometry"
+        ],
+        "confidence": "faible (titre principalement)",
+        "decisions": {
+          "balanced": "show",
+          "strict": "unknown"
+        }
+      },
+      "titleAndExcerpt": null
+    },
+    {
+      "id": "7VFpZ63Tgis",
+      "expectedDomain": "algèbre",
+      "titleOnly": {
+        "score": 66,
+        "domains": [
+          "elementary"
+        ],
+        "confidence": "faible (titre principalement)",
+        "decisions": {
+          "balanced": "show",
+          "strict": "unknown"
+        }
+      },
+      "titleAndExcerpt": {
+        "score": 79,
+        "domains": [
+          "elementary"
+        ],
+        "confidence": "moyenne (métadonnées)",
+        "decisions": {
+          "balanced": "show",
+          "strict": "show"
+        }
+      }
+    },
+    {
+      "id": "5oBnmZVrOXE",
+      "expectedDomain": "probabilités",
+      "titleOnly": {
+        "score": 61,
+        "domains": [
+          "probability"
+        ],
+        "confidence": "faible (titre principalement)",
+        "decisions": {
+          "balanced": "show",
+          "strict": "unknown"
+        }
+      },
+      "titleAndExcerpt": {
+        "score": 68,
+        "domains": [
+          "probability"
+        ],
+        "confidence": "moyenne (métadonnées)",
+        "decisions": {
+          "balanced": "show",
+          "strict": "show"
+        }
+      }
+    },
+    {
+      "id": "fNk_zzaMoSs",
+      "expectedDomain": "algèbre linéaire",
+      "titleOnly": {
+        "score": 68,
+        "domains": [
+          "elementary",
+          "linear"
+        ],
+        "confidence": "faible (titre principalement)",
+        "decisions": {
+          "balanced": "show",
+          "strict": "unknown"
+        }
+      },
+      "titleAndExcerpt": {
+        "score": 68,
+        "domains": [
+          "elementary",
+          "linear"
+        ],
+        "confidence": "faible (titre principalement)",
+        "decisions": {
+          "balanced": "show",
+          "strict": "unknown"
+        }
+      }
+    },
+    {
+      "id": "PFDu9oVAE-g",
+      "expectedDomain": "algèbre linéaire",
+      "titleOnly": {
+        "score": 68,
+        "domains": [
+          "elementary",
+          "linear"
+        ],
+        "confidence": "faible (titre principalement)",
+        "decisions": {
+          "balanced": "show",
+          "strict": "unknown"
+        }
+      },
+      "titleAndExcerpt": {
+        "score": 75,
+        "domains": [
+          "elementary",
+          "linear"
+        ],
+        "confidence": "moyenne (métadonnées)",
+        "decisions": {
+          "balanced": "show",
+          "strict": "show"
+        }
+      }
+    },
+    {
+      "id": "pWtt0AvU0KA",
+      "expectedDomain": "analyse",
+      "titleOnly": {
+        "score": 58,
+        "domains": [
+          "calculus"
+        ],
+        "confidence": "faible (titre principalement)",
+        "decisions": {
+          "balanced": "show",
+          "strict": "unknown"
+        }
+      },
+      "titleAndExcerpt": {
+        "score": 58,
+        "domains": [
+          "calculus"
+        ],
+        "confidence": "moyenne (métadonnées)",
+        "decisions": {
+          "balanced": "show",
+          "strict": "hide"
+        }
+      }
+    },
+    {
+      "id": "6dZLq77gSGU",
+      "expectedDomain": "théorie des nombres",
+      "titleOnly": {
+        "score": 43,
+        "domains": [
+          "elementary",
+          "number"
+        ],
+        "confidence": "faible (titre principalement)",
+        "decisions": {
+          "balanced": "show",
+          "strict": "unknown"
+        }
+      },
+      "titleAndExcerpt": null
+    },
+    {
+      "id": "vv3JNSPKeEU",
+      "expectedDomain": "topologie",
+      "titleOnly": {
+        "score": 56,
+        "domains": [
+          "advanced"
+        ],
+        "confidence": "faible (titre principalement)",
+        "decisions": {
+          "balanced": "show",
+          "strict": "unknown"
+        }
+      },
+      "titleAndExcerpt": {
+        "score": 56,
+        "domains": [
+          "advanced"
+        ],
+        "confidence": "moyenne (métadonnées)",
+        "decisions": {
+          "balanced": "show",
+          "strict": "hide"
+        }
+      }
+    }
+  ]
+}

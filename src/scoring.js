@@ -1,29 +1,33 @@
 (function(root){
 'use strict';
 // These are metadata-only indicators, never a judgement of mathematical truth.
+// Unicode-aware boundaries: JavaScript \\b treats accented letters as non-word characters.
+const TOKEN_LEFT='(?<![\\p{L}\\p{N}])';
+const TOKEN_RIGHT='(?![\\p{L}\\p{N}])';
+function token(source){return new RegExp(TOKEN_LEFT+'(?:'+source+')'+TOKEN_RIGHT,'iu');}
 const rules={
- elementary:/\b(arithmetic|arithmétique|algèbre|algebra|equation|équation|fractions?|polynom|mathematics|mathématiques|maths?|mathe|matem[aá]tic)\b/i,
- geometry:/\b(géométrie|geometry|trigonométrie|trigonometry|triangles?|euclid|geometric)\b/i,
- calculus:/\b(analyse|calculus|limite|limits?|derivat|dériv|intégral|integral|continuit|continuity|séries?|series)\b/i,
- linear:/\b(algèbre linéaire|linear algebra|matrices?|matrix|vecteurs?|vectors?|eigenvalues?|valeurs propres|espaces? vectoriels?)\b/i,
- probability:/\b(probabilit|probability|statistics?|statistiques?|variance|bayesian|bayésien)\b/i,
- discrete:/\b(combinatoire|combinatorics|discrete math|mathématiques discrètes|permutations?|recurrence|récurrence)\b/i,
- number:/\b(théorie des nombres|number theory|nombres? premiers?|prime numbers?|congruence|modular|diophant)\b/i,
- logic:/\b(logique|logic|ensembles?|set theory|théorème de g[oö]del|godel|predicate|prédicat)\b/i,
- graphs:/\b(théorie des graphes|graph theory|graphes?|graphs?|trees?|arbres? couvrants?)\b/i,
- complexity:/\b(complexit|complexity|algorithm|algorith|np.complete|p vs np|computability|calculabilit)\b/i,
- optimization:/\b(optimis|optimiz|convex|simplex|programmation linéaire|linear programming)\b/i,
- advanced:/\b(topolog|topology|functional analysis|analyse fonctionnelle|measure theory|théorie de la mesure|abstract algebra|algèbre abstraite|differential geometry|géométrie différentielle|category theory)\b/i
+ elementary:token(String.raw`(?:second degré|quadratic equation|arithmetic|arithmétique|algèbre|algebra|equation|équation|fractions?|polyn[oô]mes?|polynomials?|mathematics|mathématiques|maths?|mathe|matem[aá]tic)`),
+ geometry:token(String.raw`(?:pythagore|pythagoras|géométrie|geometry|trigonométrie|trigonometry|triangles?|euclid|geometric)`),
+ calculus:token(String.raw`(analyse|calculus|limite|limits?|derivat(?:ive|ives|ion)|dériv(?:ée|ées|er|ation)|intégral(?:e|es|es?)|integral|continuit(?:é|és)|continuity|séries? numériques?|power series|infinite series)`),
+ linear:token(String.raw`(algèbre linéaire|linear algebra|matrices?|matrix|vecteurs?|vectors?|eigenvalues?|valeurs propres|espaces? vectoriels?)`),
+ probability:token(String.raw`(probabilit(?:é|és|y|ies)|probability|statistics?|statistiques?|variance|bayesian|bayésien)`),
+ discrete:token(String.raw`(combinatoire|combinatorics|discrete math|mathématiques discrètes|permutations?|recurrence|récurrence)`),
+ number:token(String.raw`(théorie des nombres|number theory|nombres? premiers?|prime numbers?|congruence|modular|diophant)`),
+ logic:token(String.raw`(logique|logic|ensembles?|set theory|théorème de g[oö]del|godel|predicate|prédicat)`),
+ graphs:token(String.raw`(théorie des graphes|graph theory|graphes?|graphs?|trees?|arbres? couvrants?)`),
+ complexity:token(String.raw`(complexit(?:é|és)|complexity|algorithm|algorith(?:me|mes|mique)|np.complete|p vs np|computability|calculabilit)`),
+ optimization:token(String.raw`(optimis(?:ation|er|é)|optimiz(?:ation|e|ed)|convex|simplex|programmation linéaire|linear programming)`),
+ advanced:token(String.raw`(topolog(?:ie|ique|y|ical)|topology|functional analysis|analyse fonctionnelle|measure theory|théorie de la mesure|abstract algebra|algèbre abstraite|differential geometry|géométrie différentielle|category theory)`)
 };
-const mathGeneral=/\b(mathématiques?|maths?|mathematics?|matem[aá]ticas?|mathématique|theorem|théorème|proof|preuve|démonstration|demonstration|algebra|algèbre|equations?|équations?|geometry|géométrie|calculus|derivative|dérivée|integral|intégrale|probabilit|statistics|statistiques|number theory|théorie des nombres|graph theory|linear algebra|analyse mathématique)\b/i;
-const pedagogy=/\b(cours|course|leçon|lesson|lecture|tutoriel|tutorial|explained|expliqu|comprendre|understand|introduction|initiation|apprendre|learn|masterclass|chapter|chapitre|playlist|formation|professeur|teacher)\b/i;
-const proof=/\b(démonstration|demonstration|preuve|proof|prove|théorème|theorem|rigoureux|rigorous|derivation|dérivation mathématique)\b/i;
-const intuition=/\b(intuition|intuitive|visuel|visual|géométrique|geometric|pourquoi|why|conceptuel|conceptual|animation|3d)\b/i;
-const exercise=/\b(exercices?|exercises?|corrigés?|solutions?|problèmes?|problems?|worked examples?|exemples? corrigés?)\b/i;
-const structure=/\b(chapitre|chapter|partie|part \d|cours complet|full course|playlist|leçon \d|lesson \d|introduction|prérequis|prerequisite)\b/i;
-const clickbait=/\b(shocking|incroyable|impossible|personne ne sait|nobody knows|mind.?blowing|secret|100% guaranteed|en 30 secondes|in 30 seconds)\b/i;
-const advanced=/\b(university|universit|graduate|master|phd|doctorat|advanced|avancé|research|recherche)\b/i;
-const beginner=/\b(débutant|beginner|bases? de|introduction|initiation|pour les nuls|from scratch|fondamentaux)\b/i;
+const mathGeneral=token(String.raw`(mathématiques?|maths?|mathematics?|matem[aá]ticas?|mathématique|theorem|théorème|proof|preuve|démonstration|demonstration|algebra|algèbre|equations?|équations?|geometry|géométrie|calculus|derivative|dérivée|integral|intégrale|probabilit(?:é|és|y|ies)|statistics|statistiques|number theory|théorie des nombres|graph theory|linear algebra|analyse mathématique)`);
+const pedagogy=token(String.raw`(cours|course|leçon|lesson|lecture|tutoriel|tutorial|explained|expliqu(?:er|é|ée|ées|és|ation)|comprendre|understand|introduction|initiation|apprendre|learn|masterclass|chapter|chapitre|playlist|formation|professeur|teacher)`);
+const proof=token(String.raw`(démonstration|demonstration|preuve|proof|prove|théorème|theorem|rigoureux|rigorous|derivation|dérivation mathématique)`);
+const intuition=token(String.raw`(intuition|intuitive|visuel|visual|géométrique|geometric|pourquoi|why|conceptuel|conceptual|animation|3d)`);
+const exercise=token(String.raw`(exercices?|exercises?|corrigés?|solutions?|problèmes?|problems?|worked examples?|exemples? corrigés?)`);
+const structure=token(String.raw`(chapitre|chapter|partie|part \\d|cours complet|full course|playlist|leçon \\d|lesson \\d|introduction|prérequis|prerequisite)`);
+const clickbait=token(String.raw`(shocking|incroyable|impossible|personne ne sait|nobody knows|mind.?blowing|secret|100% guaranteed|en 30 secondes|in 30 seconds)`);
+const advanced=token(String.raw`(university|universit(?:é|aire|y)|graduate|master|phd|doctorat|advanced|avancé|research|recherche)`);
+const beginner=token(String.raw`(débutant|beginner|bases? de|introduction|initiation|pour les nuls|from scratch|fondamentaux)`);
 function evaluate(video,settings={}){
  const title=String(video.title||'').trim(), context=String(video.context||'').trim(), channel=String(video.channel||'').trim();
  const text=[title,context].join(' '); const domains=Object.keys(rules).filter(k=>rules[k].test(text));

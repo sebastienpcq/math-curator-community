@@ -5,6 +5,7 @@
  function validDate(s){const n=Date.parse(s);return Number.isFinite(n)?n:null;}
  function reviewState(step,events,now=Date.now()){
   const ordered=events.filter(e=>e.skillId===step.id).slice().sort((a,b)=>validDate(a.timestamp)-validDate(b.timestamp));
+  // Same timestamps retain insertion order (stable sort): later recorded attempt wins.
   const errors=ordered.filter(e=>!e.correct).length;
   const latest=ordered.at(-1);
   const lastCorrect=ordered.filter(e=>e.correct).at(-1);
@@ -14,7 +15,11 @@
   const successive=ordered.slice().reverse().findIndex(e=>!e.correct);
   const streak=successive<0?ordered.length:successive;
   const stage=Math.min(Math.max(0,streak-1),INTERVALS.length-1);
-  const dueAt=lastCorrect?Math.max(last,validDate(lastCorrect.timestamp))+INTERVALS[stage]*DAY:null;
+  // An incorrect answer invalidates the pending successful-review schedule.
+  // The skill remains in weakSkills; a new success starts a fresh interval.
+  const dueAt=latest.correct&&lastCorrect!==undefined
+   ?last+INTERVALS[stage]*DAY
+   :null;
   return {errors,independent,stage,due:dueAt!==null&&now>=dueAt,nextAt:dueAt===null?null:new Date(dueAt).toISOString()};
  }
  function weakSkills(path,events){

@@ -1,0 +1,67 @@
+{
+  "version": "0.1",
+  "kind": "synthetic-text-fixtures-not-youtube-videos",
+  "note": "Independent intent labels specified before engine execution; not evidence of real-world video accuracy.",
+  "cases": [
+    {
+      "title": "Cours de géométrie : triangles",
+      "relevant": true
+    },
+    {
+      "title": "Probabilités conditionnelles : exercice corrigé",
+      "relevant": true
+    },
+    {
+      "title": "Démonstration du théorème de Pythagore",
+      "relevant": true
+    },
+    {
+      "title": "Topologie : espaces ouverts",
+      "relevant": true
+    },
+    {
+      "title": "Fractions et nombres rationnels",
+      "relevant": true
+    },
+    {
+      "title": "Introduction to eigenvectors and eigenvalues",
+      "relevant": true
+    },
+    {
+      "title": "Best gaming highlights compilation",
+      "relevant": false
+    },
+    {
+      "title": "Makeup tutorial for beginners",
+      "relevant": false
+    },
+    {
+      "title": "History documentary about medieval castles",
+      "relevant": false
+    },
+    {
+      "title": "Music theory: chord progressions",
+      "relevant": false
+    },
+    {
+      "title": "Geometric shapes in modern graphic design",
+      "relevant": false,
+      "ambiguous": true
+    },
+    {
+      "title": "Mathematics of poker betting strategies",
+      "relevant": true,
+      "ambiguous": true
+    },
+    {
+      "title": "The secret equation to get rich fast",
+      "relevant": false,
+      "ambiguous": true
+    },
+    {
+      "title": "Learn JavaScript arrays and algorithms",
+      "relevant": false,
+      "ambiguous": true
+    }
+  ]
+}

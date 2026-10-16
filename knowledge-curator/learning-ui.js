@@ -6,7 +6,7 @@ const msg=document.querySelector('#study-message');
 const count=document.querySelector('#study-count');
 let data=null,progress={};
 let history=[];
-function readHistory(){try{return KnowledgeAttempts.read(localStorage);}catch(error){msg.textContent='Historique inaccessible : '+error.message;return [];}}
+function readHistory(){try{return KnowledgeStorage.readAttempts(localStorage,KnowledgeAttempts);}catch(error){msg.textContent='Historique inaccessible : '+error.message;return [];}}
 function derivedProgress(){const next={...progress};for(const s of data.paths[0].steps){const state=KnowledgeMastery.status(s,history);if(state!=='not_started')next[s.id]={status:state,updatedAt:next[s.id]?.updatedAt||new Date().toISOString()};else if(next[s.id]?.status==='demonstrated'||next[s.id]?.status==='consolidate')next[s.id]={status:'in_progress',updatedAt:new Date().toISOString()};}return next;}
 function showHistory(){const list=document.querySelector('#attempt-history');list.replaceChildren();for(const a of history.slice(-30).reverse()){const li=document.createElement('li');const skill=data.paths[0].steps.find(s=>s.id===a.skillId);li.textContent=(skill?.title||a.skillId)+' · '+a.exerciseId+' · '+(a.correct?'correct':'incorrect')+' · '+new Date(a.timestamp).toLocaleString('fr-FR');list.append(li);}if(!history.length){const li=document.createElement('li');li.textContent='Aucune tentative enregistrée.';list.append(li);}}
 function validProgress(p){
@@ -15,11 +15,14 @@ function validProgress(p){
  return Object.entries(p).every(([id,value])=>allowed.has(id)&&value&&typeof value==='object'&&['in_progress','consolidate','demonstrated'].includes(value.status)&&typeof value.updatedAt==='string');
 }
 function load(){
- try {const raw=localStorage.getItem(KEY);const p=raw?JSON.parse(raw):{};progress=validProgress(p)?p:{};}
- catch {progress={};msg.textContent='Impossible de lire la progression enregistrée.';}
+ try {
+  if(KnowledgeStorage.recover(localStorage,KnowledgeAttempts,validProgress))
+   msg.textContent='Import interrompu récupéré depuis la sauvegarde locale.';
+  progress=KnowledgeStorage.readProgress(localStorage,validProgress);return true;}
+ catch {msg.textContent='Impossible de lire la progression enregistrée. Aucune sauvegarde automatique effectuée.';return false;}
 }
 function persist(){
- try{localStorage.setItem(KEY,JSON.stringify(progress));return true;}
+ try{KnowledgeStorage.writeProgress(localStorage,progress,validProgress);return true;}
  catch{msg.textContent='Sauvegarde locale indisponible. Exporte ta progression pour la conserver.';return false;}
 }
 function setStatus(id,status){progress[id]={status,updatedAt:new Date().toISOString()};persist();render();}
@@ -65,7 +68,7 @@ function render(){
     const ok=KnowledgeLearning.grade(exercise,input.value);
     feedback.textContent=(ok?'Réponse correcte. ':'Réponse à revoir. ')+exercise.explanation;
     try {
-      KnowledgeAttempts.append(localStorage,{
+      KnowledgeStorage.appendAttempt(localStorage,KnowledgeAttempts,{
         skillId:s.id,exerciseId:exercise.id,correct:ok,timestamp:new Date().toISOString()
       });
     } catch(error) {
@@ -94,7 +97,7 @@ function render(){
     form.addEventListener('submit',event=>{
      event.preventDefault();
      const ok=KnowledgeLearning.grade(ex,input.value);
-     try {KnowledgeAttempts.append(localStorage,{skillId:s.id,exerciseId:ex.id,correct:ok,timestamp:new Date().toISOString()});}
+     try {KnowledgeStorage.appendAttempt(localStorage,KnowledgeAttempts,{skillId:s.id,exerciseId:ex.id,correct:ok,timestamp:new Date().toISOString()});}
      catch(error){msg.textContent='Révision non enregistrée : '+error.message;return;}
      msg.textContent=(ok?'Rappel correct. ':'Rappel à consolider. ')+ex.explanation;
      render();
@@ -107,23 +110,70 @@ function render(){
  count.textContent=done+' / '+path.steps.length+' compétences démontrées';
 }
 document.querySelector('#progress-export').addEventListener('click',()=>{
- const blob=new Blob([JSON.stringify({version:2,progress,attempts:KnowledgeAttempts.read(localStorage)},null,2)],{type:'application/json'});
- const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='knowledge-curator-progression.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+ try {
+  if(KnowledgeStorage.pending(localStorage))throw Error('Récupération en attente');
+  const attempts=KnowledgeStorage.readAttempts(localStorage,KnowledgeAttempts);
+  const saved=KnowledgeStorage.readProgress(localStorage,validProgress);
+  const blob=new Blob([JSON.stringify({version:2,progress:saved,attempts},null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='knowledge-curator-progression.json';a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  msg.textContent='Export de la progression préparé.';
+ } catch(error) {
+  msg.textContent='Export impossible : données locales indisponibles ou récupération en attente. Aucune donnée modifiée.';
+ }
 });
 document.querySelector('#progress-import').addEventListener('change',async e=>{
  const file=e.target.files?.[0];if(!file)return;
  if(file.size>100000){msg.textContent='Fichier trop volumineux.';return;}
  try{const payload=JSON.parse(await file.text());if(![1,2].includes(payload.version)||!validProgress(payload.progress))throw Error('Format invalide');
-    const history=KnowledgeAttempts.read(localStorage);
-    if(payload.version===2){
-      if(!KnowledgeAttempts.validateHistory(payload.attempts))throw Error('Historique invalide');
-      KnowledgeAttempts.replace(localStorage,payload.attempts);
+    const previousHistory=KnowledgeStorage.readAttempts(localStorage,KnowledgeAttempts);
+    const previousProgress=progress;
+    if(payload.version===1&&previousHistory.length){
+      msg.textContent='Import V1 refusé : un historique récent existe déjà. Exporte tes données actuelles avant toute migration.';
+      e.target.value='';
+      return;
     }
-    progress=payload.progress;
-    history=readHistory();progress=derivedProgress();
-    if(!persist()){
-      if(payload.version===2)KnowledgeAttempts.replace(localStorage,history);
-      throw Error('Sauvegarde indisponible');
+    // Keep original V1 assertions in a separate, non-authoritative archive.
+    // The active progression still requires fresh evidence of mastery.
+    const legacyArchive=payload.version===1
+      ?JSON.stringify({version:1,importedAt:new Date().toISOString(),progress:payload.progress})
+      :null;
+    const previousLegacyArchive=KnowledgeStorage.readArchive(localStorage,validProgress);
+    if(payload.version===1){
+      payload.progress=Object.fromEntries(Object.entries(payload.progress).map(([id,value])=>[
+        id,value.status==='demonstrated'||value.status==='consolidate'
+          ?{...value,status:'in_progress'}
+          :value
+      ]));
+    }
+    if(payload.version===2&&!KnowledgeAttempts.validateHistory(payload.attempts))throw Error('Historique invalide');
+    try {
+      const next=KnowledgeStorage.transaction(localStorage,KnowledgeAttempts,validProgress,old=>{
+        const importedHistory=payload.version===2?payload.attempts:old.attempts;
+        const nextProgress={...payload.progress};
+        for(const step of data.paths[0].steps){
+          const status=KnowledgeMastery.status(step,importedHistory);
+          if(status!=='not_started')nextProgress[step.id]={
+            status,updatedAt:nextProgress[step.id]?.updatedAt||new Date().toISOString()
+          };
+          else if(['demonstrated','consolidate'].includes(nextProgress[step.id]?.status))
+            nextProgress[step.id]={status:'in_progress',updatedAt:new Date().toISOString()};
+        }
+        return {progress:nextProgress,attempts:importedHistory,
+          legacyArchive:legacyArchive===null?old.legacyArchive:legacyArchive};
+      });
+      progress=next.progress;
+      history=next.attempts;
+    } catch(error) {
+      progress=previousProgress;
+      history=previousHistory;
+      if(error.message.includes('Rollback failed')){
+        msg.textContent='Import interrompu : restauration impossible. Le journal de récupération est conservé. Ne réinitialise pas le stockage.';
+        e.target.value='';
+        return;
+      }
+      throw error;
     }
     render();msg.textContent='Progression importée.';}
  catch{msg.textContent='Import refusé : fichier non conforme.';}
@@ -131,10 +181,32 @@ document.querySelector('#progress-import').addEventListener('change',async e=>{
 });
 document.querySelector('#progress-reset').addEventListener('click',()=>{
  if(!confirm('Effacer toute la progression locale ?'))return;
- progress={};KnowledgeAttempts.replace(localStorage,[]);history=[];persist();render();msg.textContent='Progression réinitialisée.';
+ const JOURNAL='knowledge-curator-import-journal-v1';
+ try {
+  if(KnowledgeStorage.pending(localStorage)){
+   msg.textContent='Réinitialisation refusée : une récupération de données est en attente.';
+   return;
+  }
+  try {
+   KnowledgeStorage.transaction(localStorage,KnowledgeAttempts,validProgress,old=>({
+    progress:{},attempts:[],legacyArchive:old.legacyArchive
+   }));
+   progress={};history=[];render();
+   msg.textContent='Progression réinitialisée.';
+  } catch(error) {
+   if(error.message.includes('Rollback failed')){
+    msg.textContent='Réinitialisation interrompue : récupération requise au prochain démarrage. Ne vide pas le stockage.';
+   } else {
+    load();history=readHistory();render();
+    msg.textContent='Réinitialisation annulée : les données précédentes sont conservées.';
+   }
+  }
+ } catch(error) {
+  msg.textContent='Réinitialisation impossible : stockage indisponible.';
+ }
 });
 fetch('learning.json').then(r=>{if(!r.ok)throw Error('Impossible de charger le parcours');return r.json();}).then(d=>{
  const errors=KnowledgeLearning.validate(d);if(errors.length)throw Error(errors.join(', '));
- data=d;load();history=readHistory();progress=derivedProgress();persist();render();
+ data=d;if(!load())return;history=readHistory();progress=derivedProgress();persist();render();
 }).catch(error=>{msg.textContent='Parcours indisponible : '+error.message;});
 })();

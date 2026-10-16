@@ -27,3 +27,49 @@ test('review is scheduled in future, then becomes due',()=>{
  assert.equal(before.nextAt,'2026-10-16T00:00:00.000Z');
 });
 test('single correct answer never proves mastery',()=>assert.equal(mastery.achieved(step,[at('ex-arithmetic',true,'2026-10-15T00:00:00.000Z')]),false));
+
+test('incorrect answer cancels pending review until a new success',()=>{
+ const events=[
+  at('ex-arithmetic',true,'2026-10-15T00:00:00.000Z'),
+  at('ex-arithmetic-v2',false,'2026-10-15T12:00:00.000Z')
+ ];
+ const state=review.reviewState(step,events,Date.parse('2026-10-17T00:00:00.000Z'));
+ assert.equal(state.due,false);
+ assert.equal(state.nextAt,null);
+ assert.equal(state.errors,1);
+ const recovered=review.reviewState(step,[...events,at('ex-arithmetic-v3',true,'2026-10-17T00:00:00.000Z')],Date.parse('2026-10-17T00:01:00.000Z'));
+ assert.equal(recovered.due,false);
+ assert.equal(recovered.stage,0);
+ assert.equal(recovered.nextAt,'2026-10-18T00:00:00.000Z');
+});
+test('streak intervals grow monotonically and cap at 30 days',()=>{
+ const day=86400000,base=Date.parse('2026-10-15T00:00:00.000Z');
+ let events=[];
+ const expected=[1,3,7,14,30,30,30];
+ for(let i=0;i<expected.length;i++){
+  events.push(at('ex-arithmetic',true,new Date(base+i*day).toISOString()));
+  const state=review.reviewState(step,events,base+i*day);
+  assert.equal(state.stage,Math.min(i,4));
+  assert.equal(Date.parse(state.nextAt)-(base+i*day),expected[i]*day);
+  assert.equal(state.due,false);
+ }
+});
+test('chronological ordering governs review, not insertion order',()=>{
+ const earlier=at('ex-arithmetic',true,'2026-10-15T00:00:00.000Z');
+ const later=at('ex-arithmetic-v2',false,'2026-10-16T00:00:00.000Z');
+ assert.deepEqual(review.reviewState(step,[later,earlier],Date.parse('2026-10-17T00:00:00.000Z')),review.reviewState(step,[earlier,later],Date.parse('2026-10-17T00:00:00.000Z')));
+});
+
+test('same-time events use insertion order',()=>{
+ const stamp='2026-10-15T00:00:00.000Z';
+ const ok=at('ex-arithmetic',true,stamp),bad=at('ex-arithmetic-v2',false,stamp);
+ assert.equal(review.reviewState(step,[ok,bad],Date.parse(stamp)).nextAt,null);
+ assert.equal(review.reviewState(step,[bad,ok],Date.parse(stamp)).nextAt,'2026-10-16T00:00:00.000Z');
+});
+
+test('invalid history replacement preserves stored data',()=>{
+ const store=memory(),event=at('ex-arithmetic',true,'2026-10-15T00:00:00.000Z');
+ attempts.append(store,event);
+ assert.throws(()=>attempts.replace(store,[{...event,correct:'invalid'}]));
+ assert.deepEqual(attempts.read(store),[event]);
+});

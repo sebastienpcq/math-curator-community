@@ -78,3 +78,13 @@ test('untrusted transport error codes never expose a secret',async()=>{
  const poisoned=Object.assign(new Error('transport failed'),{code:secret});
  await errorCode(async()=>{throw poisoned;},'NETWORK_ERROR',{maxRetries:0});
 });
+
+test('malformed HTTP error body preserves status-based retry policy',async()=>{
+ let calls=0;
+ const malformed=status=>({ok:false,status,json:async()=>{throw Error(secret);}});
+ await assert.rejects(client(async()=>{calls++;return malformed(503);}).getVideos([id]),{code:'HTTP_ERROR',status:503});
+ assert.equal(calls,3);
+ calls=0;
+ await assert.rejects(client(async()=>{calls++;return malformed(403);}).getVideos([id]),{code:'ACCESS_DENIED',status:403});
+ assert.equal(calls,1);
+});

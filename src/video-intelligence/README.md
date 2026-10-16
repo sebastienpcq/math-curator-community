@@ -23,3 +23,9 @@ The tests cover malformed IDs, missing titles, a verified ten-video positive cor
 5. Keep scoring provenance separate from any claim of mathematical correctness.
 
 The adapter is not wired into the Chrome UI, and no external network calls occur.
+
+## Server-side YouTube Data API connector (cycle 88)
+
+`youtube-api.cjs` exports `createYouTubeClient({apiKey,fetchImpl})`. Use only on a trusted server or CLI; do not import this module into the public Chrome extension or commit credentials. The transport is injectable for offline tests. It calls the official `videos.list` endpoint with `snippet,contentDetails` and up to 50 video IDs. Results include normalized public metadata and `missingIds`, without guessing whether an absent video was deleted, private or otherwise inaccessible. Quota errors (`QUOTA_EXCEEDED`), access denials (`ACCESS_DENIED`), and other HTTP errors (`HTTP_ERROR`) are distinguished where the API supplies an error reason.
+
+Run `node --test knowledge-curator/evaluation/youtube-api.test.cjs`. These tests use simulated responses, not live YouTube credentials. API quotas and real-network compatibility require a separate authorized integration test. The connector is not yet wired into the Chrome extension.

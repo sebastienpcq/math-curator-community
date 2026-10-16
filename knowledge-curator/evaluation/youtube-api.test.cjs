@@ -13,3 +13,20 @@ test('network errors and aborted requests',async()=>{const c=createYouTubeClient
 
 test('quota exhaustion gets distinct code',async()=>{const c=createYouTubeClient({apiKey:'fixture-key',fetchImpl:async()=>response(403,{error:{errors:[{reason:'quotaExceeded'}]}})});await assert.rejects(c.getVideos([id]),e=>e.code==='QUOTA_EXCEEDED');});
 test('access denial gets distinct code',async()=>{const c=createYouTubeClient({apiKey:'fixture-key',fetchImpl:async()=>response(403,{error:{errors:[{reason:'keyInvalid'}]}})});await assert.rejects(c.getVideos([id]),e=>e.code==='ACCESS_DENIED');});
+
+test('API key is sent only in header, not URL',async()=>{
+ let observed;
+ const c=createYouTubeClient({apiKey:'fixture-secret',fetchImpl:async(url,options)=>{
+  observed={url,options};return response(200,{items:[]});
+ }});
+ await c.getVideos([id]);
+ assert.equal(observed.options.headers['X-Goog-Api-Key'],'fixture-secret');
+ assert.ok(!observed.url.includes('fixture-secret'));
+ assert.equal(new URL(observed.url).searchParams.has('key'),false);
+});
+test('network errors do not expose transport exception secrets',async()=>{
+ const c=createYouTubeClient({apiKey:'fixture-secret',fetchImpl:async()=>{
+  throw new Error('fixture-secret was exposed by transport');
+ }});
+ await assert.rejects(c.getVideos([id]),e=>!e.message.includes('fixture-secret')&&!e.cause);
+});

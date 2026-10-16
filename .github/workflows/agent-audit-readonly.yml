@@ -1,0 +1,36 @@
+name: Agent audit (read-only, manual)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: agent-audit-readonly
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Bounded AI audit
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          AUDIT_MODEL: gpt-4.1-mini
+          AUDIT_OUTPUT: /tmp/autonomous-audit-report.json
+        run: python3 scripts/autonomous_audit.py
+      - name: Publish report artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: autonomous-audit-report
+          path: /tmp/autonomous-audit-report.json
+          retention-days: 14

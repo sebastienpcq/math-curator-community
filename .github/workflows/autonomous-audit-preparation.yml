@@ -1,0 +1,37 @@
+name: Autonomous audit preparation
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 4 * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: autonomous-audit-preparation
+  cancel-in-progress: false
+
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout audit branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/autonomous-audit-setup
+          persist-credentials: false
+      - name: Inspect audit state (read-only)
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo 'Audit branch HEAD:'
+          git rev-parse HEAD
+          echo 'Project manifests:'
+          find . -maxdepth 5 -name package.json -not -path '*/node_modules/*' -print
+          echo 'Existing workflow files:'
+          find .github/workflows -maxdepth 1 -type f -print 2>/dev/null || true
+          echo 'Audit journal:'
+          if [ -f AUDIT_LOOP.md ]; then tail -n 45 AUDIT_LOOP.md; else echo 'No root audit journal'; fi
+          echo 'Preparation only: no AI agent is invoked and no changes are pushed.'

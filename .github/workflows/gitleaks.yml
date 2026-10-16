@@ -39,6 +39,7 @@ jobs:
           if [ "$result" -eq 1 ]; then
             if [ -f /tmp/gitleaks-report.json ]; then
               python3 scripts/classify-gitleaks.py /tmp/gitleaks-report.json || true
+              python3 scripts/audit-gitleaks-history.py /tmp/gitleaks-report.json || true
             fi
             echo "::error::Gitleaks detected potential secrets; values and locations suppressed"
             exit 1

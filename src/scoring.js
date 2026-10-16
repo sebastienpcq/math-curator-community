@@ -8,7 +8,7 @@ function token(source){return new RegExp(TOKEN_LEFT+'(?:'+source+')'+TOKEN_RIGHT
 const rules={
  elementary:token(String.raw`(?:second degré|quadratic equation|arithmetic|arithmétique|algèbre|algebra|equation|équation|fractions?|polyn[oô]mes?|polynomials?|mathematics|mathématiques|maths?|mathe|matem[aá]tic)`),
  geometry:token(String.raw`(?:pythagore|pythagoras|géométrie|geometry|trigonométrie|trigonometry|triangles?|euclid|geometric)`),
- calculus:token(String.raw`(analyse|calculus|limite|limits?|derivat(?:ive|ives|ion)|dériv(?:ée|ées|er|ation)|intégral(?:e|es|es?)|integral|continuit(?:é|és)|continuity|séries?|series)`),
+ calculus:token(String.raw`(analyse|calculus|limite|limits?|derivat(?:ive|ives|ion)|dériv(?:ée|ées|er|ation)|intégral(?:e|es|es?)|integral|continuit(?:é|és)|continuity|séries? numériques?|power series|infinite series)`),
  linear:token(String.raw`(algèbre linéaire|linear algebra|matrices?|matrix|vecteurs?|vectors?|eigenvalues?|valeurs propres|espaces? vectoriels?)`),
  probability:token(String.raw`(probabilit(?:é|és|y|ies)|probability|statistics?|statistiques?|variance|bayesian|bayésien)`),
  discrete:token(String.raw`(combinatoire|combinatorics|discrete math|mathématiques discrètes|permutations?|recurrence|récurrence)`),

@@ -42,5 +42,9 @@ class ClassifierTests(unittest.TestCase):
         source="const KEY='fictional-storage-id-123456';\nfetch('/test',{headers:{Authorization:KEY}});"
         self.assertEqual(module.classify(source,"fictional-storage-id-123456",1)[0],"unverified")
 
+    def test_direct_adapter_literal(self):
+        source="storage.getItem('example-storage-marker-123');"
+        self.assertEqual(module.classify(source,"example-storage-marker-123",1)[0],"probable_storage_identifier")
+
 if __name__=="__main__":
     unittest.main()

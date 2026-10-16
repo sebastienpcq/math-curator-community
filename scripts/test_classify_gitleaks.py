@@ -23,5 +23,12 @@ class ClassifierTests(unittest.TestCase):
     def test_empty_secret_is_unverified(self):
         self.assertEqual(module.classify("const KEY='x';","",1)[0],"unverified")
 
+    def test_unrelated_literal_is_not_exempted(self):
+        source="const label='fictional-storage-id-123456';\\nconsole.log(label);"
+        self.assertEqual(module.classify(source,"fictional-storage-id-123456",1)[0],"unverified")
+    def test_storage_literal_argument_is_probable_only(self):
+        source="localStorage.setItem('fictional-storage-id-123456','data');"
+        self.assertEqual(module.classify(source,"fictional-storage-id-123456",1)[0],"probable_storage_identifier")
+
 if __name__=="__main__":
     unittest.main()

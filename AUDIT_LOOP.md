@@ -723,3 +723,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Tests de non-divulgation ajoutés pour URL, en-tête et message d'erreur ; documentation actualisée.
 - Validation de la compatibilité de l'en-tête avec l'API réelle et CI du cycle 90 encore nécessaires. Aucun appel réel ni activation dans l'extension.
 - Aucune modification directe de `main`, fusion ou release.
+
+## Cycle 91 — Validation CI et réponses API inattendues
+
+- CI cycle 90 : Node réussi ; Chromium encore en cours au premier relevé.
+- Renforcement mineur du connecteur : refus explicite des réponses JSON nulles ou de structure invalide.
+- Deux tests hors réseau ajoutés : payload nul et ID inattendu ; aucune classification d'une vidéo absente comme privée ou supprimée sans preuve.
+- CI cycle 91 à confirmer. L'appel API réel reste impossible sans clé autorisée côté serveur.
+- Aucun changement de `main`, fusion ou release.

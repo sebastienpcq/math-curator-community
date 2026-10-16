@@ -83,3 +83,30 @@ jobs:
             exit "$result"
           fi
           echo "Gitleaks history scan completed without findings"
+
+      - name: Verify synthetic credential detection
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION=8.24.3
+          curl -fsSL --retry 2 "https://github.com/gitleaks/gitleaks/releases/download/v${VERSION}/gitleaks_${VERSION}_linux_x64.tar.gz" -o /tmp/gl-synthetic.tar.gz
+          mkdir -p /tmp/gl-synthetic-bin
+          tar -xzf /tmp/gl-synthetic.tar.gz -C /tmp/gl-synthetic-bin gitleaks
+          test_dir=$(mktemp -d)
+          trap 'rm -rf "$test_dir"; rm -f /tmp/gl-synthetic.tar.gz /tmp/gl-synthetic-report.json /tmp/gl-synthetic-output.log' EXIT
+          (
+            cd "$test_dir"
+            git init -q
+            git config user.name "CI Test"
+            git config user.email "ci@example.invalid"
+            python3 -c 'from pathlib import Path; Path("fixture.txt").write_text("github_token = "+chr(34)+"ghp_"+"aB3dE5fG7hJ9kL2mN4pQ6rS8tU0vW1xY2zZ3"+chr(34)+"\\n")'
+            git add fixture.txt
+            git commit -qm "synthetic scanner control"
+            set +e
+            /tmp/gl-synthetic-bin/gitleaks git --no-banner --gitleaks-ignore-path "$GITHUB_WORKSPACE/.gitleaksignore" --report-format json --report-path /tmp/gl-synthetic-report.json . >/tmp/gl-synthetic-output.log 2>&1
+            status=$?
+            set -e
+            if [ "$status" -ne 1 ]; then echo "::error::Synthetic secret was not detected"; exit 1; fi
+            python3 -c 'import json; r=json.load(open("/tmp/gl-synthetic-report.json")); assert any(x.get("RuleID")=="github-pat" for x in r)'
+          )
+          echo "Synthetic secret detection confirmed"

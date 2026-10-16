@@ -1,0 +1,23 @@
+name: Math Curator YouTube API one-time verification
+on:
+  push:
+    branches:
+      - agent/recursive-audit
+    paths:
+      - '.github/workflows/youtube-api-live-check.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify one public YouTube video
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+          YOUTUBE_VIDEO_ID: PFDu9oVAE-g
+        run: node src/video-intelligence/verify-live.cjs

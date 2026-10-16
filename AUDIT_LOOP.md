@@ -690,3 +690,12 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Huit descriptions partielles précédemment vérifiées ajoutées au corpus ; comparaison titre seul vs titre + extrait enregistrée dans `SCORING_PAIRED_V03.json`. Le corpus ne contient pas les descriptions intégrales.
 - Quatorze titres synthétiques annotés indépendamment : TP 7, FP 2, TN 5, FN 0. Métriques limitées aux fixtures synthétiques ; pas de mesure fiable de précision réelle sur YouTube.
 - Aucune fusion dans `main`. Vérification CI du dernier commit nécessaire avant de déclarer le cycle validé.
+
+## Cycle 85 — Premiers vrais négatifs YouTube
+
+- CI cycle 84 : contrôles Node et Chromium réussis (runs 38896600166 et 38896600160).
+- vidIQ : 0 crédit disponible, renouvellement annoncé le 6 novembre 2026. Recherche publique utilisée à la place.
+- Trois vidéos YouTube réelles vérifiées via titres/descriptions : bande-annonce Geometry Dash et deux tutoriels de guitare math rock.
+- Exécution réelle du moteur sur les titres : 3/3 classées pertinentes mathématiques, malgré leur sujet non mathématique. Étiquettes provisoires fondées sur les descriptions, sans double annotation indépendante.
+- Corpus, script reproductible, CI et rapport actualisés. Pas de correction opportuniste fondée sur seulement trois exemples ; prochaine priorité : politique d'ambiguïté et corpus équilibré.
+- CI du cycle 85 à confirmer ; aucune modification directe de `main`.

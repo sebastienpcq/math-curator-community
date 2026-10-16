@@ -33,7 +33,10 @@ jobs:
           result=$?
           set -e
           if [ "$result" -eq 1 ]; then
-            echo "::error::Gitleaks detected potential secrets; report suppressed to protect sensitive data"
+            if [ -f /tmp/gitleaks-report.json ]; then
+              jq -r '[.[] | .RuleID] | group_by(.) | map({rule: .[0], count: length}) | .[] | "Rule: \\(.rule) | findings: \\(.count)"' /tmp/gitleaks-report.json || true
+            fi
+            echo "::error::Gitleaks detected potential secrets; values and locations suppressed"
             exit 1
           elif [ "$result" -ne 0 ]; then
             echo "::error::Gitleaks scan failed (code $result); details suppressed"

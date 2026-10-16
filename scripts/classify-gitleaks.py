@@ -35,7 +35,7 @@ def classify(source, secret, line):
     if not assignments:
         # A literal may be passed directly to storage.setItem, or appear in a
         # comparison inside a test; never promote it without positive evidence.
-        if any(re.search(r"\b(?:localStorage|sessionStorage)\s*\.\s*(?:getItem|setItem|removeItem)\s*\([^)]*"+re.escape(secret),lines[i]) for i in occurrences):
+        if any(re.search(r"\b(?:localStorage|sessionStorage|storage)\s*\.\s*(?:getItem|setItem|removeItem)\s*\([^)]*"+re.escape(secret),lines[i]) for i in occurrences):
             return "probable_storage_identifier", "storage_literal_argument_"+location_note
     if assignments:
         for var in assignments:

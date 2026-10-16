@@ -1,0 +1,144 @@
+{
+  "scope": "synthetic metadata relevance only; not real video pedagogical quality",
+  "counts": {
+    "tp": 7,
+    "fp": 2,
+    "tn": 5,
+    "fn": 0
+  },
+  "precision": 0.7777777777777778,
+  "recall": 1,
+  "f1": 0.8750000000000001,
+  "rows": [
+    {
+      "title": "Cours de géométrie : triangles",
+      "reference": true,
+      "predicted": true,
+      "score": 61,
+      "domains": [
+        "geometry"
+      ],
+      "ambiguous": false
+    },
+    {
+      "title": "Probabilités conditionnelles : exercice corrigé",
+      "reference": true,
+      "predicted": true,
+      "score": 56,
+      "domains": [
+        "probability"
+      ],
+      "ambiguous": false
+    },
+    {
+      "title": "Démonstration du théorème de Pythagore",
+      "reference": true,
+      "predicted": true,
+      "score": 58,
+      "domains": [
+        "geometry"
+      ],
+      "ambiguous": false
+    },
+    {
+      "title": "Topologie : espaces ouverts",
+      "reference": true,
+      "predicted": true,
+      "score": 43,
+      "domains": [
+        "advanced"
+      ],
+      "ambiguous": false
+    },
+    {
+      "title": "Fractions et nombres rationnels",
+      "reference": true,
+      "predicted": true,
+      "score": 43,
+      "domains": [
+        "elementary"
+      ],
+      "ambiguous": false
+    },
+    {
+      "title": "Introduction to eigenvectors and eigenvalues",
+      "reference": true,
+      "predicted": true,
+      "score": 63,
+      "domains": [
+        "linear"
+      ],
+      "ambiguous": false
+    },
+    {
+      "title": "Best gaming highlights compilation",
+      "reference": false,
+      "predicted": false,
+      "score": null,
+      "domains": [],
+      "ambiguous": false
+    },
+    {
+      "title": "Makeup tutorial for beginners",
+      "reference": false,
+      "predicted": false,
+      "score": null,
+      "domains": [],
+      "ambiguous": false
+    },
+    {
+      "title": "History documentary about medieval castles",
+      "reference": false,
+      "predicted": false,
+      "score": null,
+      "domains": [],
+      "ambiguous": false
+    },
+    {
+      "title": "Music theory: chord progressions",
+      "reference": false,
+      "predicted": false,
+      "score": null,
+      "domains": [],
+      "ambiguous": false
+    },
+    {
+      "title": "Geometric shapes in modern graphic design",
+      "reference": false,
+      "predicted": true,
+      "score": 50,
+      "domains": [
+        "geometry"
+      ],
+      "ambiguous": true
+    },
+    {
+      "title": "Mathematics of poker betting strategies",
+      "reference": true,
+      "predicted": true,
+      "score": 48,
+      "domains": [
+        "elementary"
+      ],
+      "ambiguous": true
+    },
+    {
+      "title": "The secret equation to get rich fast",
+      "reference": false,
+      "predicted": true,
+      "score": 36,
+      "domains": [
+        "elementary"
+      ],
+      "ambiguous": true
+    },
+    {
+      "title": "Learn JavaScript arrays and algorithms",
+      "reference": false,
+      "predicted": false,
+      "score": null,
+      "domains": [],
+      "ambiguous": true
+    }
+  ]
+}

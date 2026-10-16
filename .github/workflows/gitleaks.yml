@@ -47,6 +47,28 @@ jobs:
                 set -e
                 if [ "$dry_status" -eq 0 ]; then
                   echo "Gitleaks candidate dry-run: no remaining findings"
+                  # A separate temporary Git repository must still trigger secret detection.
+                  synthetic_dir=$(mktemp -d)
+                  (
+                    cd "$synthetic_dir"
+                    git init -q
+                    git config user.name "CI Test"
+                    git config user.email "ci@example.invalid"
+                    python3 -c 'from pathlib import Path; Path("fixture.txt").write_text("github_token = "+chr(34)+"ghp_"+"A"*36+chr(34)+"\\n")'
+                    git add fixture.txt
+                    git commit -qm "synthetic scanner control"
+                    set +e
+                    /tmp/gitleaks-bin/gitleaks git --no-banner --gitleaks-ignore-path /tmp/gitleaks-candidate-ignore --report-format json --report-path /tmp/gitleaks-synthetic.json . >/tmp/gitleaks-synthetic.log 2>&1
+                    synthetic_status=$?
+                    set -e
+                    if [ "$synthetic_status" -ne 1 ]; then
+                      echo "::error::Synthetic secret detection control failed"
+                      exit 2
+                    fi
+                    python3 -c 'import json; r=json.load(open("/tmp/gitleaks-synthetic.json")); assert any(x.get("RuleID")=="github-pat" for x in r), "Expected GitHub token rule not triggered"'
+                    echo "Synthetic secret detection control passed"
+                  )
+                  rm -rf "$synthetic_dir" /tmp/gitleaks-synthetic.json /tmp/gitleaks-synthetic.log
                 else
                   echo "::warning::Gitleaks candidate dry-run did not pass (exit $dry_status)"
                 fi

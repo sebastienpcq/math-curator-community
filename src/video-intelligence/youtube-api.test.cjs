@@ -97,3 +97,12 @@ test('HTTP 403 rate limiting retries, ordinary forbidden does not',async()=>{
  await assert.rejects(client(async()=>{calls++;return fail(403,'forbidden');}).getVideos([id]),{code:'ACCESS_DENIED',status:403});
  assert.equal(calls,1);
 });
+
+test('Retry-After values are bounded and invalid values use backoff',async()=>{
+ for(const [header,expected] of [['999999999999999999999',30000],['invalid',200],['-1',200]]){
+  let calls=0;const delays=[];
+  await assert.rejects(client(async()=>{calls++;return fail(429,'',{'retry-after':header});},{maxRetries:1,sleep:async ms=>delays.push(ms)}).getVideos([id]),{code:'RATE_LIMITED'});
+  assert.equal(calls,2);
+  assert.deepEqual(delays,[expected]);
+ }
+});

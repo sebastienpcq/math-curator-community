@@ -57,3 +57,19 @@ test('caller cancellation is not retried',async()=>{
 test('timeout produces a sanitized error',async()=>{
  await errorCode((_url,{signal})=>new Promise((resolve,reject)=>signal.addEventListener('abort',()=>reject(Error(secret)),{once:true})),'TIMEOUT',{timeoutMs:5,maxRetries:0});
 });
+
+test('response body timeout is enforced',async()=>{
+ await errorCode(async()=>({ok:true,status:200,json:()=>new Promise(()=>{})}),'TIMEOUT',{timeoutMs:8,maxRetries:0});
+});
+test('retry wait can be interrupted by caller',async()=>{
+ const controller=new AbortController();
+ let calls=0;
+ const c=client(async()=>{calls++;return fail(429);},{sleep:()=>new Promise(()=>{})});
+ const pending=c.getVideos([id],{signal:controller.signal});
+ setImmediate(()=>controller.abort());
+ await assert.rejects(pending,{code:'ABORTED'});
+ assert.equal(calls,1);
+});
+test('HTTP fetch that ignores AbortSignal still times out',async()=>{
+ await errorCode(()=>new Promise(()=>{}),'TIMEOUT',{timeoutMs:8,maxRetries:0});
+});

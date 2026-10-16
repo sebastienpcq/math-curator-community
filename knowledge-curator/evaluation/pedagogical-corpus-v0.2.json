@@ -1,0 +1,207 @@
+{
+  "version": "0.2",
+  "date": "2026-10-16",
+  "limitations": "Échantillon intentionnel, non représentatif; aucune validation de la justesse mathématique. Transcriptions récupérées via vidIQ mais non reproduites.",
+  "videos": [
+    {
+      "id": "0-y8RUNPnQE",
+      "url": "https://www.youtube.com/watch?v=0-y8RUNPnQE",
+      "title": "Découvrir les fractions CM1 - CM2 - Cycle 3 - Maths - Mathématiques",
+      "channel": "Maître Lucas",
+      "duration": "PT7M32S",
+      "domainExpected": "arithmétique",
+      "levelPresumed": "primaire",
+      "transcript": {
+        "available": true,
+        "reportedLanguage": "en (métadonnée incohérente avec texte français)",
+        "contentStored": false
+      },
+      "referenceLabels": {
+        "mathematicalRelevance": true,
+        "source": "titre et description consultés",
+        "quality": "non évaluée",
+        "correctness": "non vérifiée"
+      }
+    },
+    {
+      "id": "m0HUFgWbgsA",
+      "url": "https://www.youtube.com/watch?v=m0HUFgWbgsA",
+      "title": "LE COURS : Les fractions - Sixième - Cinquième",
+      "channel": "Yvan Monka",
+      "duration": "PT31M57S",
+      "domainExpected": "arithmétique",
+      "levelPresumed": "collège",
+      "transcript": {
+        "available": true,
+        "reportedLanguage": "fr",
+        "contentStored": false
+      },
+      "referenceLabels": {
+        "mathematicalRelevance": true,
+        "source": "titre et description consultés",
+        "quality": "non évaluée",
+        "correctness": "non vérifiée"
+      }
+    },
+    {
+      "id": "49OnlwASFbg",
+      "url": "https://www.youtube.com/watch?v=49OnlwASFbg",
+      "title": "DÉMONSTRATION du théorème de Pythagore - Quatrième",
+      "channel": "Yvan Monka",
+      "duration": "PT4M24S",
+      "domainExpected": "géométrie",
+      "levelPresumed": "collège",
+      "transcript": {
+        "available": true,
+        "reportedLanguage": "fr",
+        "contentStored": false
+      },
+      "referenceLabels": {
+        "mathematicalRelevance": true,
+        "source": "titre et description consultés",
+        "quality": "non évaluée",
+        "correctness": "non vérifiée"
+      }
+    },
+    {
+      "id": "7VFpZ63Tgis",
+      "url": "https://www.youtube.com/watch?v=7VFpZ63Tgis",
+      "title": "DEMONSTRATION : Solutions d'une équation du second degré - Première",
+      "channel": "Yvan Monka",
+      "duration": "PT13M17S",
+      "domainExpected": "algèbre",
+      "levelPresumed": "lycée",
+      "transcript": {
+        "available": true,
+        "reportedLanguage": "fr",
+        "contentStored": false
+      },
+      "referenceLabels": {
+        "mathematicalRelevance": true,
+        "source": "titre et description consultés",
+        "quality": "non évaluée",
+        "correctness": "non vérifiée"
+      }
+    },
+    {
+      "id": "5oBnmZVrOXE",
+      "url": "https://www.youtube.com/watch?v=5oBnmZVrOXE",
+      "title": "LE COURS : Probabilités conditionnelles - Première/Terminale",
+      "channel": "Yvan Monka",
+      "duration": "PT25M39S",
+      "domainExpected": "probabilités",
+      "levelPresumed": "lycée",
+      "transcript": {
+        "available": true,
+        "reportedLanguage": "fr",
+        "contentStored": false
+      },
+      "referenceLabels": {
+        "mathematicalRelevance": true,
+        "source": "titre et description consultés",
+        "quality": "non évaluée",
+        "correctness": "non vérifiée"
+      }
+    },
+    {
+      "id": "fNk_zzaMoSs",
+      "url": "https://www.youtube.com/watch?v=fNk_zzaMoSs",
+      "title": "Vectors | Chapter 1, Essence of linear algebra",
+      "channel": "3Blue1Brown",
+      "duration": "PT9M52S",
+      "domainExpected": "algèbre linéaire",
+      "levelPresumed": "introduction universitaire",
+      "transcript": {
+        "available": true,
+        "reportedLanguage": "en",
+        "contentStored": false
+      },
+      "referenceLabels": {
+        "mathematicalRelevance": true,
+        "source": "titre et description consultés",
+        "quality": "non évaluée",
+        "correctness": "non vérifiée"
+      }
+    },
+    {
+      "id": "PFDu9oVAE-g",
+      "url": "https://www.youtube.com/watch?v=PFDu9oVAE-g",
+      "title": "Eigenvectors and eigenvalues | Chapter 14, Essence of linear algebra",
+      "channel": "3Blue1Brown",
+      "duration": "PT17M16S",
+      "domainExpected": "algèbre linéaire",
+      "levelPresumed": "licence",
+      "transcript": {
+        "available": true,
+        "reportedLanguage": "en",
+        "contentStored": false
+      },
+      "referenceLabels": {
+        "mathematicalRelevance": true,
+        "source": "titre et description consultés",
+        "quality": "non évaluée",
+        "correctness": "non vérifiée"
+      }
+    },
+    {
+      "id": "pWtt0AvU0KA",
+      "url": "https://www.youtube.com/watch?v=pWtt0AvU0KA",
+      "title": "Proof of fundamental theorem of calculus | AP Calculus AB | Khan Academy",
+      "channel": "Khan Academy",
+      "duration": "PT14M",
+      "domainExpected": "analyse",
+      "levelPresumed": "fin lycée / début supérieur",
+      "transcript": {
+        "available": true,
+        "reportedLanguage": "pt-BR (piste retournée)",
+        "contentStored": false
+      },
+      "referenceLabels": {
+        "mathematicalRelevance": true,
+        "source": "titre et description consultés",
+        "quality": "non évaluée",
+        "correctness": "non vérifiée"
+      }
+    },
+    {
+      "id": "6dZLq77gSGU",
+      "url": "https://www.youtube.com/watch?v=6dZLq77gSGU",
+      "title": "What does a ≡ b (mod n) mean? Basic Modular Arithmetic, Congruence",
+      "channel": "blackpenredpen",
+      "duration": "PT5M45S",
+      "domainExpected": "théorie des nombres",
+      "levelPresumed": "introduction universitaire",
+      "transcript": {
+        "available": true,
+        "reportedLanguage": "en",
+        "contentStored": false
+      },
+      "referenceLabels": {
+        "mathematicalRelevance": true,
+        "source": "titre et description consultés",
+        "quality": "non évaluée",
+        "correctness": "non vérifiée"
+      }
+    },
+    {
+      "id": "vv3JNSPKeEU",
+      "url": "https://www.youtube.com/watch?v=vv3JNSPKeEU",
+      "title": "Topology Lecture 01: Topological Spaces",
+      "channel": "Marius Furter",
+      "duration": "PT40M31S",
+      "domainExpected": "topologie",
+      "levelPresumed": "universitaire avancé",
+      "transcript": {
+        "available": true,
+        "reportedLanguage": "en",
+        "contentStored": false
+      },
+      "referenceLabels": {
+        "mathematicalRelevance": true,
+        "source": "titre et description consultés",
+        "quality": "non évaluée",
+        "correctness": "non vérifiée"
+      }
+    }
+  ]
+}

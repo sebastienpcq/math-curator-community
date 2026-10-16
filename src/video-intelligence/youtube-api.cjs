@@ -43,7 +43,7 @@ function createYouTubeClient({apiKey,fetchImpl=globalThis.fetch,maxRetries=2,sle
      ]);
     }catch(e){if(e?.code==='TIMEOUT'||e?.code==='ABORTED')throw e;throw apiError(response.ok?'INVALID_JSON':'HTTP_ERROR',response.status);}
    }catch(e){
-    const code=signal?.aborted?'ABORTED':controller.signal.aborted?'TIMEOUT':e?.code||'NETWORK_ERROR';
+    const code=signal?.aborted?'ABORTED':controller.signal.aborted?'TIMEOUT':(e?.code==='INVALID_RESPONSE'||e?.code==='INVALID_JSON'||e?.code==='INVALID_PAYLOAD'||e?.code==='HTTP_ERROR')?e.code:'NETWORK_ERROR';
     if(code==='NETWORK_ERROR'&&attempt<maxRetries){await wait(200*2**attempt,signal);continue;}
     throw apiError(code,e?.status||null);
    }finally{clearTimeout(timer);signal?.removeEventListener('abort',abort);}

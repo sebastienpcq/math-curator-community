@@ -715,3 +715,11 @@ Contrôler les résultats CI et traiter les anomalies de planification des révi
 - Tests hors réseau ajoutés (`youtube-live-cli.test.cjs`) pour absence de clé, succès simulé, quota et vidéo absente ; CI configurée pour les exécuter.
 - Aucun outil disponible ne permet de consulter ou d'utiliser un secret GitHub configuré ; aucun appel réel à l'API n'a été effectué. La validation réelle reste bloquée jusqu'à mise à disposition sécurisée d'une clé autorisée.
 - Aucune modification de `main`, fusion ou release. CI du dernier commit à confirmer.
+
+## Cycle 90 — Renforcement sécurité connecteur
+
+- CI cycle 89 : workflows Node et Chromium réussis (38899047908, 38899047939).
+- Clé API déplacée de la query string vers l'en-tête `X-Goog-Api-Key` dans le client serveur ; exceptions de transport expurgées.
+- Tests de non-divulgation ajoutés pour URL, en-tête et message d'erreur ; documentation actualisée.
+- Validation de la compatibilité de l'en-tête avec l'API réelle et CI du cycle 90 encore nécessaires. Aucun appel réel ni activation dans l'extension.
+- Aucune modification directe de `main`, fusion ou release.

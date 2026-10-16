@@ -1,6 +1,6 @@
 # Gitleaks forensic justification — draft, not an allowlist
 
-Status: **NOT APPROVED FOR EXCEPTIONS**. No fingerprints or detected values are disclosed here.
+Status: **Five narrowly scoped historical fingerprints approved and active on the audit branch.** The full detected value is not reproduced in this report. The allowlist is maintained in `.gitleaksignore`.
 
 ## Scope and observed evidence
 
@@ -20,10 +20,10 @@ Current module relationships: `attempts.cjs` declares an attempts storage key; `
 
 - Static inspection of selected diffs and current modules does not establish all historical runtime flows or absence of sensitive reuse.
 - The equality grouping proves one repeated detected value, not that it is intrinsically non-sensitive.
-- No exception is approved, generated, or activated.
-- The Gitleaks scan must continue failing on unresolved findings.
+- Five exact-fingerprint exceptions have been activated after matching the historical storage constant, confirming all five finding identities, and testing a temporary allowlist.
+- Gitleaks CI passed on the audit branch and separately confirmed that a synthetic GitHub token is still detected. This does not establish absence of every possible secret.
 
-## Conditions before any targeted exception
+## Verification record and residual controls
 
 1. Independently establish that the exact reported value is the intended public storage identifier in all relevant historical contexts.
 2. Review uses across reachable Git history, including aliases and dynamically constructed uses, and document any unexamined branches.
@@ -32,4 +32,4 @@ Current module relationships: `attempts.cjs` declares an attempts storage key; `
 5. Add only exact-fingerprint allowlist entries after approval, with regression tests demonstrating a separate synthetic API key still triggers detection.
 6. Re-run Gitleaks and functional CI on the final commit.
 
-Decision: **NO-GO for merge pending verification and controlled exception review.**
+Decision: **Security checks passed for the audited historical exceptions. Merge remains a separate review decision.** The real YouTube Data API v3 regression passed on workflow run 38974870313. The PR targets `agent/youtube-live-validation`, not `main`. Re-check CI after any new changes.

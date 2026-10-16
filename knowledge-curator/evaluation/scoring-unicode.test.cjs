@@ -18,3 +18,12 @@ for(const title of ['gaming highlights','geometrician fantasy game','topological
 test('pilot positive titles retain mathematical relevance',()=>{
  for(const v of corpus.videos)assert.equal(scoring.evaluate({title:v.title}).relevant,true,v.id);
 });
+
+test('generic video series is not mistaken for calculus',()=>{
+ const ev=scoring.evaluate({title:'Vectors | Essence of linear algebra',context:'Beginning the linear algebra series with the basics.'});
+ assert.ok(ev.domains.includes('linear'));
+ assert.ok(!ev.domains.includes('calculus'));
+});
+test('explicit infinite series still indicates calculus',()=>{
+ assert.ok(scoring.evaluate({title:'Infinite series convergence lecture'}).domains.includes('calculus'));
+});

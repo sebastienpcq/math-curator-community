@@ -40,20 +40,7 @@ jobs:
             if [ -f /tmp/gitleaks-report.json ]; then
               python3 scripts/classify-gitleaks.py /tmp/gitleaks-report.json || true
               python3 scripts/audit-gitleaks-history.py /tmp/gitleaks-report.json || true
-              python3 - /tmp/gitleaks-report.json <<'PY'
-              import json, sys
-              report=json.load(open(sys.argv[1],encoding='utf-8'))
-              expected={
-                  ('4a0fff15d734','knowledge-curator/attempts.cjs'),
-                  ('149bdd12227d','knowledge-curator/tests/browser.spec.cjs'),
-                  ('4d5e863a93c6','knowledge-curator/tests/browser.spec.cjs'),
-                  ('602e38bb00b9','knowledge-curator/tests/browser.spec.cjs'),
-                  ('be3cacc01a79','knowledge-curator/tests/browser.spec.cjs')
-              }
-              observed={(str(x.get('Commit',''))[:12],x.get('File')) for x in report}
-              fingerprints=[x.get('Fingerprint') for x in report]
-              print(json.dumps({'audit':'fingerprint_identity','expected_locations':len(report)==5 and observed==expected,'five_distinct_fingerprints':len(fingerprints)==5 and all(isinstance(x,str) and bool(x) for x in fingerprints) and len(set(fingerprints))==5,'expected_rule':all(x.get('RuleID')=='generic-api-key' for x in report),'exceptions_activated':False}))
-              PY
+              python3 -c 'import json,sys; r=json.load(open(sys.argv[1])); e={("4a0fff15d734","knowledge-curator/attempts.cjs"),("149bdd12227d","knowledge-curator/tests/browser.spec.cjs"),("4d5e863a93c6","knowledge-curator/tests/browser.spec.cjs"),("602e38bb00b9","knowledge-curator/tests/browser.spec.cjs"),("be3cacc01a79","knowledge-curator/tests/browser.spec.cjs")}; f=[x.get("Fingerprint") for x in r]; print(json.dumps({"audit":"fingerprint_identity","expected_locations":len(r)==5 and {(str(x.get("Commit",""))[:12],x.get("File")) for x in r}==e,"five_distinct_fingerprints":len(f)==5 and all(isinstance(x,str) and bool(x) for x in f) and len(set(f))==5,"expected_rule":all(x.get("RuleID")=="generic-api-key" for x in r),"exceptions_activated":False}))' /tmp/gitleaks-report.json
             fi
             echo "::error::Gitleaks detected potential secrets; values and locations suppressed"
             exit 1

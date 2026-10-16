@@ -31,7 +31,7 @@ jobs:
            "ignore_retry_after":("Number.isFinite(seconds)?Math.min(seconds*1000,30000):200*2**attempt","200*2**attempt"),
            "disable_dedup":("const unique=[...new Set(ids)];","const unique=ids;"),
            "leak_key_in_url":("url.searchParams.set('part','snippet,contentDetails');","url.searchParams.set('key',apiKey);url.searchParams.set('part','snippet,contentDetails');"),
-           "disable_timeout":("const timer=setTimeout(abort,timeoutMs);","const timer=setTimeout(abort,timeoutMs*100000);"),
+           "disable_timeout":("const timer=setTimeout(abort,timeoutMs);","const timer=setTimeout(abort,timeoutMs*20);"),
            "malformed_403_as_503":("body=null;","body=null;response={...response,status:503};"),
           }
           def run(path):

@@ -34,7 +34,29 @@ jobs:
           set -e
           if [ "$result" -eq 1 ]; then
             if [ -f /tmp/gitleaks-report.json ]; then
-              jq -r '[.[] | {rule: (.RuleID // "unknown"), file: (.File // "unknown"), commit: ((.Commit // "unknown") | .[0:12])}] | group_by([.rule,.file,.commit]) | .[] | {rule: .[0].rule, file: .[0].file, commit: .[0].commit, count: length} | @json' /tmp/gitleaks-report.json || true
+              python3 - <<'PY'
+              import json, subprocess, collections
+              findings=json.load(open('/tmp/gitleaks-report.json'))
+              results=collections.Counter()
+              for f in findings:
+                  path=f.get('File','')
+                  commit=f.get('Commit','')
+                  secret=f.get('Secret','')
+                  line=f.get('StartLine')
+                  classification='unverified'
+                  if path in ('knowledge-curator/attempts.cjs','knowledge-curator/tests/browser.spec.cjs') and commit and isinstance(line,int) and secret:
+                      try:
+                          source=subprocess.check_output(['git','show',f'{commit}:{path}'],stderr=subprocess.DEVNULL).decode('utf-8')
+                          lines=source.splitlines()
+                          matched=lines[line-1] if 0<line<=len(lines) else ''
+                          if secret in matched and any(marker in matched for marker in ('localStorage.', 'getItem(', 'setItem(', 'removeItem(', 'const KEY=', 'attemptsKey=', 'progressKey=')):
+                              classification='storage-key-candidate'
+                      except (subprocess.CalledProcessError,UnicodeDecodeError):
+                          pass
+                  results[(f.get('RuleID','unknown'),classification)]+=1
+              for (rule,classification),count in sorted(results.items()):
+                  print(json.dumps({'rule':rule,'classification':classification,'count':count}))
+              PY
             fi
             echo "::error::Gitleaks detected potential secrets; values and locations suppressed"
             exit 1

@@ -38,5 +38,9 @@ class ClassifierTests(unittest.TestCase):
         source="const KEY='fictional-storage-id-123456';\nfunction read(storage){return storage.getItem(KEY);}"
         self.assertEqual(module.classify(source,"fictional-storage-id-123456",1)[0],"probable_storage_identifier")
 
+    def test_secret_used_as_authorization_remains_unverified(self):
+        source="const KEY='fictional-storage-id-123456';\nfetch('/test',{headers:{Authorization:KEY}});"
+        self.assertEqual(module.classify(source,"fictional-storage-id-123456",1)[0],"unverified")
+
 if __name__=="__main__":
     unittest.main()

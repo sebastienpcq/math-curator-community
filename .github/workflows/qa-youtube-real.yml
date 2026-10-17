@@ -1,0 +1,38 @@
+name: Math Curator real YouTube acceptance
+on:
+  push:
+    branches: [agent/qa-youtube-real-20261017]
+    paths:
+      - '.github/workflows/qa-youtube-real.yml'
+      - 'scripts/qa-youtube-real.cjs'
+permissions:
+  contents: read
+jobs:
+  acceptance:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Assert product files match reference SHA
+        run: |
+          git diff --exit-code d762095dfbf9c6b716acf6a75d903a1b8f5e79f8 HEAD -- manifest.json popup.html options.html src
+      - name: Install existing QA dependencies
+        run: |
+          npm install --no-save @playwright/test@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Run bounded acceptance against real YouTube
+        run: node scripts/qa-youtube-real.cjs
+      - name: Upload acceptance evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: math-curator-real-youtube-evidence
+          path: qa-evidence/
+          retention-days: 7
+          if-no-files-found: warn

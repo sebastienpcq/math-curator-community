@@ -99,3 +99,31 @@ test('favorite remove and add are serialized without losing unrelated entries',a
   expect(saved.bcdefghijkl).toBeDefined();
  }finally{await browser?.context.close();fs.rmSync(profile,{recursive:true,force:true});}
 });
+
+test('two concurrent removals preserve unrelated favorites',async()=>{
+ const profile=fs.mkdtempSync(path.join(os.tmpdir(),'mc-double-remove-'));let browser;
+ try{
+  browser=await start(profile);
+  const page=await browser.context.newPage();await page.goto('chrome-extension://'+browser.id+'/options.html');
+  const ids=['abcdefghijk','bcdefghijkl','cdefghijklm'];
+  for(const id of ids)expect((await page.evaluate(video=>chrome.runtime.sendMessage({type:'SAVE_VIDEO',video}),{id,title:id})).ok)).toBe(true);
+  const replies=await page.evaluate(()=>Promise.all(['abcdefghijk','bcdefghijkl'].map(id=>chrome.runtime.sendMessage({type:'REMOVE_FAVORITE',id}))));
+  expect(replies.every(r=>r.ok)).toBe(true);
+  expect(Object.keys((await read(browser.worker)).saved||{})).toEqual(['cdefghijklm']);
+ }finally{await browser?.context.close();fs.rmSync(profile,{recursive:true,force:true});}
+});
+test('confirmed favorite survives service worker restart',async()=>{
+ const profile=fs.mkdtempSync(path.join(os.tmpdir(),'mc-worker-restart-'));let browser;
+ try{
+  browser=await start(profile);
+  const page=await browser.context.newPage();await page.goto('chrome-extension://'+browser.id+'/options.html');
+  expect((await page.evaluate(()=>chrome.runtime.sendMessage({type:'SAVE_VIDEO',video:{id:'abcdefghijk',title:'Persisted'}}))).ok).toBe(true);
+  const old=browser.worker;
+  const session=await browser.context.newCDPSession(old);
+  await session.send('ServiceWorker.stopAllWorkers');
+  await session.detach();
+  const next=await browser.context.waitForEvent('serviceworker',{timeout:15000}).catch(()=>browser.context.serviceWorkers()[0]);
+  const saved=await read(next||browser.worker);
+  expect(saved.saved?.abcdefghijk?.title).toBe('Persisted');
+ }finally{await browser?.context.close();fs.rmSync(profile,{recursive:true,force:true});}
+});

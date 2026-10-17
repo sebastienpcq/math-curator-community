@@ -155,9 +155,9 @@ test('stale options page must not silently remove a newer channel addition',asyn
   await expect.poll(async()=>(await read(browser.worker)).allowChannels?.includes('Channel Alpha')).toBe(true);
   await b.locator('#allowChannels').fill('Channel Beta');
   await b.locator('#saveRules').click();
-  await expect.poll(async()=>(await read(browser.worker)).allowChannels?.includes('Channel Beta')).toBe(true);
+  await expect(b.locator('#status')).toContainText('Conflit');
   const channels=(await read(browser.worker)).allowChannels;
   expect(channels).toContain('Channel Alpha');
-  expect(channels).toContain('Channel Beta');
+  expect(channels).not.toContain('Channel Beta');
  }finally{await browser?.context.close();fs.rmSync(profile,{recursive:true,force:true});}
 });

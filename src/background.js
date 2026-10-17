@@ -20,6 +20,25 @@ chrome.runtime.onMessage.addListener((msg,_sender,respond)=>{
   updateSettings(patch).then(settings=>respond({ok:true,settings})).catch(()=>respond({ok:false,error:'Storage update failed'}));
   return true;
  }
+ if(['REMOVE_FAVORITE','CLEAR_FAVORITES'].includes(msg?.type)){
+  const task=settingsQueue.catch(()=>{}).then(async()=>{
+   const {settings:stored}=await chrome.storage.local.get('settings');
+   const current={...MathConfig.DEFAULTS,...stored};
+   const saved={...(current.saved||{})};
+   if(msg.type==='REMOVE_FAVORITE'){
+    if(typeof msg.id!=='string'||!/^[A-Za-z0-9_-]{11}$/.test(msg.id))throw Error('Invalid video ID');
+    delete saved[msg.id];
+   }else{
+    for(const id of Object.keys(saved))delete saved[id];
+   }
+   const next={...current,saved};
+   await chrome.storage.local.set({settings:next});
+   return next;
+  });
+  settingsQueue=task.catch(()=>{});
+  task.then(settings=>respond({ok:true,settings})).catch(()=>respond({ok:false,error:'Favorite update failed'}));
+  return true;
+ }
  if(msg?.type!=='SAVE_VIDEO')return;
  (async()=>{
   const v=msg.video;

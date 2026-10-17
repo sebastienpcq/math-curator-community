@@ -48,7 +48,7 @@ test('options preferences persist across browser restart',async()=>{
   await expect(reopened.locator('#domains input[type=checkbox]').first()).toBeChecked();
  }finally{await browser?.context.close();fs.rmSync(profile,{recursive:true,force:true});}
 });
-test('concurrent popup and options stale snapshots expose lost-update risk',async()=>{
+test('concurrent popup and options preserve independent settings changes',async()=>{
  const profile=fs.mkdtempSync(path.join(os.tmpdir(),'mc-race-'));let browser;
  try{
   browser=await start(profile);
@@ -61,8 +61,8 @@ test('concurrent popup and options stale snapshots expose lost-update risk',asyn
   await options.locator('#saveRules').click();
   await expect.poll(async()=>(await read(browser.worker)).allowChannels?.[0]).toBe('3Blue1Brown');
   const result=await read(browser.worker);
-  // Diagnostic regression: currently each page writes a stale full settings object.
-  expect(result.enabled).toBe(false);
+  // Independent edits must both survive the serialized patch protocol.
+  expect(result.enabled).toBe(true);
   expect(result.allowChannels).toEqual(['3Blue1Brown']);
  }finally{await browser?.context.close();fs.rmSync(profile,{recursive:true,force:true});}
 });

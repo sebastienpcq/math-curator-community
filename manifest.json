@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Math Curator Community",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Filtre local et réversible de vidéos de mathématiques sur YouTube, sans compte ni IA externe.",
   "permissions": [
     "storage"

@@ -126,3 +126,19 @@ test('confirmed favorite survives Chromium restart',async()=>{
   expect(saved.saved?.abcdefghijk?.title).toBe('Persisted');
  }finally{await browser?.context.close();fs.rmSync(profile,{recursive:true,force:true});}
 });
+
+test('stale domain list patches must not erase independently selected domains',async()=>{
+ const profile=fs.mkdtempSync(path.join(os.tmpdir(),'mc-domain-race-'));let browser;
+ try{
+  browser=await start(profile);
+  const a=await browser.context.newPage(),b=await browser.context.newPage();
+  await a.goto('chrome-extension://'+browser.id+'/options.html');
+  await b.goto('chrome-extension://'+browser.id+'/options.html');
+  await a.locator('#domains input[type=checkbox]').nth(0).check();
+  await expect.poll(async()=>(await read(browser.worker)).domains?.length).toBe(1);
+  await b.locator('#domains input[type=checkbox]').nth(1).check();
+  await expect.poll(async()=>(await read(browser.worker)).domains?.length).toBe(2);
+  const domains=(await read(browser.worker)).domains;
+  expect(new Set(domains).size).toBe(2);
+ }finally{await browser?.context.close();fs.rmSync(profile,{recursive:true,force:true});}
+});

@@ -3,6 +3,7 @@ on:
   pull_request:
     branches:
       - agent/youtube-live-validation
+      - agent/youtube-client-hardening
   workflow_dispatch:
 permissions:
   contents: read

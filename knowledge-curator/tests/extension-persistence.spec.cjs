@@ -48,7 +48,7 @@ test('options preferences persist across browser restart',async()=>{
   await expect(reopened.locator('#domains input[type=checkbox]').first()).toBeChecked();
  }finally{await browser?.context.close();fs.rmSync(profile,{recursive:true,force:true});}
 });
-test('concurrent popup and options stale snapshots expose lost-update risk',async()=>{
+test('concurrent popup and options preserve independent settings changes',async()=>{
  const profile=fs.mkdtempSync(path.join(os.tmpdir(),'mc-race-'));let browser;
  try{
   browser=await start(profile);
@@ -61,8 +61,103 @@ test('concurrent popup and options stale snapshots expose lost-update risk',asyn
   await options.locator('#saveRules').click();
   await expect.poll(async()=>(await read(browser.worker)).allowChannels?.[0]).toBe('3Blue1Brown');
   const result=await read(browser.worker);
-  // Diagnostic regression: currently each page writes a stale full settings object.
-  expect(result.enabled).toBe(false);
+  // Independent edits must both survive the serialized patch protocol.
+  expect(result.enabled).toBe(true);
   expect(result.allowChannels).toEqual(['3Blue1Brown']);
+ }finally{await browser?.context.close();fs.rmSync(profile,{recursive:true,force:true});}
+});
+
+test('simultaneous favorite saves preserve both entries',async()=>{
+ const profile=fs.mkdtempSync(path.join(os.tmpdir(),'mc-favorites-'));let browser;
+ try{
+  browser=await start(profile);
+  const worker=browser.worker;
+  const sender=await browser.context.newPage();await sender.goto('chrome-extension://'+browser.id+'/options.html');
+  const result=await sender.evaluate(async()=>{
+   const videos=[{id:'abcdefghijk',title:'First'},{id:'bcdefghijkl',title:'Second'}];
+   return Promise.all(videos.map(video=>chrome.runtime.sendMessage({type:'SAVE_VIDEO',video})));
+  });
+  expect(result.every(x=>x.ok)).toBe(true);
+  const saved=(await read(worker)).saved;
+  expect(Object.keys(saved).sort()).toEqual(['abcdefghijk','bcdefghijkl']);
+ }finally{await browser?.context.close();fs.rmSync(profile,{recursive:true,force:true});}
+});
+test('favorite remove and add are serialized without losing unrelated entries',async()=>{
+ const profile=fs.mkdtempSync(path.join(os.tmpdir(),'mc-favorite-race-'));let browser;
+ try{
+  browser=await start(profile);
+  const worker=browser.worker;
+  const sender=await browser.context.newPage();await sender.goto('chrome-extension://'+browser.id+'/options.html');
+  await sender.evaluate(()=>chrome.runtime.sendMessage({type:'SAVE_VIDEO',video:{id:'abcdefghijk',title:'Old'}}));
+  const replies=await sender.evaluate(()=>Promise.all([
+   chrome.runtime.sendMessage({type:'REMOVE_FAVORITE',id:'abcdefghijk'}),
+   chrome.runtime.sendMessage({type:'SAVE_VIDEO',video:{id:'bcdefghijkl',title:'New'}})
+  ]));
+  expect(replies.every(x=>x.ok)).toBe(true);
+  const saved=(await read(worker)).saved;
+  expect(saved.abcdefghijk).toBeUndefined();
+  expect(saved.bcdefghijkl).toBeDefined();
+ }finally{await browser?.context.close();fs.rmSync(profile,{recursive:true,force:true});}
+});
+
+test('two concurrent removals preserve unrelated favorites',async()=>{
+ const profile=fs.mkdtempSync(path.join(os.tmpdir(),'mc-double-remove-'));let browser;
+ try{
+  browser=await start(profile);
+  const page=await browser.context.newPage();await page.goto('chrome-extension://'+browser.id+'/options.html');
+  const ids=['abcdefghijk','bcdefghijkl','cdefghijklm'];
+  for(const id of ids)expect((await page.evaluate(video=>chrome.runtime.sendMessage({type:'SAVE_VIDEO',video}),{id,title:id})).ok).toBe(true);
+  const replies=await page.evaluate(()=>Promise.all(['abcdefghijk','bcdefghijkl'].map(id=>chrome.runtime.sendMessage({type:'REMOVE_FAVORITE',id}))));
+  expect(replies.every(r=>r.ok)).toBe(true);
+  expect(Object.keys((await read(browser.worker)).saved||{})).toEqual(['cdefghijklm']);
+ }finally{await browser?.context.close();fs.rmSync(profile,{recursive:true,force:true});}
+});
+test('confirmed favorite survives Chromium restart',async()=>{
+ const profile=fs.mkdtempSync(path.join(os.tmpdir(),'mc-worker-restart-'));let browser;
+ try{
+  browser=await start(profile);
+  const page=await browser.context.newPage();await page.goto('chrome-extension://'+browser.id+'/options.html');
+  expect((await page.evaluate(()=>chrome.runtime.sendMessage({type:'SAVE_VIDEO',video:{id:'abcdefghijk',title:'Persisted'}}))).ok).toBe(true);
+  // A confirmed write must survive a full Chromium restart with the same profile.
+  // This is stronger for durability, but does not assert worker-only restart semantics.
+  await browser.context.close();browser=null;
+  browser=await start(profile);
+  const saved=await read(browser.worker);
+  expect(saved.saved?.abcdefghijk?.title).toBe('Persisted');
+ }finally{await browser?.context.close();fs.rmSync(profile,{recursive:true,force:true});}
+});
+
+test('stale domain list patches must not erase independently selected domains',async()=>{
+ const profile=fs.mkdtempSync(path.join(os.tmpdir(),'mc-domain-race-'));let browser;
+ try{
+  browser=await start(profile);
+  const a=await browser.context.newPage(),b=await browser.context.newPage();
+  await a.goto('chrome-extension://'+browser.id+'/options.html');
+  await b.goto('chrome-extension://'+browser.id+'/options.html');
+  await a.locator('#domains input[type=checkbox]').nth(0).check();
+  await expect.poll(async()=>(await read(browser.worker)).domains?.length).toBe(1);
+  await b.locator('#domains input[type=checkbox]').nth(1).check();
+  await expect.poll(async()=>(await read(browser.worker)).domains?.length).toBe(2);
+  const domains=(await read(browser.worker)).domains;
+  expect(new Set(domains).size).toBe(2);
+ }finally{await browser?.context.close();fs.rmSync(profile,{recursive:true,force:true});}
+});
+
+test('stale options page must not silently remove a newer channel addition',async()=>{
+ const profile=fs.mkdtempSync(path.join(os.tmpdir(),'mc-channel-conflict-'));let browser;
+ try{
+  browser=await start(profile);
+  const a=await browser.context.newPage(),b=await browser.context.newPage();
+  await a.goto('chrome-extension://'+browser.id+'/options.html');
+  await b.goto('chrome-extension://'+browser.id+'/options.html');
+  await a.locator('#allowChannels').fill('Channel Alpha');
+  await a.locator('#saveRules').click();
+  await expect.poll(async()=>(await read(browser.worker)).allowChannels?.includes('Channel Alpha')).toBe(true);
+  await b.locator('#allowChannels').fill('Channel Beta');
+  await b.locator('#saveRules').click();
+  await expect(b.locator('#status')).toContainText('Conflit');
+  const channels=(await read(browser.worker)).allowChannels;
+  expect(channels).toContain('Channel Alpha');
+  expect(channels).not.toContain('Channel Beta');
  }finally{await browser?.context.close();fs.rmSync(profile,{recursive:true,force:true});}
 });

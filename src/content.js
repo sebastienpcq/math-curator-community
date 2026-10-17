@@ -20,7 +20,7 @@ function showDialog(video,ev){
  const basis=document.createElement('p');basis.textContent='Source : '+ev.basis+'. Ceci n’est pas un score de rigueur validé.';box.append(basis);
  const list=document.createElement('ul');for(const t of [...ev.evidence,...ev.warnings]){const li=document.createElement('li');li.textContent=t;list.append(li);}box.append(list);
  const save=document.createElement('button');save.textContent='Enregistrer';save.addEventListener('click',()=>{chrome.runtime.sendMessage({type:'SAVE_VIDEO',video},res=>{save.textContent=res?.ok?'Enregistrée':'Erreur';});});box.append(save);
- if(video.id){const allow=document.createElement('button');allow.textContent='Toujours autoriser';allow.addEventListener('click',async()=>{settings.allowVideos=[...new Set([...(settings.allowVideos||[]),video.id])];await chrome.storage.local.set({settings});box.remove();scan();});box.append(allow);}
+ if(video.id){const allow=document.createElement('button');allow.textContent='Toujours autoriser';allow.addEventListener('click',async()=>{const response=await chrome.runtime.sendMessage({type:'ADD_LIST_ITEM',key:'allowVideos',value:video.id});if(!response?.ok)throw Error('Storage update failed');settings={...MathConfig.DEFAULTS,...response.settings};box.remove();scan();});box.append(allow);}
  const close=document.createElement('button');close.textContent='Fermer';close.addEventListener('click',()=>box.remove());box.append(close);document.body.append(box);close.focus();box.addEventListener('keydown',e=>{if(e.key==='Escape')box.remove();});
 }
 function process(card){

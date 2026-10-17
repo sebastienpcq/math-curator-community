@@ -12,6 +12,22 @@ function updateSettings(patch){
  return task;
 }
 chrome.runtime.onMessage.addListener((msg,_sender,respond)=>{
+ if(msg?.type==='REPLACE_CHANNEL_RULES'){
+  const keys=['allowChannels','blockChannels'];
+  const valid=o=>o&&typeof o==='object'&&!Array.isArray(o)&&keys.every(k=>Array.isArray(o[k])&&o[k].length<=200&&o[k].every(v=>typeof v==='string'&&v.trim()&&v.length<=200));
+  if(!valid(msg.expected)||!valid(msg.desired)){respond({ok:false,error:'Invalid channel rules'});return;}
+  const task=settingsQueue.catch(()=>{}).then(async()=>{
+   const {settings:stored}=await chrome.storage.local.get('settings');
+   const current={...MathConfig.DEFAULTS,...stored};
+   if(keys.some(k=>JSON.stringify(current[k])!==JSON.stringify(msg.expected[k])))return {ok:false,error:'CONFLICT',settings:current};
+   const next={...current,allowChannels:[...new Set(msg.desired.allowChannels)],blockChannels:[...new Set(msg.desired.blockChannels)]};
+   await chrome.storage.local.set({settings:next});
+   return {ok:true,settings:next};
+  });
+  settingsQueue=task.catch(()=>{});
+  task.then(respond).catch(()=>respond({ok:false,error:'Storage update failed'}));
+  return true;
+ }
  if(msg?.type==='REPLACE_CHANNEL_LIST'){
   const key=msg.key;
   if(!['allowChannels','blockChannels'].includes(key)||!Array.isArray(msg.expected)||!Array.isArray(msg.desired)||
@@ -53,7 +69,7 @@ chrome.runtime.onMessage.addListener((msg,_sender,respond)=>{
  }
  if(msg?.type==='PATCH_SETTINGS'){
   const patch=msg.patch;
-  if(!patch||typeof patch!=='object'||Array.isArray(patch)||Object.keys(patch).some(k=>!Object.hasOwn(MathConfig.DEFAULTS,k))){
+  if(!patch||typeof patch!=='object'||Array.isArray(patch)||Object.keys(patch).some(k=>!Object.hasOwn(MathConfig.DEFAULTS,k)||['saved','domains','allowChannels','blockChannels','allowVideos','blockVideos'].includes(k))){
    respond({ok:false,error:'Invalid settings patch'});return;
   }
   updateSettings(patch).then(settings=>respond({ok:true,settings})).catch(()=>respond({ok:false,error:'Storage update failed'}));

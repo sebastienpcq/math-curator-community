@@ -66,3 +66,34 @@ test('concurrent popup and options preserve independent settings changes',async(
   expect(result.allowChannels).toEqual(['3Blue1Brown']);
  }finally{await browser?.context.close();fs.rmSync(profile,{recursive:true,force:true});}
 });
+
+test('simultaneous favorite saves preserve both entries',async()=>{
+ const profile=fs.mkdtempSync(path.join(os.tmpdir(),'mc-favorites-'));let browser;
+ try{
+  browser=await start(profile);
+  const worker=browser.worker;
+  const result=await worker.evaluate(async()=>{
+   const videos=[{id:'abcdefghijk',title:'First'},{id:'bcdefghijkl',title:'Second'}];
+   return Promise.all(videos.map(video=>chrome.runtime.sendMessage({type:'SAVE_VIDEO',video})));
+  });
+  expect(result.every(x=>x.ok)).toBe(true);
+  const saved=(await read(worker)).saved;
+  expect(Object.keys(saved).sort()).toEqual(['abcdefghijk','bcdefghijkl']);
+ }finally{await browser?.context.close();fs.rmSync(profile,{recursive:true,force:true});}
+});
+test('favorite remove and add are serialized without losing unrelated entries',async()=>{
+ const profile=fs.mkdtempSync(path.join(os.tmpdir(),'mc-favorite-race-'));let browser;
+ try{
+  browser=await start(profile);
+  const worker=browser.worker;
+  await worker.evaluate(()=>chrome.runtime.sendMessage({type:'SAVE_VIDEO',video:{id:'abcdefghijk',title:'Old'}}));
+  const replies=await worker.evaluate(()=>Promise.all([
+   chrome.runtime.sendMessage({type:'REMOVE_FAVORITE',id:'abcdefghijk'}),
+   chrome.runtime.sendMessage({type:'SAVE_VIDEO',video:{id:'bcdefghijkl',title:'New'}})
+  ]));
+  expect(replies.every(x=>x.ok)).toBe(true);
+  const saved=(await read(worker)).saved;
+  expect(saved.abcdefghijk).toBeUndefined();
+  expect(saved.bcdefghijkl).toBeDefined();
+ }finally{await browser?.context.close();fs.rmSync(profile,{recursive:true,force:true});}
+});

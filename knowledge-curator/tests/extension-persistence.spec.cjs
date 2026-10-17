@@ -72,7 +72,8 @@ test('simultaneous favorite saves preserve both entries',async()=>{
  try{
   browser=await start(profile);
   const worker=browser.worker;
-  const result=await worker.evaluate(async()=>{
+  const sender=await browser.context.newPage();await sender.goto('chrome-extension://'+browser.id+'/options.html');
+  const result=await sender.evaluate(async()=>{
    const videos=[{id:'abcdefghijk',title:'First'},{id:'bcdefghijkl',title:'Second'}];
    return Promise.all(videos.map(video=>chrome.runtime.sendMessage({type:'SAVE_VIDEO',video})));
   });
@@ -86,8 +87,9 @@ test('favorite remove and add are serialized without losing unrelated entries',a
  try{
   browser=await start(profile);
   const worker=browser.worker;
-  await worker.evaluate(()=>chrome.runtime.sendMessage({type:'SAVE_VIDEO',video:{id:'abcdefghijk',title:'Old'}}));
-  const replies=await worker.evaluate(()=>Promise.all([
+  const sender=await browser.context.newPage();await sender.goto('chrome-extension://'+browser.id+'/options.html');
+  await sender.evaluate(()=>chrome.runtime.sendMessage({type:'SAVE_VIDEO',video:{id:'abcdefghijk',title:'Old'}}));
+  const replies=await sender.evaluate(()=>Promise.all([
    chrome.runtime.sendMessage({type:'REMOVE_FAVORITE',id:'abcdefghijk'}),
    chrome.runtime.sendMessage({type:'SAVE_VIDEO',video:{id:'bcdefghijkl',title:'New'}})
   ]));

@@ -142,3 +142,22 @@ test('stale domain list patches must not erase independently selected domains',a
   expect(new Set(domains).size).toBe(2);
  }finally{await browser?.context.close();fs.rmSync(profile,{recursive:true,force:true});}
 });
+
+test('stale options page must not silently remove a newer channel addition',async()=>{
+ const profile=fs.mkdtempSync(path.join(os.tmpdir(),'mc-channel-conflict-'));let browser;
+ try{
+  browser=await start(profile);
+  const a=await browser.context.newPage(),b=await browser.context.newPage();
+  await a.goto('chrome-extension://'+browser.id+'/options.html');
+  await b.goto('chrome-extension://'+browser.id+'/options.html');
+  await a.locator('#allowChannels').fill('Channel Alpha');
+  await a.locator('#saveRules').click();
+  await expect.poll(async()=>(await read(browser.worker)).allowChannels?.includes('Channel Alpha')).toBe(true);
+  await b.locator('#allowChannels').fill('Channel Beta');
+  await b.locator('#saveRules').click();
+  await expect.poll(async()=>(await read(browser.worker)).allowChannels?.includes('Channel Beta')).toBe(true);
+  const channels=(await read(browser.worker)).allowChannels;
+  expect(channels).toContain('Channel Alpha');
+  expect(channels).toContain('Channel Beta');
+ }finally{await browser?.context.close();fs.rmSync(profile,{recursive:true,force:true});}
+});

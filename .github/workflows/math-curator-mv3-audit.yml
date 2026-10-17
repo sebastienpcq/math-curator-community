@@ -24,5 +24,7 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Validate MV3 manifest and deterministic scoring
         run: node --test tests/community.test.cjs
+      - name: Test storage failure recovery in isolated Node harness
+        run: node --test tests/storage-failure.test.cjs
       - name: Run real Chromium MV3 fixture tests
         run: npx playwright test knowledge-curator/tests/extension-mv3.spec.cjs knowledge-curator/tests/extension-persistence.spec.cjs --reporter=line --workers=1

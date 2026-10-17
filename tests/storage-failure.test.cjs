@@ -47,3 +47,19 @@ test('failed favorite save is not acknowledged and removal can proceed',async()=
  assert.equal((await h.send({type:'REMOVE_FAVORITE',id:'abcdefghijk'})).ok,true);
  assert.deepEqual(Object.keys(h.state.settings.saved),[]);
 });
+
+test('channel pair update must not partially commit when one expected list is stale',async()=>{
+ const h=harness();
+ assert.equal((await h.send({type:'PATCH_SETTINGS',patch:{allowChannels:['Original'],blockChannels:['Blocked']}})).ok,true);
+ const result=await h.send({type:'REPLACE_CHANNEL_RULES',expected:{allowChannels:['Original'],blockChannels:[]},desired:{allowChannels:['Updated'],blockChannels:['Other']}});
+ assert.equal(result.ok,false);
+ assert.equal(result.error,'CONFLICT');
+ assert.deepEqual(h.state.settings.allowChannels,['Original']);
+ assert.deepEqual(h.state.settings.blockChannels,['Blocked']);
+});
+test('settings patch rejects mutable collection replacement',async()=>{
+ const h=harness();
+ const result=await h.send({type:'PATCH_SETTINGS',patch:{allowChannels:['Unreviewed']}});
+ assert.equal(result.ok,false);
+ assert.deepEqual(h.state.settings.saved,{});
+});

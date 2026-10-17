@@ -1,48 +1,68 @@
-# Math Curator — Une extension pour apprendre les maths sur YouTube
+# Math Curator Community
 
-J'en avais un peu marre de chercher des cours de maths intéressants sur YouTube et de devoir faire le tri entre les bonnes vidéos, les recommandations hors sujet et les Shorts qui n'apportent pas grand-chose.
+**Un filtre local et réversible pour travailler les mathématiques sur YouTube.**
 
-Du coup, plutôt que de continuer à perdre du temps, j'ai fini par développer ma propre extension Chrome.
+Math Curator permet de choisir un niveau et des domaines, de filtrer les recommandations, de masquer les Shorts et d'enregistrer des vidéos. Sans compte Math Curator, clé API ni analyse distante.
 
-L'idée est assez simple : **faire de YouTube un outil d'apprentissage un peu plus sérieux**, sans avoir à se battre constamment avec ses recommandations.
+> Candidat **1.0.1-rc1**, version du manifeste **1.0.1**. Aucune publication officielle de cette version n'a encore eu lieu. La release historique v1.0.0 reste inchangée.
 
-Avec Math Curator, on peut notamment :
+## Installer le candidat
 
-- Choisir son niveau en mathématiques.
-- Sélectionner les domaines qu'on souhaite travailler.
-- Filtrer les recommandations pour privilégier les contenus pédagogiques.
-- Masquer les Shorts et limiter les distractions.
+1. Dans [GitHub Actions](https://github.com/seblenonsaint/math-curator-community/actions/workflows/math-curator-v101.yml), ouvrir une exécution réussie de **Math Curator v1.0.1 candidate** correspondant à cette branche.
+2. Télécharger l'artefact **math-curator-v1.0.1-rc1-evidence** (connexion GitHub éventuellement nécessaire ; conservation sept jours).
+3. Décompresser l'artefact puis `release-candidate/math-curator-community-v1.0.1-rc1.zip`.
+4. Conserver le dossier extrait dans un emplacement permanent ; il contient directement `manifest.json` et `src/`.
+5. Ouvrir `chrome://extensions/`, activer le **mode développeur**, puis choisir **Charger l'extension non empaquetée** et sélectionner ce dossier.
 
-Le but n'est pas de prétendre que l'extension va trouver systématiquement les meilleurs cours du monde, mais plutôt de faciliter les recherches et de garder un environnement un minimum cohérent quand on veut bosser ses maths.
+L'ancienne archive `math-curator-community-v1.zip` n'est pas ce candidat.
 
-C'est gratuit, sans compte à créer et sans logiciel supplémentaire à installer.
+Reconstruction depuis un clone possédant l'historique de référence, avec Git et Python 3 :
 
-## Installation
+```bash
+git switch release/prepare-math-curator-v1.0.1
+python3 release-tools/build_v101.py
+```
 
-Pour ceux qui veulent essayer :
+Le ZIP, son inventaire et `SHA256SUMS.txt` sont créés dans `release-candidate/`. Le script vérifie que les fichiers applicatifs sont identiques au commit validé, à l'exception de la version du manifeste.
 
-1. Téléchargez le fichier [`math-curator-community-v1.zip`](https://github.com/seblenonsaint/math-curator-community/blob/main/math-curator-community-v1.zip) depuis le dépôt (bouton **Download raw file**).
-2. Décompressez l'archive.
-3. Ouvrez `chrome://extensions/` dans Chrome.
-4. Activez le **mode développeur** en haut à droite.
-5. Cliquez sur **Charger l'extension non empaquetée**, puis sélectionnez le dossier décompressé contenant le fichier `manifest.json`.
+## Utilisation
 
-Et voilà.
+Le filtrage est **désactivé par défaut**. Dans la popup, activer **Filtrage actif**, choisir l'intensité (**Exploration**, **Équilibré**, **Strict**), le niveau et le seuil indicatif. Les cases permettent de masquer les Shorts et d'afficher les indices.
 
-## Pour la suite
+Ouvrir **Domaines et favoris** pour sélectionner des domaines, autoriser ou bloquer des chaînes (un nom par ligne, puis **Enregistrer les listes**).
 
-C'est une première version, donc je ne vais pas prétendre que tout est parfait. Il y a certainement des ajustements à faire, des filtres à améliorer et quelques bugs qui m'ont échappé.
+Pour réafficher les vidéos : désactiver **Filtrage actif** ou cliquer sur **Tout réafficher**.
 
-Je compte continuer à travailler dessus tranquillement, en fonction de ce que je remarque à l'utilisation et des retours éventuels.
+## Favoris
 
-Si certains veulent la tester, [signaler un problème](https://github.com/seblenonsaint/math-curator-community/issues/new/choose) ou proposer une amélioration, n'hésitez pas. Les retours constructifs sont toujours utiles.
+Activer le filtrage et **Afficher les indices**. Sur une vidéo restée visible, cliquer sur le badge **Math Curator**, puis **Enregistrer** dans les détails. L'accusé **Enregistrée** confirme l'opération. Les favoris et leurs boutons de suppression sont dans les options.
 
-Et si ça peut éviter à quelques personnes de perdre autant de temps que moi à chercher des cours convenables, ce sera déjà pas mal.
+Une vidéo masquée ne propose pas de badge accessible. Préférences et favoris restent dans le stockage local de l'extension. Le redémarrage complet a été testé ; synchronisation, désinstallation et changement de profil ne sont pas couverts.
 
-**GitHub :** https://github.com/seblenonsaint/math-curator-community
+## Limites et confidentialité
 
-**Téléchargement de la version 1 :** https://github.com/seblenonsaint/math-curator-community/blob/main/math-curator-community-v1.zip
+Les indices reposent sur les titres et métadonnées visibles. Ils ne garantissent ni l'exactitude scientifique, ni la rigueur d'une démonstration, ni la qualité pédagogique. Le filtre peut masquer des contenus utiles ou conserver des contenus hors sujet.
 
-**Historique des versions :** https://github.com/seblenonsaint/math-curator-community/releases
+Le traitement est local ; l'extension n'envoie pas les contenus analysés à un service distant. YouTube utilise normalement le réseau. Son DOM et ses restrictions peuvent évoluer.
 
-**Contribuer :** [CONTRIBUTING.md](CONTRIBUTING.md)
+Compatibilité effectivement vérifiée : Chromium 141.0.7390.37 sous Ubuntu avec sandbox active. Firefox, mobile et distribution Chrome Web Store ne sont pas validés.
+
+## Traçabilité
+
+Code comportemental issu de `d762095dfbf9c6b716acf6a75d903a1b8f5e79f8`. La version du manifeste passe de 1.0.0 à 1.0.1 ; aucune fonction ajoutée.
+Les [tests réels de filtrage](https://github.com/seblenonsaint/math-curator-community/actions/runs/39016636655) et [de favoris persistants](https://github.com/seblenonsaint/math-curator-community/actions/runs/39017409363) concernent ce code source antérieur.
+Les contrôles exécutés sur la branche 1.0.1 sont publiés dans son workflow dédié ; les résultats historiques ne sont pas présentés comme de nouveaux tests.
+
+Voir [les notes de version](docs/release-v1.0.1/NOTES.md) et [le rapport de préparation](docs/release-v1.0.1/PREPARATION.md).
+
+## Licence et publication
+
+**MIT proposée, non adoptée.** Aucun fichier LICENSE officiel ajouté. Le [texte proposé](docs/release-v1.0.1/MIT-PROPOSED.txt) ne constitue pas l'octroi d'une licence.
+L'approbation de la licence et l'identification du titulaire restent nécessaires. Aucune certification juridique exhaustive n'est revendiquée.
+
+La PR est destinée à une revue humaine : aucune fusion, aucun tag ni aucune release ne sont autorisés automatiquement par les tests.
+
+[Signaler un problème](https://github.com/seblenonsaint/math-curator-community/issues/new/choose) · [Contribuer](CONTRIBUTING.md)
+
+Préciser navigateur, réglages et étapes de reproduction, sans données personnelles.
+

@@ -1,0 +1,116 @@
+name: Math Curator v1.0.1 candidate
+on:
+  push:
+    branches: [release/prepare-math-curator-v1.0.1]
+permissions:
+  contents: read
+jobs:
+  acceptance:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build and verify exact application provenance
+        run: python3 release-tools/build_v101.py
+      - name: Critical Node regression checks
+        run: node --test tests/community.test.cjs tests/storage-failure.test.cjs
+      - name: Install existing QA dependencies
+        run: |
+          npm install --no-save @playwright/test@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Diagnose runner and select existing secure sandbox helper
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p qa-evidence
+          {
+            id
+            uname -r
+            for key in kernel.unprivileged_userns_clone kernel.apparmor_restrict_unprivileged_userns user.max_user_namespaces; do
+              sysctl "$key" || true
+            done
+            cat /proc/self/attr/current || true
+            if unshare --user --map-root-user true; then
+              echo "Unprivileged user namespace probe: PASS"
+            else
+              echo "Unprivileged user namespace probe: DENIED"
+            fi
+            sudo aa-status || true
+            sudo journalctl -k --since '-5 minutes' --no-pager | grep -E 'apparmor|userns' || true
+          } 2>&1 | tee qa-evidence/runner-sandbox-diagnostics.txt
+          helper=/opt/google/chrome/chrome-sandbox
+          if [ ! -f "$helper" ]; then
+            echo "::error::Existing Chrome SUID sandbox helper unavailable; no security policy changed."
+            exit 1
+          fi
+          readlink -f "$helper" | tee -a qa-evidence/runner-sandbox-diagnostics.txt
+          stat -Lc '%U %G %a %n' "$helper" | tee -a qa-evidence/runner-sandbox-diagnostics.txt
+          test "$(stat -Lc '%u' "$helper")" = 0
+          # Restore the vendor helper's intended SUID permissions only after
+          # checking its bytes against the installed package manifest.
+          python3 <<'PY'
+          import hashlib, pathlib
+          helper = pathlib.Path('/opt/google/chrome/chrome-sandbox')
+          manifest = pathlib.Path('/var/lib/dpkg/info/google-chrome-stable.md5sums')
+          expected = None
+          for line in manifest.read_text().splitlines():
+              digest, filename = line.split(maxsplit=1)
+              if filename.lstrip('./') == str(helper).lstrip('/'):
+                  expected = digest
+          if expected is None or hashlib.md5(helper.read_bytes()).hexdigest() != expected:
+              raise SystemExit('Sandbox helper package integrity check failed')
+          print('Sandbox helper matches installed Google Chrome package manifest')
+          PY
+          sudo chmod 4755 "$helper"
+          stat -Lc '%U %G %a %n' "$helper" | tee -a qa-evidence/runner-sandbox-diagnostics.txt
+          test "$(stat -Lc '%a' "$helper")" = 4755
+          echo "CHROME_DEVEL_SANDBOX=$helper" >> "$GITHUB_ENV"
+      - name: Prove Chromium starts with sandbox protection
+        shell: bash
+        run: |
+          node <<'JS'
+          const {chromium}=require('@playwright/test');
+          const fs=require('node:fs');
+          (async()=>{
+            const browser=await chromium.launch({channel:'chromium',headless:true,chromiumSandbox:true});
+            try{
+              const page=await browser.newPage();
+              await page.goto('chrome://sandbox');
+              const status=await page.locator('body').innerText();
+              fs.writeFileSync('qa-evidence/chromium-sandbox.txt',browser.version()+'\n'+status);
+              console.log(status);
+              await page.screenshot({path:'qa-evidence/chromium-sandbox.png'});
+              if(!/Seccomp-BPF sandbox\s+Yes/i.test(status))throw Error('Seccomp-BPF sandbox not confirmed');
+              if(!/(?:Layer 1 Sandbox\s+(?:SUID|Namespace)|(?:SUID sandbox|Namespace sandbox)\s+Yes)/i.test(status))throw Error('Layer-one sandbox not confirmed');
+            }finally{await browser.close();}
+          })().catch(e=>{console.error(e);process.exitCode=1;});
+          JS
+      - name: Verify extracted v1.0.1 candidate
+        run: node release-tools/archive_smoke.cjs
+      - name: Scan distributed files for secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 2 https://github.com/gitleaks/gitleaks/releases/download/v8.24.3/gitleaks_8.24.3_linux_x64.tar.gz -o /tmp/gl.tar.gz
+          mkdir /tmp/gl-v101
+          tar -xzf /tmp/gl.tar.gz -C /tmp/gl-v101 gitleaks
+          /tmp/gl-v101/gitleaks dir release-candidate/extracted --redact --no-banner
+      - name: Upload acceptance evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: math-curator-v1.0.1-rc1-evidence
+          path: |
+            qa-evidence/
+            release-candidate/*.zip
+            release-candidate/*.json
+            release-candidate/*.txt
+          retention-days: 7
+          if-no-files-found: warn
+

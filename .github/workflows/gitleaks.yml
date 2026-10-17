@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - agent/youtube-client-hardening
+      - fix/mv3-settings-serialized-writes
   pull_request:
     branches:
       - agent/youtube-live-validation

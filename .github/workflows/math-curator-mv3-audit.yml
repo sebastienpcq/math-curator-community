@@ -15,6 +15,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -26,5 +27,34 @@ jobs:
         run: node --test tests/community.test.cjs
       - name: Test storage failure recovery in isolated Node harness
         run: node --test tests/storage-failure.test.cjs
+      - name: Gitleaks full history and synthetic control
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 2 https://github.com/gitleaks/gitleaks/releases/download/v8.24.3/gitleaks_8.24.3_linux_x64.tar.gz -o /tmp/mv3-gl.tar.gz
+          mkdir -p /tmp/mv3-gl
+          tar -xzf /tmp/mv3-gl.tar.gz -C /tmp/mv3-gl gitleaks
+          chmod 700 /tmp/mv3-gl/gitleaks
+          if ! /tmp/mv3-gl/gitleaks git --no-banner . >/dev/null 2>&1; then
+            echo "::error::Gitleaks history scan failed or found potential secrets (details suppressed)"
+            exit 1
+          fi
+          temp=$(mktemp -d)
+          trap 'rm -rf "$temp" /tmp/mv3-gl.tar.gz /tmp/mv3-gl' EXIT
+          (
+            cd "$temp"
+            git init -q
+            git config user.name CI
+            git config user.email ci@example.invalid
+            python3 -c 'from pathlib import Path; Path("fixture.txt").write_text("github_token = "+chr(34)+"ghp_"+"aB3dE5fG7hJ9kL2mN4pQ6rS8tU0vW1xY2zZ3"+chr(34)+"\\n")'
+            git add fixture.txt
+            git commit -qm synthetic
+            set +e
+            /tmp/mv3-gl/gitleaks git --no-banner --gitleaks-ignore-path "$GITHUB_WORKSPACE/.gitleaksignore" . >/dev/null 2>&1
+            status=$?
+            set -e
+            if [ "$status" -ne 1 ]; then echo "::error::Synthetic detection failed"; exit 1; fi
+          )
+          echo "Gitleaks history and synthetic controls passed"
       - name: Run real Chromium MV3 fixture tests
         run: npx playwright test knowledge-curator/tests/extension-mv3.spec.cjs knowledge-curator/tests/extension-persistence.spec.cjs --reporter=line --workers=1

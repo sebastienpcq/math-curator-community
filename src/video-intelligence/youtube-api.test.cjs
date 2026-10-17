@@ -120,3 +120,68 @@ test('timeout has a bounded wall-clock deadline',async()=>{
  const watchdog=new Promise((_,reject)=>setTimeout(()=>reject(new Error('timeout watchdog exceeded')),150));
  await assert.rejects(Promise.race([c.getVideos([id]),watchdog]),{code:'TIMEOUT'});
 });
+
+test('adversarial: concurrent cancellation is isolated from another call',async()=>{
+ const stop=new AbortController();
+ const c=client((_url,{signal})=>new Promise((resolve,reject)=>{
+  signal.addEventListener('abort',()=>reject(new Error(secret)),{once:true});
+  setImmediate(()=>resolve(ok([{id,snippet:{title:'Math',channelTitle:'Channel'}}])));
+ }),{maxRetries:0,timeoutMs:1000});
+ stop.abort();
+ const [cancelled,other]=await Promise.allSettled([c.getVideos([id],{signal:stop.signal}),c.getVideos([id])]);
+ assert.equal(cancelled.status,'rejected');
+ assert.equal(cancelled.reason.code,'ABORTED');
+ assert.equal(other.status,'fulfilled');
+ assert.equal(other.value.videos.length,1);
+});
+test('adversarial: malformed transport responses do not expose credentials',async()=>{
+ const fixtures=[null,{}, {ok:'yes'}, {ok:true,status:200,json:async()=>{throw new Error(secret);}}];
+ for(const fixture of fixtures){
+  await assert.rejects(client(async()=>fixture,{maxRetries:0}).getVideos([id]),e=>{
+   assert.ok(['INVALID_RESPONSE','INVALID_JSON'].includes(e.code));
+   assert.ok(!JSON.stringify({message:e.message,code:e.code,status:e.status}).includes(secret));
+   return true;
+  });
+ }
+});
+test('adversarial: poisoned HTTP reason does not propagate into public errors',async()=>{
+ const poison={error:{errors:[{reason:secret}],message:secret}};
+ const response={ok:false,status:403,headers:{get:()=>null},json:async()=>poison};
+ await assert.rejects(client(async()=>response,{maxRetries:0}).getVideos([id]),e=>{
+  assert.equal(e.code,'ACCESS_DENIED');
+  assert.equal(e.status,403);
+  assert.ok(!e.message.includes(secret));
+  return true;
+ });
+});
+test('adversarial: sequential retry attempts use independent bounded deadlines',async()=>{
+ let attempts=0;
+ const c=client(()=>{attempts++;return new Promise(()=>{});},{maxRetries:2,timeoutMs:6});
+ const started=Date.now();
+ const result=await Promise.race([
+  c.getVideos([id]).then(()=>({type:'resolved'}),e=>({type:'rejected',code:e.code})),
+  new Promise(resolve=>setTimeout(()=>resolve({type:'watchdog'}),500))
+ ]);
+ assert.deepEqual(result,{type:'rejected',code:'TIMEOUT'});
+ assert.equal(attempts,1);
+ assert.ok(Date.now()-started<500);
+});
+test('adversarial: independent calls do not share retry counters',async()=>{
+ let calls=0;
+ const c=client(async()=>{calls++;return fail(503);},{maxRetries:1});
+ const settled=await Promise.allSettled([c.getVideos([id]),c.getVideos([id])]);
+ assert.equal(calls,4);
+ for(const result of settled){assert.equal(result.status,'rejected');assert.equal(result.reason.code,'HTTP_ERROR');}
+});
+
+test('adversarial: cumulative retry-after budget stays finite at maximum retry setting',async()=>{
+ const delays=[];let calls=0;
+ const c=client(async()=>{calls++;return fail(429,'',{'retry-after':'999999999999'});},{
+  maxRetries:5,sleep:async ms=>{delays.push(ms);},timeoutMs:10
+ });
+ await assert.rejects(c.getVideos([id]),{code:'RATE_LIMITED',status:429});
+ assert.equal(calls,6);
+ assert.equal(delays.length,5);
+ assert.ok(delays.every(ms=>ms===30000));
+ assert.equal(delays.reduce((sum,ms)=>sum+ms,0),150000);
+});

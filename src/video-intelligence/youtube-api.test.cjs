@@ -125,7 +125,7 @@ test('adversarial: concurrent cancellation is isolated from another call',async(
  const stop=new AbortController();
  const c=client((_url,{signal})=>new Promise((resolve,reject)=>{
   signal.addEventListener('abort',()=>reject(new Error(secret)),{once:true});
-  if(!stop.signal.aborted) setImmediate(()=>resolve(ok([{id,snippet:{title:'Math',channelTitle:'Channel'}}])));
+  setImmediate(()=>resolve(ok([{id,snippet:{title:'Math',channelTitle:'Channel'}}])));
  }),{maxRetries:0,timeoutMs:1000});
  stop.abort();
  const [cancelled,other]=await Promise.allSettled([c.getVideos([id],{signal:stop.signal}),c.getVideos([id])]);

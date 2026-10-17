@@ -6,6 +6,7 @@ on:
   pull_request:
     branches:
       - agent/youtube-live-validation
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
@@ -23,7 +24,7 @@ jobs:
         run: node --test src/video-intelligence/youtube-api.test.cjs
 
   live:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/agent/youtube-client-hardening'
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/agent/youtube-client-hardening'
     needs: test
     runs-on: ubuntu-24.04
     timeout-minutes: 5

@@ -50,7 +50,8 @@ test('failed favorite save is not acknowledged and removal can proceed',async()=
 
 test('channel pair update must not partially commit when one expected list is stale',async()=>{
  const h=harness();
- assert.equal((await h.send({type:'PATCH_SETTINGS',patch:{allowChannels:['Original'],blockChannels:['Blocked']}})).ok,true);
+ assert.equal((await h.send({type:'ADD_LIST_ITEM',key:'allowChannels',value:'Original'})).ok,true);
+ assert.equal((await h.send({type:'ADD_LIST_ITEM',key:'blockChannels',value:'Blocked'})).ok,true);
  const result=await h.send({type:'REPLACE_CHANNEL_RULES',expected:{allowChannels:['Original'],blockChannels:[]},desired:{allowChannels:['Updated'],blockChannels:['Other']}});
  assert.equal(result.ok,false);
  assert.equal(result.error,'CONFLICT');

@@ -89,7 +89,7 @@ jobs:
               console.log(status);
               await page.screenshot({path:'qa-evidence/chromium-sandbox.png'});
               if(!/Seccomp-BPF sandbox\s+Yes/i.test(status))throw Error('Seccomp-BPF sandbox not confirmed');
-              if(!/(?:SUID sandbox|Namespace sandbox)\s+Yes/i.test(status))throw Error('Layer-one sandbox not confirmed');
+              if(!/(?:Layer 1 Sandbox\s+(?:SUID|Namespace)|(?:SUID sandbox|Namespace sandbox)\s+Yes)/i.test(status))throw Error('Layer-one sandbox not confirmed');
             }finally{await browser.close();}
           })().catch(e=>{console.error(e);process.exitCode=1;});
           JS

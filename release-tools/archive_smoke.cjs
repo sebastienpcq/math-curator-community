@@ -9,8 +9,9 @@ expect(await w.evaluate(()=>chrome.runtime.getManifest().version)).toBe('1.0.0')
 const errors=[];c.on('page',p=>p.on('pageerror',e=>errors.push(e.message)));
 const popup=await c.newPage();await popup.goto(base+'/popup.html');await expect(popup.locator('#enabled')).toBeVisible();
 const options=await c.newPage();await options.goto(base+'/options.html');await expect(options.locator('#domains input').first()).toBeVisible();await expect(options.locator('#saveRules')).toBeVisible();
+await expect(popup.locator('#status')).toContainText('Désactivé');
 await popup.locator('#level').selectOption('advanced');
-await expect.poll(()=>w.evaluate(async()=>(await chrome.storage.local.get('settings')).settings.level)).toBe('advanced');
+await expect.poll(()=>w.evaluate(async()=>(await chrome.storage.local.get('settings')).settings?.level)).toBe('advanced');
 expect(errors).toEqual([]);
 const report={status:'PASS',chromium:c.browser().version(),source:'d762095dfbf9c6b716acf6a75d903a1b8f5e79f8',qaSHA:process.env.GITHUB_SHA,assertions:['extracted ZIP MV3 service worker available','popup usable','options usable','UI preference stored','no observed interface pageerror'],sha256:JSON.parse(fs.readFileSync('release-candidate/package-manifest.json')).sha256};
 fs.writeFileSync('release-candidate/archive-smoke.json',JSON.stringify(report,null,2));console.log(JSON.stringify(report));

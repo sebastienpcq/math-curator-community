@@ -12,6 +12,26 @@ function updateSettings(patch){
  return task;
 }
 chrome.runtime.onMessage.addListener((msg,_sender,respond)=>{
+ if(msg?.type==='REPLACE_CHANNEL_LIST'){
+  const key=msg.key;
+  if(!['allowChannels','blockChannels'].includes(key)||!Array.isArray(msg.expected)||!Array.isArray(msg.desired)||
+     [...msg.expected,...msg.desired].some(x=>typeof x!=='string'||!x.trim()||x.length>200)||
+     msg.expected.length>200||msg.desired.length>200){
+   respond({ok:false,error:'Invalid channel list'});return;
+  }
+  const task=settingsQueue.catch(()=>{}).then(async()=>{
+   const {settings:stored}=await chrome.storage.local.get('settings');
+   const current={...MathConfig.DEFAULTS,...stored};
+   const actual=Array.isArray(current[key])?current[key]:[];
+   if(JSON.stringify(actual)!==JSON.stringify(msg.expected))return {ok:false,error:'CONFLICT',settings:current};
+   const next={...current,[key]:[...new Set(msg.desired)]};
+   await chrome.storage.local.set({settings:next});
+   return {ok:true,settings:next};
+  });
+  settingsQueue=task.catch(()=>{});
+  task.then(respond).catch(()=>respond({ok:false,error:'Storage update failed'}));
+  return true;
+ }
  if(msg?.type==='ADD_LIST_ITEM'||msg?.type==='REMOVE_LIST_ITEM'){
   const allowed=['domains','allowChannels','blockChannels','allowVideos','blockVideos'];
   const key=msg.key,value=msg.value;

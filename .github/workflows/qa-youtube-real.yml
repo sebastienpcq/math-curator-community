@@ -54,6 +54,23 @@ jobs:
           readlink -f "$helper" | tee -a qa-evidence/runner-sandbox-diagnostics.txt
           stat -Lc '%U %G %a %n' "$helper" | tee -a qa-evidence/runner-sandbox-diagnostics.txt
           test "$(stat -Lc '%u' "$helper")" = 0
+          # Restore the vendor helper's intended SUID permissions only after
+          # checking its bytes against the installed package manifest.
+          python3 <<'PY'
+          import hashlib, pathlib
+          helper = pathlib.Path('/opt/google/chrome/chrome-sandbox')
+          manifest = pathlib.Path('/var/lib/dpkg/info/google-chrome-stable.md5sums')
+          expected = None
+          for line in manifest.read_text().splitlines():
+              digest, filename = line.split(maxsplit=1)
+              if filename.lstrip('./') == str(helper).lstrip('/'):
+                  expected = digest
+          if expected is None or hashlib.md5(helper.read_bytes()).hexdigest() != expected:
+              raise SystemExit('Sandbox helper package integrity check failed')
+          print('Sandbox helper matches installed Google Chrome package manifest')
+          PY
+          sudo chmod 4755 "$helper"
+          stat -Lc '%U %G %a %n' "$helper" | tee -a qa-evidence/runner-sandbox-diagnostics.txt
           test "$(stat -Lc '%a' "$helper")" = 4755
           echo "CHROME_DEVEL_SANDBOX=$helper" >> "$GITHUB_ENV"
       - name: Prove Chromium starts with sandbox protection

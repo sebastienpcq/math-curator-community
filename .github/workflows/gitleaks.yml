@@ -1,0 +1,112 @@
+name: Secret scanning (Gitleaks)
+on:
+  push:
+    branches:
+      - agent/youtube-client-hardening
+  pull_request:
+    branches:
+      - agent/youtube-live-validation
+permissions:
+  contents: read
+jobs:
+  gitleaks:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Test classifier with synthetic fixtures
+        run: python3 -m unittest discover -s scripts -p 'test_classify_gitleaks.py'
+      - name: Scan full available Git history without disclosing findings
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION=8.24.3
+          curl --fail --silent --show-error --location --retry 2 \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${VERSION}/gitleaks_${VERSION}_linux_x64.tar.gz" \
+            --output /tmp/gitleaks.tar.gz
+          mkdir -p /tmp/gitleaks-bin
+          tar -xzf /tmp/gitleaks.tar.gz -C /tmp/gitleaks-bin gitleaks
+          umask 077
+          set +e
+          /tmp/gitleaks-bin/gitleaks git --no-banner --report-format json \
+            --report-path /tmp/gitleaks-report.json . >/tmp/gitleaks-output.log 2>&1
+          result=$?
+          set -e
+          trap 'rm -f /tmp/gitleaks-report.json /tmp/gitleaks-output.log /tmp/gitleaks-candidate-ignore /tmp/gitleaks-dry-run.json /tmp/gitleaks-dry-run.log' EXIT
+          if [ "$result" -eq 1 ]; then
+            if [ -f /tmp/gitleaks-report.json ]; then
+              python3 scripts/classify-gitleaks.py /tmp/gitleaks-report.json || true
+              python3 scripts/audit-gitleaks-history.py /tmp/gitleaks-report.json || true
+              if python3 scripts/prepare-gitleaks-dry-run.py /tmp/gitleaks-report.json /tmp/gitleaks-candidate-ignore; then
+                set +e
+                /tmp/gitleaks-bin/gitleaks git --no-banner --gitleaks-ignore-path /tmp/gitleaks-candidate-ignore --report-format json --report-path /tmp/gitleaks-dry-run.json . >/tmp/gitleaks-dry-run.log 2>&1
+                dry_status=$?
+                set -e
+                if [ "$dry_status" -eq 0 ]; then
+                  echo "Gitleaks candidate dry-run: no remaining findings"
+                  # A separate temporary Git repository must still trigger secret detection.
+                  synthetic_dir=$(mktemp -d)
+                  (
+                    cd "$synthetic_dir"
+                    git init -q
+                    git config user.name "CI Test"
+                    git config user.email "ci@example.invalid"
+                    python3 -c 'from pathlib import Path; Path("fixture.txt").write_text("github_token = "+chr(34)+"ghp_"+"aB3dE5fG7hJ9kL2mN4pQ6rS8tU0vW1xY2zZ3"+chr(34)+"\\n")'
+                    git add fixture.txt
+                    git commit -qm "synthetic scanner control"
+                    set +e
+                    /tmp/gitleaks-bin/gitleaks git --no-banner --gitleaks-ignore-path /tmp/gitleaks-candidate-ignore --report-format json --report-path /tmp/gitleaks-synthetic.json . >/tmp/gitleaks-synthetic.log 2>&1
+                    synthetic_status=$?
+                    set -e
+                    if [ "$synthetic_status" -ne 1 ]; then
+                      echo "::error::Synthetic secret detection control failed (exit $synthetic_status)"
+                      exit 2
+                    fi
+                    python3 -c 'import json; r=json.load(open("/tmp/gitleaks-synthetic.json")); assert any(x.get("RuleID")=="github-pat" for x in r), "Expected GitHub token rule not triggered"'
+                    echo "Synthetic secret detection control passed"
+                  )
+                  rm -rf "$synthetic_dir" /tmp/gitleaks-synthetic.json /tmp/gitleaks-synthetic.log
+                else
+                  echo "::warning::Gitleaks candidate dry-run did not pass (exit $dry_status)"
+                fi
+              fi
+              python3 -c 'import json,subprocess,sys; findings=json.load(open(sys.argv[1])); p=subprocess.run(["git","show","4a0fff15d734:knowledge-curator/attempts.cjs"],capture_output=True,check=False); lines=p.stdout.decode("utf-8","replace").splitlines() if p.returncode==0 else []; vals=[s.split("=",1)[1].strip().rstrip(";").strip(chr(39)+chr(34)) for s in lines if s.strip().startswith("const KEY=")]; ok=len(vals)==1 and len(findings)==5 and all(f.get("Secret")==vals[0] for f in findings); print(json.dumps({"audit":"historical_constant_exact_match","verified":ok,"history_available":p.returncode==0,"key_declarations":len(vals),"exceptions_activated":False})); sys.exit(0 if ok else 2)' /tmp/gitleaks-report.json
+              python3 -c 'import json,sys; r=json.load(open(sys.argv[1])); e={("4a0fff15d734","knowledge-curator/attempts.cjs"),("149bdd12227d","knowledge-curator/tests/browser.spec.cjs"),("4d5e863a93c6","knowledge-curator/tests/browser.spec.cjs"),("602e38bb00b9","knowledge-curator/tests/browser.spec.cjs"),("be3cacc01a79","knowledge-curator/tests/browser.spec.cjs")}; f=[x.get("Fingerprint") for x in r]; print(json.dumps({"audit":"fingerprint_identity","expected_locations":len(r)==5 and {(str(x.get("Commit",""))[:12],x.get("File")) for x in r}==e,"five_distinct_fingerprints":len(f)==5 and all(isinstance(x,str) and bool(x) for x in f) and len(set(f))==5,"expected_rule":all(x.get("RuleID")=="generic-api-key" for x in r),"exceptions_activated":False}))' /tmp/gitleaks-report.json
+            fi
+            echo "::error::Gitleaks detected potential secrets; values and locations suppressed"
+            exit 1
+          elif [ "$result" -ne 0 ]; then
+            echo "::error::Gitleaks scan failed (code $result); details suppressed"
+            exit "$result"
+          fi
+          echo "Gitleaks history scan completed without findings"
+
+      - name: Verify synthetic credential detection
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION=8.24.3
+          curl -fsSL --retry 2 "https://github.com/gitleaks/gitleaks/releases/download/v${VERSION}/gitleaks_${VERSION}_linux_x64.tar.gz" -o /tmp/gl-synthetic.tar.gz
+          mkdir -p /tmp/gl-synthetic-bin
+          tar -xzf /tmp/gl-synthetic.tar.gz -C /tmp/gl-synthetic-bin gitleaks
+          test_dir=$(mktemp -d)
+          trap 'rm -rf "$test_dir"; rm -f /tmp/gl-synthetic.tar.gz /tmp/gl-synthetic-report.json /tmp/gl-synthetic-output.log' EXIT
+          (
+            cd "$test_dir"
+            git init -q
+            git config user.name "CI Test"
+            git config user.email "ci@example.invalid"
+            python3 -c 'from pathlib import Path; Path("fixture.txt").write_text("github_token = "+chr(34)+"ghp_"+"aB3dE5fG7hJ9kL2mN4pQ6rS8tU0vW1xY2zZ3"+chr(34)+"\\n")'
+            git add fixture.txt
+            git commit -qm "synthetic scanner control"
+            set +e
+            /tmp/gl-synthetic-bin/gitleaks git --no-banner --gitleaks-ignore-path "$GITHUB_WORKSPACE/.gitleaksignore" --report-format json --report-path /tmp/gl-synthetic-report.json . >/tmp/gl-synthetic-output.log 2>&1
+            status=$?
+            set -e
+            if [ "$status" -ne 1 ]; then echo "::error::Synthetic secret was not detected"; exit 1; fi
+            python3 -c 'import json; r=json.load(open("/tmp/gl-synthetic-report.json")); assert any(x.get("RuleID")=="github-pat" for x in r)'
+          )
+          echo "Synthetic secret detection confirmed"

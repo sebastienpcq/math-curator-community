@@ -106,7 +106,7 @@ test('two concurrent removals preserve unrelated favorites',async()=>{
   browser=await start(profile);
   const page=await browser.context.newPage();await page.goto('chrome-extension://'+browser.id+'/options.html');
   const ids=['abcdefghijk','bcdefghijkl','cdefghijklm'];
-  for(const id of ids)expect((await page.evaluate(video=>chrome.runtime.sendMessage({type:'SAVE_VIDEO',video}),{id,title:id})).ok)).toBe(true);
+  for(const id of ids)expect((await page.evaluate(video=>chrome.runtime.sendMessage({type:'SAVE_VIDEO',video}),{id,title:id})).ok).toBe(true);
   const replies=await page.evaluate(()=>Promise.all(['abcdefghijk','bcdefghijkl'].map(id=>chrome.runtime.sendMessage({type:'REMOVE_FAVORITE',id}))));
   expect(replies.every(r=>r.ok)).toBe(true);
   expect(Object.keys((await read(browser.worker)).saved||{})).toEqual(['cdefghijklm']);

@@ -173,3 +173,15 @@ test('adversarial: independent calls do not share retry counters',async()=>{
  assert.equal(calls,4);
  for(const result of settled){assert.equal(result.status,'rejected');assert.equal(result.reason.code,'HTTP_ERROR');}
 });
+
+test('adversarial: cumulative retry-after budget stays finite at maximum retry setting',async()=>{
+ const delays=[];let calls=0;
+ const c=client(async()=>{calls++;return fail(429,'',{'retry-after':'999999999999'});},{
+  maxRetries:5,sleep:async ms=>{delays.push(ms);},timeoutMs:10
+ });
+ await assert.rejects(c.getVideos([id]),{code:'RATE_LIMITED',status:429});
+ assert.equal(calls,6);
+ assert.equal(delays.length,5);
+ assert.ok(delays.every(ms=>ms===30000));
+ assert.equal(delays.reduce((sum,ms)=>sum+ms,0),150000);
+});

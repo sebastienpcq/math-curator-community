@@ -44,16 +44,17 @@ jobs:
               echo "Unprivileged user namespace probe: DENIED"
             fi
             sudo aa-status || true
-            sudo journalctl -k --since '-5 minutes' --no-pager | rg 'apparmor|userns' || true
+            sudo journalctl -k --since '-5 minutes' --no-pager | grep -E 'apparmor|userns' || true
           } 2>&1 | tee qa-evidence/runner-sandbox-diagnostics.txt
           helper=/opt/google/chrome/chrome-sandbox
           if [ ! -f "$helper" ]; then
             echo "::error::Existing Chrome SUID sandbox helper unavailable; no security policy changed."
             exit 1
           fi
-          stat -c '%U %G %a %n' "$helper" | tee -a qa-evidence/runner-sandbox-diagnostics.txt
-          test "$(stat -c '%u' "$helper")" = 0
-          test "$(stat -c '%a' "$helper")" = 4755
+          readlink -f "$helper" | tee -a qa-evidence/runner-sandbox-diagnostics.txt
+          stat -Lc '%U %G %a %n' "$helper" | tee -a qa-evidence/runner-sandbox-diagnostics.txt
+          test "$(stat -Lc '%u' "$helper")" = 0
+          test "$(stat -Lc '%a' "$helper")" = 4755
           echo "CHROME_DEVEL_SANDBOX=$helper" >> "$GITHUB_ENV"
       - name: Prove Chromium starts with sandbox protection
         shell: bash

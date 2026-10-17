@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Math Curator human video annotation v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "video_id",
+    "source_url",
+    "collected_at",
+    "evidence_level",
+    "annotator_id",
+    "relevance",
+    "domains",
+    "level",
+    "format",
+    "pedagogical_suitability",
+    "mathematical_correctness",
+    "confidence",
+    "rationale"
+  ],
+  "properties": {
+    "video_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{11}$"
+    },
+    "source_url": {
+      "type": "string",
+      "pattern": "^https://(www\\.)?youtube\\.com/watch\\?v=[A-Za-z0-9_-]{11}(&.*)?$"
+    },
+    "collected_at": {
+      "type": "string",
+      "format": "date"
+    },
+    "evidence_level": {
+      "enum": [
+        "title",
+        "title_description",
+        "transcript_review",
+        "video_review"
+      ]
+    },
+    "annotator_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "relevance": {
+      "enum": [
+        "relevant",
+        "irrelevant",
+        "uncertain"
+      ]
+    },
+    "domains": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "elementary",
+          "geometry",
+          "calculus",
+          "linear",
+          "probability",
+          "discrete",
+          "number",
+          "logic",
+          "graphs",
+          "complexity",
+          "optimization",
+          "advanced"
+        ]
+      }
+    },
+    "level": {
+      "enum": [
+        "beginner",
+        "intermediate",
+        "advanced",
+        "unknown"
+      ]
+    },
+    "format": {
+      "enum": [
+        "lesson",
+        "exercise",
+        "proof",
+        "intuition",
+        "other",
+        "unknown"
+      ]
+    },
+    "pedagogical_suitability": {
+      "enum": [
+        "suitable",
+        "unsuitable",
+        "uncertain"
+      ]
+    },
+    "mathematical_correctness": {
+      "enum": [
+        "verified",
+        "issues_found",
+        "not_assessed"
+      ]
+    },
+    "confidence": {
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ]
+    },
+    "rationale": {
+      "type": "string",
+      "minLength": 10
+    },
+    "evidence_notes": {
+      "type": "string"
+    },
+    "target_audience": {
+      "type": "string"
+    },
+    "learning_objective": {
+      "type": "string"
+    }
+  }
+}

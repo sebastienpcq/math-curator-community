@@ -12,6 +12,25 @@ function updateSettings(patch){
  return task;
 }
 chrome.runtime.onMessage.addListener((msg,_sender,respond)=>{
+ if(msg?.type==='ADD_LIST_ITEM'||msg?.type==='REMOVE_LIST_ITEM'){
+  const allowed=['domains','allowChannels','blockChannels','allowVideos','blockVideos'];
+  const key=msg.key,value=msg.value;
+  if(!allowed.includes(key)||typeof value!=='string'||!value.trim()||value.length>200){
+   respond({ok:false,error:'Invalid list operation'});return;
+  }
+  const task=settingsQueue.catch(()=>{}).then(async()=>{
+   const {settings:stored}=await chrome.storage.local.get('settings');
+   const current={...MathConfig.DEFAULTS,...stored};
+   const existing=Array.isArray(current[key])?current[key]:[];
+   const list=msg.type==='ADD_LIST_ITEM'?[...new Set([...existing,value])]:existing.filter(x=>x!==value);
+   const next={...current,[key]:list};
+   await chrome.storage.local.set({settings:next});
+   return next;
+  });
+  settingsQueue=task.catch(()=>{});
+  task.then(settings=>respond({ok:true,settings})).catch(()=>respond({ok:false,error:'List update failed'}));
+  return true;
+ }
  if(msg?.type==='PATCH_SETTINGS'){
   const patch=msg.patch;
   if(!patch||typeof patch!=='object'||Array.isArray(patch)||Object.keys(patch).some(k=>!Object.hasOwn(MathConfig.DEFAULTS,k))){
